@@ -1,0 +1,23 @@
+name: "Definition of feature"
+description: "Defines a new feature to improve the project."
+title: "[feat] Brief description of the feature (use types of conventional commits)"
+labels: enhancement
+labels: high
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # **💥 New feature**
+  - type: textarea
+    attributes:
+      label: "Description of the feature."
+      description: "Describe in detail the objective of the issue using imperative. Explain what needs to be done and what it is for."
+      placeholder: "We need to implement study activity system that allows timging and saving activities with its information."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Additional context"
+      description: "Provide any additional details that may be helpful (optional)."
+    validations:
+      required: false
