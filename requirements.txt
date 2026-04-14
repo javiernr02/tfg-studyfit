@@ -1,0 +1,12 @@
+Django==6.0.4
+djangorestframework==3.14.0
+psycopg2==2.9.9
+Pillow==11.1.0
+python-dotenv==1.0.1
+python-dateutil==2.9.0.post0
+sqlparse==0.5.2
+Faker==25.2.0
+coverage==7.5.4
+selenium==4.41.0
+locust==2.32.1
+chromedriver-autoinstaller==0.6.4
