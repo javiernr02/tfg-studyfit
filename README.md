@@ -46,23 +46,23 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
       psql -U postgres
     - Crear la base de datos:
   
-      ```bash
+      ```sql
       CREATE DATABASE studyfitdb;
     - Crear usuario:
   
-      ```bash
+      ```sql
       CREATE USER studyfituser WITH PASSWORD 'your_password';
     - Hacer propietario de la BD al usuario creado:
   
-      ```bash
+      ```sql
       ALTER DATABASE studyfitdb OWNER TO studyfituser;
     - Comprobar información de la BD:
   
-      ```bash
+      ```sql
       \l
     - Para salir de postgreSQL:
   
-      ```bash
+      ```sql
       \q
 7) Editar archivo de configuración
     - Copiar contenido .env.example en nuevo archivo .env
