@@ -85,7 +85,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```bash
       python manage.py flush
-    - Para acceder al panel de administración /admin creamos usuario escribiendo username y password:
+    - Para acceder al panel de administración /admin creamos usuario escribiendo los datos que queramos para username, email y password:
   
       ```bash
       python manage.py createsuperuser
