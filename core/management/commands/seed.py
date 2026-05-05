@@ -8,7 +8,12 @@ import core.models as models
 import unicodedata
 import re
 
+SEED = 2026
+random.seed(SEED)
+
 fake = Faker('es_ES')
+Faker.seed(SEED)
+fake.seed_instance(SEED)
 
 def clean_text(text):
     # Quitar tildes
@@ -35,7 +40,7 @@ class Command(BaseCommand):
 
         users = []
 
-        for _ in range(80):
+        for _ in range(200):
             base_level = random.choices(population=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], weights=[20, 15, 15, 15, 10, 10, 5, 5, 3, 2])[0]
 
             xp = (base_level - 1) * 1000 + random.randint(0, 999)
