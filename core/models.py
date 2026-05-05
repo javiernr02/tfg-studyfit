@@ -69,7 +69,7 @@ class StudyActivity(Activity):
 class SportType(models.TextChoices):
     WALK = 'walk', 'Caminata'
     RUN = 'run', 'Carrera'
-    WEIGHTS = 'weights', 'pesas'
+    WEIGHTS = 'weights', 'Pesas'
     BIKE = 'bike', 'Bicicleta'
     PILATES = 'pilates', 'Pilates'
     YOGA = 'yoga', 'Yoga'
