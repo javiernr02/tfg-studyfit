@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+<div class="home-title">
+    Resumen
+</div>
+<div class="dashboard">
+    <div class="card">
+        <div class="card-title">
+            <i class="fa-solid fa-book"></i>
+            Horas de Estudio
+        </div>
+        <div class="card-value">
+            {{ study_durations_format }}
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">
+            <i class="fa-solid fa-heart-pulse"></i>
+            Horas de Deporte
+        </div>
+        <div class="card-value">
+            {{ sport_durations_format }}
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">
+            <i class="fa-solid fa-rotate-left"></i>
+            Últimos 7 Días
+        </div>
+        <div class="card-value">
+            {{ last_activities }} actividades
+        </div>
+    </div>
+    <div class="activities-card">
+        <div class="card-title">
+            <i class="fa-solid fa-list"></i>
+            Actividades
+        </div>
+        <div class="activities-content">
+            <div class="card-column">
+                <div class="card-title">
+                    <i class="fa-solid fa-book"></i>
+                    Estudio
+                </div>
+                <div class="card-value">
+                    <div class="row-title">
+                        <span>Asignatura</span>
+                        <span>Horas</span>
+                        <span>Actividades</span>
+                    </div>
+                    {% for subject, i in study_activities_by_subjects_format.items %}
+                        <div class="row">
+                            <span>{{ subject.name }}</span>
+                            <span>{{ i.duration }}</span>
+                            <span>{{ i.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-column">
+                <div class="card-title">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    Deporte
+                </div>
+                <div class="card-value">
+                    <div class="row-title">
+                        <span>Tipo de Deporte</span>
+                        <span>Horas</span>
+                        <span>Actividades</span>
+                    </div>
+                    {% for sport_type, i in sport_activities_by_sport_types_format.items %}
+                        <div class="row">
+                            <span>{{ sport_type }}</span>
+                            <span>{{ i.duration }}</span>
+                            <span>{{ i.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
