@@ -25,7 +25,10 @@ body {
 
 header {
     height: 110px;
-    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 nav.navbar {
@@ -124,7 +127,7 @@ nav.navbar .nav-links a {
 main {
     flex: 1;
     padding: 20px;
-    margin-top: 90px
+    margin-top: 110px;
 }
 
 footer {
@@ -168,5 +171,53 @@ nav.footer-links a {
 
 nav.footer-links a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 950px) {
+    .logo span {
+        font-size: 10px;
+    }
+
+    nav.navbar .logo img {
+        height: 80px;
+        width: auto;
+        display: block;
+    }
+    
+    .button {
+        font-size: 1rem;
+    }
+
+    .rounded-button {
+        font-size: 0.8rem;
+    }
+
+    .button span {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .logo span {
+        font-size: 10px;
+    }
+
+    nav.navbar .logo img {
+        height: 80px;
+        width: auto;
+        display: block;
+    }
+    
+    .button {
+        font-size: 1rem;
+    }
+
+    .rounded-button {
+        font-size: 0.8rem;
+    }
+
+    .button span {
+        font-size: 0.8rem;
+    }
 }
 
