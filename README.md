@@ -69,15 +69,15 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
     - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 5)
 6) Preparación base de datos
     - Nos ubicamos en raíz del proyecto
-    - Ejecutar migraciones detectando cambios en los modelos:
+    - Crea archivos de migraciones por los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones):
   
       ```bash
       python manage.py makemigrations
-    - Ejecutar esos cambios y crear el schema en la BD:
+    - Aplica las migraciones generadas a la BD:
   
       ```bash
       python manage.py migrate
-    - Poblar la BD con los datos mediante el script creado:
+    - Poblar la BD con los datos mediante el script aleatorio y reproducible (seed fijado) creado:
 
       ```bash
       python manage.py seed
