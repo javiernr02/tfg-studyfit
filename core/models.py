@@ -8,7 +8,7 @@ class Trophy(models.Model):
     
     description = models.TextField(blank=True)
 
-    icon = models.ImageField(upload_to='trophies/', null=True, blank=True)
+    icon = models.CharField(max_length=255, null=True, blank=True)
     
     points = models.PositiveIntegerField(default=1)
 
