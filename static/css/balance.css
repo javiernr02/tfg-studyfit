@@ -1,0 +1,210 @@
+
+.balance-title {
+    text-align: center;
+    font-size: 30px;
+    color: #0D4846;
+}
+
+.balance-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    text-align: center;
+}
+
+.trophies-card {
+    background-color: #FFFFFF;
+    border: 1px solid #52DD5D;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.trophies-card .card-title {
+    background-color: #52DD5D;
+    color: #FFFFFF;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.trophies-card .card-value {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.repeatable-trophies-title {
+    color: #0D4846;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.repeatable-trophies-title span {
+    color: #5f5e5e;
+    font-weight: normal;
+    font-size: 15px;
+}
+
+.repeatable-trophies-title i {
+    color: #24B88D;
+}
+
+.non-repeatable-trophies-title {
+    color: #0D4846;
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.non-repeatable-trophies-title span {
+    color: #5f5e5e;
+    font-weight: normal;
+    font-size: 15px;
+}
+
+.non-repeatable-trophies-title i {
+    color: #24B88D;
+    font-size: 22px;
+}
+
+.trophy  {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.trophy img {
+    width: 35px;
+    height: auto;
+    margin-right: 5px;
+}
+
+.non-obtained-non-repeatable-trophies-title {
+    margin-bottom: 20px;
+}
+
+.non-obtained-non-repeatable-trophies-title i {
+    color: #5f5e5e;
+}
+
+.non-obtained-trophy  {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.non-obtained-trophy img {
+    width: 35px;
+    height: auto;
+    margin-right: 5px;
+    filter: grayscale(100%);
+    opacity: 0.5;
+}
+
+.trophy .trophy-date {
+    color: #5f5e5e;
+    font-weight: normal;
+    font-size: 15px;
+}
+
+.trophy-obtained-today {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.trophy-not-obtained-today {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.trophy-obtained-today i {
+    color: green;
+}
+
+.trophy-not-obtained-today i {
+    color: red;
+}
+
+span {
+    color: #5f5e5e;
+}
+
+.initial-table {
+    border-collapse: collapse;
+}
+
+.initial-table td {
+    border: 1px solid #5f5e5e;
+    background-color: #bebebe;
+    padding: 10px;
+    text-align: center;
+    color: #0D4846;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.balance-value p {
+    color: #5f5e5e;
+}
+
+.streak i {
+    color: #24B88D;
+}
+
+.streak {
+    color: #0D4846;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.streak span {
+    color: #5f5e5e;
+    font-weight: normal;
+}
+
+.level i {
+    color: #24B88D;
+}
+
+.level {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #0D4846;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.level span {
+    color: #5f5e5e;
+    font-weight: normal;
+}
+
+.data {
+    margin-left: 20px;
+    color: #0D4846;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.data span {
+    color: #5f5e5e;
+    font-weight: normal;
+}
+
+.data .remaining-points {
+    font-size: 15px;
+}

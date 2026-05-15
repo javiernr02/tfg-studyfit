@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/balance.css' %}">
+
+<div class="balance-dashboard">
+    <div class="balance-title">
+        <i class="fa-solid fa-brain"></i>
+        Equilibrio Mente-Cuerpo
+    </div>
+    <div class="header">
+        <div class="balance-value">
+            {% if balance_value %}
+                <p>¡Buen equilibrio hoy!</p>
+            {% elif not study_activities and not sport_activities %}
+                <p>Para calcular el equilibrio de hoy necesitas registrar actividades</p>
+            {% else %}
+                <p>Tienes que equilibrar tus horas de estudio y deporte</p>
+            {% endif %}
+        </div>
+
+        <table class="initial-table">
+            <tr>
+                <td>Estudio (Hoy):
+                    {% if today_study_activities %}
+                        {{ study_durations_format }}
+                    {% else %}
+                        0h
+                    {% endif %}
+                </td>
+                <td>Deporte (Hoy):
+                    {% if today_sport_activities %}
+                        {{ sport_durations_format }}
+                    {% else %}
+                        0h
+                    {% endif %}
+                </td>
+                <td>Equilibrio: {{ balance_streak_value }} días</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="trophies-card">
+        <div class="card-title">
+            <i class="fa-solid fa-trophy"></i>
+            Logros
+        </div>
+        <div class="card-value">
+            <div class="repeatable-trophies">
+                <div class="repeatable-trophies-title">
+                    <i class="fa-solid fa-arrows-spin"></i>
+                    Logros Acumulables (Hoy) <span>- {{ repeatable_trophies_count }} trofeos en total</span>
+                </div>
+                {% if repeatable_student_trophy_obtained_today %}
+                    <div class="trophy-obtained-today">
+                        <i class="fa-regular fa-circle-check"></i>
+                        <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
+                    </div>
+                {% else %}
+                    <div class="trophy-not-obtained-today">
+                        <i class="fa-regular fa-circle-xmark"></i>
+                        <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
+                    </div>
+                {% endif %}
+                {% if repeatable_sportsman_trophy_obtained_today %}
+                    <div class="trophy-obtained-today">
+                        <i class="fa-regular fa-circle-check"></i>
+                        <p>{{ repeatable_sportsman_trophy.title }}: <span>{{ repeatable_sportsman_trophy.description }}</span></p>
+                    </div>
+                {% else %}
+                    <div class="trophy-not-obtained-today">
+                        <i class="fa-regular fa-circle-xmark"></i>
+                        <p>{{ repeatable_sportsman_trophy.title }}: <span>{{ repeatable_sportsman_trophy.description }}</span></p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="non-repeatable-trophies">
+                <div class="non-repeatable-trophies-title">
+                    <i class="fa-brands fa-square-web-awesome-stroke"></i>
+                    Logros Exclusivos <span>- {{ non_repeatable_trophies_count }} trofeos en total</span>
+                </div>
+                {% if non_repeatable_trophies %}
+                    {% for i in non_repeatable_trophies %}
+                        <div class="trophy">
+                            <img src="{% static i.trophy.icon %}" alt="Icono">
+                            {{ i.trophy.title }}: <span>{{ i.trophy.description }}</span>
+                            <span class="trophy-date">(fecha de obtención: {{ i.obtained_at|date:"d/m/Y H:i" }})</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aún no has ganado ningún trofeo exclusivo</p>
+                {% endif %}
+                <div class="non-obtained-non-repeatable-trophies-title">
+                    <i class="fa-solid fa-lock"></i>
+                    Trofeos por desbloquear
+                </div>
+                {% for i in non_obtained_non_repeatable_trophies %}
+                    <div class="non-obtained-trophy">
+                        <img src="{% static i.icon %}" alt="Icono">
+                        {{ i.title }}: <span>{{ i.description }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="streak">
+                <i class="fa-solid fa-fire"></i>
+                Racha (logros acumulables consecutivos cada día): <span>{{ streak_value }}</span>
+            </div>
+
+            <div class="level">
+                <i class="fa-solid fa-star"></i>
+                Nivel: <span>{{ level }}</span>
+                <div class="data">
+                    Puntos de experiencia: <span>{{ experience_points }}</span>
+                    <span class="remaining-points">(faltan {{ remaining_points }} puntos para el próximo nivel)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
