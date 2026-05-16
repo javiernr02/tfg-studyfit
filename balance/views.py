@@ -5,6 +5,8 @@ from core.views import format_duration
 
 # Create your views here.
 
+# Gamificación equilibrio mente-cuerpo
+
 # Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
 def balance_logic(study_total_minutes, sport_total_minutes):
     
@@ -139,6 +141,8 @@ def get_balance_data(user):
         'streak_value': streak_value
     }
 
+# Obtención de diferentes datos relacionados con los trofeos repetibles (acumulables) y no repetibles (exclusivos)
+# Todos estos datos se guardan para pasarse como contexto en la función principal: balance
 def get_trophies_data(user):
     user_trophies = models.UserTrophy.objects.filter(user=user).select_related('trophy')
     
@@ -164,7 +168,9 @@ def get_trophies_data(user):
         'repeatable_student_trophy': repeatable_student_trophy,
         'repeatable_sportsman_trophy': repeatable_sportsman_trophy
     }
-        
+    
+# Función principal balance que renderiza la página html con todos los datos calculados en las funciones anteriores,
+# además de lo relacionado con niveles y puntos de experiencia
 def balance(request):
     user = models.CustomUser.objects.first()
     
