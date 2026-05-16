@@ -7,59 +7,82 @@
     <title>{% block title %}StudyFit{% endblock %}</title>
     <script src="https://kit.fontawesome.com/436fbb8bf4.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&display=swap">
-    <link rel="icon" type="image/x-icon" href="{% static 'images/StudyFitTransparente.ico' %}">
-    <link rel="shortcut icon" href="{% static 'images/StudyFitTransparente.ico' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 
 <body>
-    <div class="wrapper">
-        <header>
-            <nav class="navbar">
-                <div class="logo">
-                    <a href="{% url 'home' %}">
-                        <img src="{% static 'images/StudyFitTransparenteTexto.png' %}" alt="Logo">
-                    </a>
-                    <span>Seguimiento de estudio y deporte</span>
-                </div>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'images/StudyFitTransparenteTexto.png' %}" alt="Logo">
+                </a>
+                <span>Seguimiento de estudio y deporte</span>
+            </div>
 
-                <div class="nav-links">
-                    <div class="features-links">
-                        <a href="{% url 'home' %}" class="rounded-button">
-                            <i class="fa-solid fa-microscope"></i>
-                            Analizar
-                        </a>
-                        <a href="{% url 'home' %}" class="rounded-button">
-                            <i class="fa-solid fa-plus"></i>
-                            Registrar Actividad
-                        </a>
-                    </div>
-                    <a href="{% url 'home' %}" class="button">
-                        <i class="fa-solid fa-user"></i>
-                        <span>{{ user.first_name }} {{ user.last_name }}</span>
+            <div class="nav-links">
+                <div class="features-links">
+                    <a href="{% url 'balance' %}" class="rounded-button">
+                        <i class="fa-solid fa-microscope"></i>
+                        Analizar
+                    </a>
+                    <a href="{% url 'home' %}" class="rounded-button">
+                        <i class="fa-solid fa-plus"></i>
+                        Registrar Actividad
                     </a>
                 </div>
+                <a href="{% url 'home' %}" class="button">
+                    <i class="fa-solid fa-user"></i>
+                    <span>{{ user.first_name }} {{ user.last_name }}</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-left">
+            <div class="logo">
+                <img src="{% static 'images/TextoFooter.png' %}" alt="Logo">
+            </div>
+            <p>&copy; 2026 StudyFit. Todos los derechos reservados.</p>
+        </div>
+        <div class="footer-right">
+            <nav class="footer-links">
+                <a href="{% url 'home' %}">Sobre Nosotros</a>
             </nav>
-        </header>
+        </div>
+    </footer>
 
-        <main>
-            {% block content %}
-            {% endblock %}
-        </main>
+    <button id="topButton" class="top-button">
+        <i class="fa-solid fa-circle-chevron-up"></i>
+    </button>
 
-        <footer>
-            <div class="footer-left">
-                <div class="logo">
-                    <img src="{% static 'images/TextoFooter.png' %}" alt="Logo">
-                </div>
-                <p>&copy; 2026 StudyFit. Todos los derechos reservados.</p>
-            </div>
-            <div class="footer-right">
-                <nav class="footer-links">
-                    <a href="{% url 'home' %}">Sobre Nosotros</a>
-                </nav>
-            </div>
-        </footer>
-    </div>
+    <script>
+        const button = document.getElementById("topButton");
+
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 100) {
+                button.classList.add("show");
+            }
+            else {
+                button.classList.remove("show");
+            }
+        });
+
+        button.addEventListener("click", () => {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+    </script>
+
 </body>
 </html>
