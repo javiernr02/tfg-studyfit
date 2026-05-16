@@ -13,6 +13,10 @@ class Trophy(models.Model):
     points = models.PositiveIntegerField(default=1)
 
     is_repeatable = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name = "Trophy"
+        verbose_name_plural = "Trophies"
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -40,6 +44,10 @@ class UserTrophy(models.Model):
     
     obtained_at = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        verbose_name = "User trophy"
+        verbose_name_plural = "User trophies"
+    
 class Activity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='activities')
     
@@ -50,6 +58,10 @@ class Activity(models.Model):
     duration = models.DurationField()
     
     date = models.DateField()
+    
+    class Meta:
+        verbose_name = "Activity"
+        verbose_name_plural = "Activities"
     
 class SubjectCategory(models.TextChoices):
     SCIENCES = 'sciences', 'Ciencias'
@@ -65,6 +77,10 @@ class Subject(models.Model):
     
 class StudyActivity(Activity):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
+    
+    class Meta:
+        verbose_name = "Study activity"
+        verbose_name_plural = "Study activities"
     
 class SportType(models.TextChoices):
     WALK = 'walk', 'Caminata'
@@ -88,6 +104,10 @@ class SportActivity(Activity):
     distance = models.FloatField(null=True, blank=True)
     
     intensity = models.CharField(max_length=20, choices=Intensity.choices)
+    
+    class Meta:
+        verbose_name = "Sport activity"
+        verbose_name_plural = "Sport activities"
 
 # Atributo derivado calculado según tipo de deporte seleccionado
 sport_category = models.CharField(max_length=20, blank=False, editable=False)
