@@ -69,7 +69,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
     - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 5)
 6) Preparación base de datos
     - Nos ubicamos en raíz del proyecto
-    - Crea archivos de migraciones por los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones):
+    - Crea archivos de migraciones por los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones por el desarrollador):
   
       ```bash
       python manage.py makemigrations
