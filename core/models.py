@@ -42,7 +42,7 @@ class UserTrophy(models.Model):
     
     trophy = models.ForeignKey(Trophy, on_delete=models.CASCADE)
     
-    obtained_at = models.DateTimeField(auto_now_add=True)
+    obtained_at = models.DateTimeField()
     
     class Meta:
         verbose_name = "User trophy"

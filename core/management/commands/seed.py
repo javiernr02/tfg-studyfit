@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand, call_command
 from faker import Faker
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 import random
 from collections import defaultdict
 import core.models as models
@@ -142,11 +142,15 @@ class Command(BaseCommand):
 
         for user in users:
             
-            user_study_activities = list(models.StudyActivity.objects.filter(user=user))
-            user_sport_activities = list(models.SportActivity.objects.filter(user=user))
+            user_study_activities = list(models.StudyActivity.objects.filter(user=user).order_by('date'))
+            user_sport_activities = list(models.SportActivity.objects.filter(user=user).order_by('date'))
             
             user_number_study_activities = len(user_study_activities)
             user_number_sport_activities = len(user_sport_activities)
+            
+            user_activities = sorted(user_study_activities + user_sport_activities, key=lambda x: x.date)
+            
+            user_number_activities = len(user_activities)
             
             # Diccionario para actividades de estudio de duraciones por día
             daily_study_durations = defaultdict(lambda: timedelta())
@@ -170,46 +174,82 @@ class Command(BaseCommand):
             
             daily_sport_durations_list = [daily_sport_durations[day].total_seconds() / 3600 for day in sorted_days_sport]
             
-            #Asignación de trofeos definidos en populate/trophies.json según cumplan las condiciones
-            if user_number_study_activities >= 1:
-                self._give_trophy(user, trophies[0])  # Primer Paso
-                
-            streak = 0
+            daily_total_durations = defaultdict(lambda: timedelta())
             
-            for hours in daily_study_durations_list:
+            for activity in user_study_activities:
+                daily_total_durations[activity.date] += activity.duration
                 
-                if hours >= 2:
+            for activity in user_sport_activities:
+                daily_total_durations[activity.date] += activity.duration
+                
+            valid_days = sorted([day for day, duration in daily_total_durations.items() if duration.total_seconds() / 3600 >= 2])
+            
+            #Asignación de trofeos definidos en populate/trophies.json según cumplan las condiciones
+            if user_number_activities >= 1:
+                self._give_trophy(user, trophies[0], user_activities[0].date)  # Primer Paso
+                
+            streak = 1
+            
+            for i in range(1, len(valid_days)):
+                
+                if (valid_days[i] - valid_days[i - 1]).days == 1:
                     streak += 1
-                    if streak >= 5:
-                        self._give_trophy(user, trophies[1])  # Disciplina
-                        break
-                    else:
-                        streak = 0
-                        
-            if user_number_study_activities + user_number_sport_activities >= 20:
-                self._give_trophy(user, trophies[2])  # Máquina
+                else:
+                    streak = 1
+                    
+                if streak >= 5:
+                    self._give_trophy(user, trophies[1], valid_days[i])  # Disciplina
+                    
+                    break
                 
-            if sum(daily_study_durations_list) >= 100:
-                self._give_trophy(user, trophies[3])  # Maestro del estudio
+            if user_number_study_activities + user_number_sport_activities >= 20:
+                
+                self._give_trophy(user, trophies[2], user_activities[19].date)  # Máquina
+                
+            acc_hours = 0
+            
+            for activity in user_study_activities:
+                acc_hours += activity.duration.total_seconds() / 3600
+                   
+                if acc_hours >= 100:
+                    
+                    self._give_trophy(user, trophies[3], activity.date)  # Maestro del estudio
+                    
+                    break
                 
             if user_number_sport_activities >= 15:
-                self._give_trophy(user, trophies[4])  # Atleta
+                self._give_trophy(user, trophies[4], user_sport_activities[14].date)  # Atleta
                 
-            if any(hours >= 8 for hours in daily_study_durations_list):
-                self._give_trophy(user, trophies[5])  # Potenciando la Mente
+            for day in sorted_days_study:
                 
-            for hours in daily_study_durations_list:
+                hours = daily_study_durations[day].total_seconds() / 3600
+                
+                if hours >= 8:
+                    self._give_trophy(user, trophies[5], day)  # Potenciando la Mente
+                    
+                    break
+                
+            for day in sorted_days_study:
+                
+                hours = daily_study_durations[day].total_seconds() / 3600
                 
                 if hours >= 4:
-                    self._give_trophy(user, trophies[6])  # Estudiante Constante
+                    self._give_trophy(user, trophies[6], day)  # Estudiante Constante
                     
-            for hours in daily_sport_durations_list:
+                    break
+                    
+            for day in sorted_days_sport:
+                
+                hours = daily_sport_durations[day].total_seconds() / 3600
                 
                 if hours >= 1:
-                    self._give_trophy(user, trophies[7])  # Deportista Constante
+                    self._give_trophy(user, trophies[7], day)  # Deportista Constante
+                    
+                    break
 
         self.stdout.write(self.style.SUCCESS('Dataset generated'))
 
 
-    def _give_trophy(self, user, trophy):
-        models.UserTrophy.objects.get_or_create(user=user, trophy=trophy)
+    def _give_trophy(self, user, trophy, date):
+        aware_datetime = timezone.make_aware(datetime.combine(date, datetime.min.time()))
+        models.UserTrophy.objects.get_or_create(user=user, trophy=trophy, defaults={"obtained_at": aware_datetime})
