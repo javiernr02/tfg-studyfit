@@ -1,11 +1,17 @@
 from django.shortcuts import render
+from django.utils import timezone
 import core.models as models
 from datetime import date, timedelta
 from core.views import format_duration
+from django.db.models import Sum
+from django.db.models.functions import TruncDate
+from django.http import JsonResponse
 
 # Create your views here.
 
+
 # Gamificación equilibrio mente-cuerpo
+
 
 # Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
 def balance_logic(study_total_minutes, sport_total_minutes):
@@ -22,7 +28,7 @@ def balance_logic(study_total_minutes, sport_total_minutes):
 # Si un día no existe balance se cancela la racha acumulada
 def balance_logic_streak(user):
     
-    today = date.today()
+    today = timezone.now().date()
     balance_streak = 0
     
     while True:
@@ -64,7 +70,7 @@ def balance_logic_streak(user):
 # Si un día no se han conseguido ambos trofeos se cancela la racha acumulada
 def streak(user):
     
-    today = date.today()
+    today = timezone.now().date()
     streak = 0
     i = 0
     
@@ -89,7 +95,7 @@ def streak(user):
 # Todos estos datos se guardan para pasarse como contexto en la función principal: balance
 def get_balance_data(user):
     
-    today = date.today()
+    today = timezone.now().date()
     
     today_activities = user.activities.filter(date=today)
     
@@ -186,6 +192,83 @@ def balance(request):
         'remaining_points': remaining_points,
         **get_balance_data(user),
         **get_trophies_data(user)
+    })
+
+
+# Estadísticas equilibrio mente-cuerpo
+
+
+def stats(request):
+    user = models.CustomUser.objects.first()
+    
+    period = request.GET.get('period', 'week')
+    
+    study_activities = models.StudyActivity.objects.filter(user=user)
+    sport_activities = models.SportActivity.objects.filter(user=user)
+    
+    # Filtros para la gráfica
+    today = timezone.now().date()
+    
+    if period == 'week':
+        study_activities = study_activities.filter(date__gte=today - timedelta(days=7))
+        sport_activities = sport_activities.filter(date__gte=today - timedelta(days=7))
+        
+    elif period == 'month':
+        study_activities = study_activities.filter(date__gte=today - timedelta(days=30))
+        sport_activities = sport_activities.filter(date__gte=today - timedelta(days=30))
+        
+    elif period == 'year':
+        study_activities = study_activities.filter(date__gte=today - timedelta(days=365))
+        sport_activities = sport_activities.filter(date__gte=today - timedelta(days=365))
+        
+    study_data = (study_activities.annotate(day=TruncDate('date')).values('day').annotate(total_duration=Sum('duration')).order_by('day'))
+    sport_data = (sport_activities.annotate(day=TruncDate('date')).values('day').annotate(total_duration=Sum('duration')).order_by('day'))
+    
+    study_dict = {i['day']: i['total_duration'] or timedelta(0) for i in study_data}
+    sport_dict = {i['day']: i['total_duration'] or timedelta(0) for i in sport_data}
+    
+    all_days = sorted(set(study_dict.keys()).union(set(sport_dict.keys())))
+    
+    labels = [i.strftime('%d/%m/%Y') for i in all_days]
+    
+    study_values = [study_dict.get(i, timedelta(0)).total_seconds() / 60 for i in all_days]
+    
+    sport_values = [sport_dict.get(i, timedelta(0)).total_seconds() / 60 for i in all_days]
+    
+    study_labels_formatted = [format_duration(study_dict.get(i, timedelta(0))) for i in all_days]
+    
+    sport_labels_formatted = [format_duration(sport_dict.get(i, timedelta(0))) for i in all_days]
+    
+    study_total_time = sum(study_dict.values(), timedelta(0))
+    sport_total_time = sum(sport_dict.values(), timedelta(0))
+    
+    study_total_seconds = study_total_time.total_seconds()
+    sport_total_seconds = sport_total_time.total_seconds()
+    
+    total = study_total_seconds + sport_total_seconds
+    
+    if total > 0:
+        study_percent = (study_total_seconds / total) * 100
+        sport_percent = (sport_total_seconds / total) * 100
+    else:
+        study_percent = 0
+        sport_percent = 0
+    
+    study_total_time_formatted = format_duration(study_total_time)
+    sport_total_time_formatted = format_duration(sport_total_time)
+    
+    return JsonResponse({
+        'labels': labels,
+        'study_values': study_values,
+        'sport_values': sport_values,
+        'study_labels_formatted': study_labels_formatted,
+        'sport_labels_formatted': sport_labels_formatted,
+        'study_total_time': study_total_time.total_seconds() / 60,
+        'sport_total_time': sport_total_time.total_seconds() / 60,
+        'study_total_time_formatted': study_total_time_formatted,
+        'sport_total_time_formatted': sport_total_time_formatted,
+        'study_percent': round(study_percent, 1),
+        'sport_percent': round(sport_percent, 1)
     })
     
     
