@@ -231,9 +231,9 @@ def stats(request):
     
     labels = [i.strftime('%d/%m/%Y') for i in all_days]
     
-    study_values = [study_dict.get(i, timedelta(0)).total_seconds() / 60 for i in all_days]
+    study_values = [study_dict.get(i, timedelta(0)).total_seconds() for i in all_days]
     
-    sport_values = [sport_dict.get(i, timedelta(0)).total_seconds() / 60 for i in all_days]
+    sport_values = [sport_dict.get(i, timedelta(0)).total_seconds() for i in all_days]
     
     study_labels_formatted = [format_duration(study_dict.get(i, timedelta(0))) for i in all_days]
     
@@ -263,8 +263,8 @@ def stats(request):
         'sport_values': sport_values,
         'study_labels_formatted': study_labels_formatted,
         'sport_labels_formatted': sport_labels_formatted,
-        'study_total_time': study_total_time.total_seconds() / 60,
-        'sport_total_time': sport_total_time.total_seconds() / 60,
+        'study_total_time': study_total_seconds,
+        'sport_total_time': sport_total_seconds,
         'study_total_time_formatted': study_total_time_formatted,
         'sport_total_time_formatted': sport_total_time_formatted,
         'study_percent': round(study_percent, 1),

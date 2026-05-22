@@ -159,8 +159,8 @@
                 const lineCanvas = document.getElementById("lineChart");
                 const pieCanvas = document.getElementById("pieChart");
 
-                const study_hours = data.study_values.map(x => x / 60);
-                const sport_hours = data.sport_values.map(x => x / 60);
+                const study_hours = data.study_values.map(x => x / 3600);
+                const sport_hours = data.sport_values.map(x => x / 3600);
 
                 const hasLineData = (data.labels && data.labels.length > 0);
                 const hasPieData = (data.study_total_time > 0 || data.sport_total_time > 0);
