@@ -187,6 +187,7 @@ span {
     color: #0D4846;
     font-size: 17px;
     font-weight: bold;
+    margin-bottom: 30px;
 }
 
 .level span {
@@ -237,11 +238,12 @@ span {
     color: #FFFFFF;
 }
 
-.chart {
+.charts {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 50px;
+    margin-bottom: 50px;
 }
 
 #lineChart {
@@ -252,4 +254,64 @@ span {
 #pieChart {
     max-width: 500px;
     max-height: 500px;
+}
+
+.average-hours {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.average-hours-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #52BFDD;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.averages {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.active-averages {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.line .label {
+    color: #0D4846;
+    font-weight: bold;
+}
+
+.productive-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.productive-stats-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #52BFDD;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.productive-line {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.productive-line .label {
+    color: #0D4846;
+    font-weight: bold;
 }

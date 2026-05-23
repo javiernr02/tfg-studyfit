@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.formats import date_format
 import core.models as models
 from datetime import date, timedelta
 from core.views import format_duration
 from django.db.models import Sum
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.http import JsonResponse
 
 # Create your views here.
@@ -198,6 +199,56 @@ def balance(request):
 # Estadísticas equilibrio mente-cuerpo
 
 
+# Función para cálculo de la productividad.
+# Existe productividad cuando mínimo se estudia 1 hora y se hace media hora de deporte
+def get_most_productive(study_activities, sport_activities, trunc, format):
+    MIN_STUDY_TIME = timedelta(minutes=60)
+    MIN_SPORT_TIME = timedelta(minutes=0)
+    
+    study = (study_activities.annotate(period=trunc('date')).values('period').annotate(total_duration=Sum('duration')))
+    
+    sport = (sport_activities.annotate(period=trunc('date')).values('period').annotate(total_duration=Sum('duration')))
+    
+    study_dict = {i['period']: i['total_duration'] or timedelta(0) for i in study}
+    
+    sport_dict = {i['period']: i['total_duration'] or timedelta(0) for i in sport}
+    
+    periods = set(study_dict.keys()).union(set(sport_dict.keys()))
+    
+    best_period = None
+    best_total = timedelta(0)
+    
+    for period in periods:
+        study_time = study_dict.get(period, timedelta(0))
+        sport_time = sport_dict.get(period, timedelta(0))
+        
+        if study_time >= MIN_STUDY_TIME and sport_time >= MIN_SPORT_TIME:
+            total_time = study_time + sport_time
+            
+            if total_time > best_total:
+                best_total = total_time
+                
+                if trunc == TruncDate:
+                    date = period.strftime('%d/%m/%Y')
+                    
+                elif trunc == TruncWeek:
+                    date = f"Semana del {period.strftime('%d/%m/%Y')}"
+                    
+                elif trunc == TruncMonth:
+                    date = date_format(period, "F Y").capitalize()
+                
+                best_period = {
+                    'date': date, 
+                    'study_time': format(study_time),
+                    'sport_time': format(sport_time),
+                    'total_time': format(total_time)
+                }
+                
+    return best_period
+
+# Cálculo de los valores para dibujar gráficas en Chart.js, de medias de horas de estudio y deporte, además de
+# medias para días activos y de cálculo de la productividad.
+# Los cálculos a realizar dependen del filtro por periodo seleccionado: semana, mes, año y global
 def stats(request):
     user = models.CustomUser.objects.first()
     
@@ -206,7 +257,7 @@ def stats(request):
     study_activities = models.StudyActivity.objects.filter(user=user)
     sport_activities = models.SportActivity.objects.filter(user=user)
     
-    # Filtros para la gráfica
+    # Filtros por periodo
     today = timezone.now().date()
     
     if period == 'week':
@@ -242,6 +293,7 @@ def stats(request):
     study_total_time = sum(study_dict.values(), timedelta(0))
     sport_total_time = sum(sport_dict.values(), timedelta(0))
     
+    # Cálculo de porcentajes para mostrar en gráfico
     study_total_seconds = study_total_time.total_seconds()
     sport_total_seconds = sport_total_time.total_seconds()
     
@@ -257,6 +309,71 @@ def stats(request):
     study_total_time_formatted = format_duration(study_total_time)
     sport_total_time_formatted = format_duration(sport_total_time)
     
+    # Cálculo de medias
+    first_study_activity = study_activities.order_by('date').values_list('date', flat=True).first()
+    study_active_days = len(study_data)
+    if first_study_activity:
+        total_study_days = (today - first_study_activity).days + 1
+        
+        study_average_hours = (study_total_seconds / 3600) / total_study_days
+        
+        if study_active_days > 0:
+            study_active_average_hours = (study_total_seconds / 3600) / study_active_days
+        else:
+            study_active_average_hours = 0
+            
+        study_average = timedelta(hours=study_average_hours)
+        study_active_average = timedelta(hours=study_active_average_hours)
+    else:
+        study_average = timedelta(0)
+        
+        study_active_average = timedelta(0)
+    
+    first_sport_activity = sport_activities.order_by('date').values_list('date', flat=True).first()
+    sport_active_days = len(sport_data)
+    if first_sport_activity:
+        total_sport_days = (today - first_sport_activity).days + 1
+        
+        sport_average_hours = (sport_total_seconds / 3600) / total_sport_days
+        
+        if sport_active_days > 0:
+            sport_active_average_hours = (sport_total_seconds / 3600) / sport_active_days
+        else:
+            sport_active_average_hours = 0
+        
+        sport_average = timedelta(hours=sport_average_hours)
+        sport_active_average = timedelta(hours=sport_active_average_hours)
+    else:
+        sport_average = timedelta(0)
+        
+        sport_active_average = timedelta(0)
+        
+    # Cálculo de productividad
+    productive_stats = {
+        'best_day': get_most_productive(
+            study_activities,
+            sport_activities,
+            TruncDate,
+            format_duration
+        )
+    }
+    
+    if period in ['month', 'year']:
+        productive_stats['best_week'] = get_most_productive(
+            study_activities,
+            sport_activities,
+            TruncWeek,
+            format_duration
+        )
+        
+    if period == 'year':
+        productive_stats['best_month'] = get_most_productive(
+            study_activities,
+            sport_activities,
+            TruncMonth,
+            format_duration
+        )
+    
     return JsonResponse({
         'labels': labels,
         'study_values': study_values,
@@ -268,7 +385,12 @@ def stats(request):
         'study_total_time_formatted': study_total_time_formatted,
         'sport_total_time_formatted': sport_total_time_formatted,
         'study_percent': round(study_percent, 1),
-        'sport_percent': round(sport_percent, 1)
+        'sport_percent': round(sport_percent, 1),
+        'study_average': format_duration(study_average),
+        'study_active_average': format_duration(study_active_average),
+        'sport_average': format_duration(sport_average),
+        'sport_active_average': format_duration(sport_active_average),
+        'productive_stats': productive_stats
     })
     
     
