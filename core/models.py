@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -35,6 +36,10 @@ class CustomUser(AbstractUser):
     level = models.PositiveIntegerField(default=1)
     
     trophies = models.ManyToManyField(Trophy, through='UserTrophy')
+    
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
 
 # Tabla intermedia para relacionar usuarios con trofeos
 class UserTrophy(models.Model):
@@ -75,8 +80,13 @@ class Subject(models.Model):
     
     subjectCategory = models.CharField(max_length=20, choices=SubjectCategory.choices)
     
+CONCENTRATION_CHOICES = [(i, i) for i in range(0, 11)]
+
 class StudyActivity(Activity):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
+    
+    concentration = models.PositiveSmallIntegerField(choices=CONCENTRATION_CHOICES, 
+        validators=[MinValueValidator(0), MaxValueValidator(0)])
     
     class Meta:
         verbose_name = "Study activity"
@@ -105,19 +115,19 @@ class SportActivity(Activity):
     
     intensity = models.CharField(max_length=20, choices=Intensity.choices)
     
+    # Atributo derivado calculado según tipo de deporte seleccionado
+    sport_category = models.CharField(max_length=20, editable=False)
+
+    def save(self, *args, **kwargs):
+        if self.sport_type in ['weights']:
+            self.sport_category = 'Fuerza'
+        elif self.sport_type in ['pilates', 'yoga']:
+            self.sport_category = 'Flexibilidad'
+        else:
+            self.sport_category = 'Cardio'
+
+        super().save(*args, **kwargs)
+    
     class Meta:
         verbose_name = "Sport activity"
         verbose_name_plural = "Sport activities"
-
-# Atributo derivado calculado según tipo de deporte seleccionado
-sport_category = models.CharField(max_length=20, blank=False, editable=False)
-
-def save(self, *args, **kwargs):
-    if self.sport_type in ['weights']:
-        self.sport_category = 'Fuerza'
-    elif self.sport_type in ['pilates', 'yoga']:
-        self.sport_category = 'Flexibilidad'
-    else:
-        self.sport_category = 'Cardio'
-
-    super().save(*args, **kwargs)
