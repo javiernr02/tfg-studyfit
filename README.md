@@ -66,7 +66,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
       \q
 7) Editar archivo de configuración
     - Copiar contenido .env.example en nuevo archivo .env
-    - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 5)
+    - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 6)
 6) Preparación base de datos
     - Nos ubicamos en raíz del proyecto
     - Crea archivos de migraciones por los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones por el desarrollador):
@@ -95,7 +95,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
       ```bash
       python manage.py runserver
     - Navegar al despliegue en local: http://127.0.0.1:8000/
-    - Comprobar correcto funcionamiento de la aplicación
+    - Comprobar el correcto funcionamiento de la aplicación
 
 ## Autor 👤
 
