@@ -80,13 +80,10 @@ class Subject(models.Model):
     
     subjectCategory = models.CharField(max_length=20, choices=SubjectCategory.choices)
     
-CONCENTRATION_CHOICES = [(i, i) for i in range(0, 11)]
-
 class StudyActivity(Activity):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
     
-    concentration = models.PositiveSmallIntegerField(choices=CONCENTRATION_CHOICES, 
-        validators=[MinValueValidator(0), MaxValueValidator(0)])
+    concentration = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
     
     class Meta:
         verbose_name = "Study activity"
