@@ -203,7 +203,7 @@ def balance(request):
 # Existe productividad cuando mínimo se estudia 1 hora y se hace media hora de deporte
 def get_most_productive(study_activities, sport_activities, trunc, format):
     MIN_STUDY_TIME = timedelta(minutes=60)
-    MIN_SPORT_TIME = timedelta(minutes=0)
+    MIN_SPORT_TIME = timedelta(minutes=30)
     
     study = (study_activities.annotate(period=trunc('date')).values('period').annotate(total_duration=Sum('duration')))
     
