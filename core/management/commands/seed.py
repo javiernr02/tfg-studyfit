@@ -80,63 +80,109 @@ class Command(BaseCommand):
         subjects = list(models.Subject.objects.all())
         trophies = list(models.Trophy.objects.all())
         
+        days = [timezone.now().date() - timedelta(days=i) for i in range(400)]
+        
+        # Creación de actividades deportivas
+        self.stdout.write('Creating sport activities...')
+                    
+        options = ['Sesión', 'Actividad', 'Mejora', 'Ejercicio']
+        
+        for user in users:
+
+            sport_activities_by_day = {}
+
+            for i in days:
+                
+                sport_probability = min(0.9, 0.1 + user.level * 0.07)
+                
+                if i.weekday() >= 5:
+                    sport_probability = min(0.9, sport_probability + 0.2)
+                
+                if random.random() < sport_probability:
+                    
+                    sport_type = random.choice(list(models.SportType))
+                    
+                    if sport_type.value == 'hiit':
+                        intensity = models.Intensity.VERY_HIGH
+                    else:
+                        intensity = random.choice(models.Intensity.values)
+                        
+                    minutes = random.randint(20, 90)
+                    
+                    sport_activities_by_day[i] = sport_activities_by_day.get(i, 0) + minutes
+
+                    models.SportActivity.objects.create(
+                        user = user,
+                        title = f'{random.choice(options)} de {sport_type.label.lower()}',
+                        description = fake.text(max_nb_chars=100),
+                        duration = timedelta(minutes=minutes),
+                        date = i,
+                        sport_type = sport_type.value,
+                        distance = round(random.uniform(0, 12), 2) if sport_type.value in ['walk', 'run', 'bike', 'hiit'] else None,
+                        intensity = intensity
+                    )
+        
         # Creación de actividades de estudio
         self.stdout.write('Creating study activities...')
         
         options = ['Sesión', 'Actividad', 'Estudio', 'Ejercicios']
 
         for user in users:
-
-            study_count = int(user.level * random.uniform(2, 6))
-
-            last_date = timezone.now().date()
-
-            for i in range(study_count):
-
-                subject = random.choice(subjects)
-
-                duration = random.randint(25, 180)
-
-                activity_date = last_date - timedelta(days=random.randint(0, 400))
-
-                models.StudyActivity.objects.create(
-                    user = user,
-                    title = f'{random.choice(options)} de {subject.name}',
-                    description = fake.text(max_nb_chars=100),
-                    duration = timedelta(minutes=duration),
-                    date = activity_date,
-                    subject = subject
-                )
-        
-        # Creación de actividades deportivas
-        self.stdout.write('Creating sport activities...')
+            
+            for i in days:
                 
-        options = ['Sesión', 'Actividad', 'Mejora', 'Ejercicio']
-        
-        for user in users:
-
-            sport_count = int(user.level * random.uniform(1, 4))
-
-            for _ in range(sport_count):
-
-                sport_type = random.choice(list(models.SportType))
+                study_probability = min(0.9, 0.1 + user.level * 0.08)
                 
-                if sport_type.value == 'hiit':
-                    intensity = models.Intensity.VERY_HIGH
-                else:
-                    intensity = random.choice(models.Intensity.values)
-
-                models.SportActivity.objects.create(
-                    user = user,
-                    title = f'{random.choice(options)} de {sport_type.label.lower()}',
-                    description = fake.text(max_nb_chars=100),
-                    duration = timedelta(minutes=random.randint(20, 90)),
-                    date = timezone.now().date() - timedelta(days=random.randint(0, 400)),
-                    sport_type = sport_type.value,
-                    distance = round(random.uniform(0, 12), 2) if sport_type.value in ['walk', 'run', 'bike', 'hiit'] else None,
-                    intensity = intensity
-                )
+                if i.weekday() >= 5:
+                    study_probability = max(0.1, study_probability - 0.2)
                 
+                if random.random() < study_probability:
+                    
+                    study_activities_level_weights = {
+                        1: ([1, 2], [0.9, 0.1]),
+                        2: ([1, 2], [0.8, 0.2]),
+                        3: ([1, 2], [0.7, 0.3]),
+                        4: ([1, 2, 3], [0.45, 0.4, 0.15]),
+                        5: ([1, 2, 3], [0.25, 0.5, 0.25]),
+                        6: ([1, 2, 3], [0.05, 0.6, 0.35]),
+                        7: ([2, 3, 4], [0.3, 0.5, 0.2]),
+                        8: ([2, 3, 4], [0.1, 0.6, 0.3]),
+                        9: ([2, 3, 4, 5], [0.15, 0.4, 0.3, 0.15]),
+                        10: ([2, 3, 4, 5], [0.05, 0.2, 0.45, 0.3]),
+                    }
+                    
+                    choices, weights = study_activities_level_weights[user.level]
+                    
+                    study_activities_by_day = random.choices(choices, weights=weights)[0]
+                    
+                    sport_minutes = sport_activities_by_day.get(i, 0)
+                        
+                    for activity_by_day in range(study_activities_by_day):
+                        subject = random.choice(subjects)
+                        
+                        duration = random.randint(20, 100)
+                        
+                        fatigue = activity_by_day // 2 
+                    
+                        if sport_minutes == 0:
+                            if duration < 50:
+                                concentration = max(0, random.randint(1, 3) - fatigue)
+                            else:
+                                concentration = max(0, random.randint(3, 5) - fatigue)
+                            
+                        else:
+                            concentration = min(10, max(5, int((sport_minutes / 90) * 10 + random.randint(-1, 2)) - fatigue))
+
+                        models.StudyActivity.objects.create(
+                            user = user,
+                            title = f'{random.choice(options)} de {subject.name}',
+                            description = fake.text(max_nb_chars=100),
+                            duration = timedelta(minutes=duration),
+                            date = i,
+                            subject = subject,
+                            concentration = concentration
+                        )
+                        
         # Asignación de trofeos a usuarios según sus actividades
         self.stdout.write('Assigning trophies with logic...')
 
@@ -161,7 +207,7 @@ class Command(BaseCommand):
             
             sorted_days_study = sorted(daily_study_durations.keys())
             
-            daily_study_durations_list = [daily_study_durations[day].total_seconds() / 3600 for day in sorted_days_study]
+            # daily_study_durations_list = [daily_study_durations[day].total_seconds() / 3600 for day in sorted_days_study]
             
             # Diccionario para actividades de deporte de duraciones por día
             daily_sport_durations = defaultdict(lambda: timedelta())
@@ -172,7 +218,7 @@ class Command(BaseCommand):
             
             sorted_days_sport = sorted(daily_sport_durations.keys())
             
-            daily_sport_durations_list = [daily_sport_durations[day].total_seconds() / 3600 for day in sorted_days_sport]
+            # daily_sport_durations_list = [daily_sport_durations[day].total_seconds() / 3600 for day in sorted_days_sport]
             
             daily_total_durations = defaultdict(lambda: timedelta())
             
