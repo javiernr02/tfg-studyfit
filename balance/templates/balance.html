@@ -4,6 +4,9 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/balance.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
 
 <div class="balance-dashboard">
     <div class="balance-title">
@@ -115,7 +118,11 @@
                 Nivel: <span>{{ level }}</span>
                 <div class="data">
                     Puntos de experiencia: <span>{{ experience_points }}</span>
-                    <span class="remaining-points">(faltan {{ remaining_points }} puntos para el próximo nivel)</span>
+                    {% if level == 10 %}
+                        <span class="final-remaining-points">¡Enhorabuena has alcanzado el nivel máximo!</span>
+                    {% else %}
+                        <span class="remaining-points">(faltan {{ remaining_points }} puntos para el próximo nivel)</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -127,16 +134,23 @@
             Estadísticas
         </div>
         <div class="card-value">
-            <button class="week-button" onclick="setActive(this); load('week')">Semana</button>
-            <button onclick="setActive(this); load('month')">Mes</button>
-            <button onclick="setActive(this); load('year')">Año</button>
-            <button onclick="setActive(this); load('global')">Global</button>
+            <button class="week-button" onclick="setActive(this); load('week', this)">Semana</button>
+            <button onclick="setActive(this); load('month', this)">Mes</button>
+            <button onclick="setActive(this); load('year', this)">Año</button>
+            <button onclick="setActive(this); load('global', this)">Global</button>
             
             <p id="no-data" style="display:none; text-align:center;">No hay datos en este periodo</p>
 
             <div class="charts">
+                <i class="fa-solid fa-up-right-and-down-left-from-center" onclick="openFullscreen()"></i>
                 <canvas id="lineChart"></canvas>
                 <canvas id="pieChart"></canvas>
+            </div>
+
+            <div id="chart-fullscreen" class="chart-fullscreen" style="display:none;">
+                <p>Haz zoom y arrastra para ver mejor los datos</p>
+                <i class="fa-solid fa-xmark" onclick="closeFullscreen()"></i>
+                <canvas id="lineChartFullscreen"></canvas>
             </div>
             
             <div id="all-averages" class="average-hours">
@@ -171,15 +185,15 @@
                     <i class="fa-solid fa-rocket"></i>
                     Cálculo de Productividad
                 </div>
-                <p class="productive-line">
+                <p id="best-day-line" class="productive-line">
                     <span class="label">📆 Día más productivo:</span>
                     <span id="best-day"></span>
                 </p>
-                <p class="productive-line">
+                <p id="best-week-line" class="productive-line">
                     <span class="label">📅 Semana más productiva:</span>
                     <span id="best-week"></span>
                 </p>
-                <p class="productive-line">
+                <p id="best-month-line" class="productive-line">
                     <span class="label">📅 Mes más productivo:</span>
                     <span id="best-month"></span>
                 </p>
@@ -191,12 +205,30 @@
 <script>
     let lineChart;
     let pieChart;
+    let fullscreenChart;
+    let chartData = null;
     
-    function load(period) {
+    Chart.register(ChartZoom);
+
+    function setActive(button) {
+        document.querySelectorAll(".statistics-card button").forEach(i => i.classList.remove("active"));
+
+        if (button) {
+            button.classList.add("active");
+        }
+    }
+    
+    function load(period, button = null) {
+
+        if (button) {
+            setActive(button);
+        }
 
         fetch(`{% url 'stats' %}?period=${period}`)
             .then(response => response.json())
             .then(data => {
+
+                chartData = data;
 
                 const noData = document.getElementById("no-data");
                 const allAverages = document.getElementById("all-averages");
@@ -212,6 +244,10 @@
                 const bestDay = document.getElementById("best-day");
                 const bestWeek = document.getElementById("best-week");
                 const bestMonth = document.getElementById("best-month");
+
+                const bestDayLine = document.getElementById("best-day-line");
+                const bestWeekLine = document.getElementById("best-week-line");
+                const bestMonthLine = document.getElementById("best-month-line");
 
                 if (productive_stats.best_day) {
                     bestDay.textContent = 
@@ -279,16 +315,16 @@
                 pieCanvas.style.display = "block";
 
                 if (period == "week") {
-                    bestWeek.style.display = "none";
-                    bestMonth.style.display = "none";
+                    bestWeekLine.style.display = "none";
+                    bestMonthLine.style.display = "none";
                 }
                 else if (period == "month") {
-                    bestWeek.style.display = "block";
-                    bestMonth.style.display = "none";
+                    bestWeekLine.style.display = "flex";
+                    bestMonthLine.style.display = "none";
                 }
                 else {
-                    bestWeek.style.display = "block";
-                    bestMonth.style.display = "block";
+                    bestWeekLine.style.display = "flex";
+                    bestMonthLine.style.display = "flex";
                 }
 
                 if (lineChart) {
@@ -341,15 +377,23 @@
                             responsive: true,
                             maintainAspectRatio: false,
 
+                            interaction: {
+                                mode: "nearest",
+                                intersect: true,
+                            },
+
                             plugins: {
                                 tooltip: {
+                                    enabled: true,
+                                    mode: "nearest",
+                                    intersect: true,
                                     callbacks: {
                                         label: function(context) {
                                             if (context.dataset.label === "Estudio") {
-                                                return "Estudio: " + data.study_labels_formatted[context.dataIndex];
+                                                return "Estudio: " + chartData.study_labels_formatted[context.dataIndex];
                                             }
                                             else {
-                                                return "Deporte: " + data.sport_labels_formatted[context.dataIndex];
+                                                return "Deporte: " + chartData.sport_labels_formatted[context.dataIndex];
                                             }
                                         }
                                     }
@@ -384,10 +428,10 @@
                                     callbacks: {
                                         label: function(context) {
                                             if (context.label === "Estudio") {
-                                                return `${data.study_percent}% (${data.study_total_time_formatted})`;
+                                                return `${chartData.study_percent}% (${chartData.study_total_time_formatted})`;
                                             }
                                             else {
-                                                return `${data.sport_percent}% (${data.sport_total_time_formatted})`;
+                                                return `${chartData.sport_percent}% (${chartData.sport_total_time_formatted})`;
                                             }
                                         }
                                     }
@@ -401,17 +445,125 @@
             });
     }
 
-    function setActive(button) {
-        document.querySelectorAll("button").forEach(i => i.classList.remove("active"));
+    function openFullscreen() {
+        const container = document.getElementById("chart-fullscreen");
+        const fullscreenCanvas = document.getElementById("lineChartFullscreen");
 
-        button.classList.add("active");
+        container.style.display = "flex";
+
+        if (fullscreenChart) {
+            fullscreenChart.destroy();
+            fullscreenChart = null;
+        }
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+
+                fullscreenChart = new Chart(fullscreenCanvas, {
+                    type: "line",
+
+                    data: {
+                        labels: [...lineChart.data.labels],
+                        datasets: lineChart.data.datasets.map(dataset => ({
+                            ...dataset,
+                            data: [...dataset.data]
+                        }))
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "nearest",
+                            intersect: false,
+                            axis: "x"
+                        },
+
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: "Fechas"
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: "Tiempos"
+                                },
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return value + "h";
+                                    }
+                                }
+                            }
+                        },
+
+                        plugins: {
+                            tooltip: {
+                                enabled: true,
+                                mode: "nearest",
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataset.label === "Estudio") {
+                                            return "Estudio: " + chartData.study_labels_formatted[context.dataIndex];
+                                        }
+                                        else {
+                                            return "Deporte: " + chartData.sport_labels_formatted[context.dataIndex];
+                                        }
+                                    }
+                                }
+                            },
+
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: "x",
+                                    modifierKey: null,
+                                    threshold: 10
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: "x"
+                                }
+                            }
+                        },
+                    }
+                });
+                
+                fullscreenChart.update();
+                fullscreenChart.resize();
+            });
+        }); 
     }
 
-    window.onload = () => {
-        const initialButton = document.querySelector("button");
-        setActive(initialButton);
-        load("week");
-    };
+    function closeFullscreen() {
+        const container = document.getElementById("chart-fullscreen");
+
+        container.style.display = "none";
+
+        if (fullscreenChart) {
+            fullscreenChart.destroy();
+
+            fullscreenChart = null;
+        }
+
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const initialButton = document.querySelector(".week-button");
+
+        load("week", initialButton);
+    });
 
 </script>
 
