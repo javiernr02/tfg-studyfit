@@ -211,6 +211,12 @@ span {
     font-size: 15px;
 }
 
+.data .final-remaining-points {
+    font-size: 15px;
+    color: #52DD5D;
+    font-weight: bold;
+}
+
 .statistics-card {
     background-color: #FFFFFF;
     border: 1px solid #52BFDD;
@@ -254,6 +260,58 @@ span {
 #pieChart {
     max-width: 500px;
     max-height: 500px;
+}
+
+.chart-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+}
+
+#lineChartFullscreen {
+    width: 95% !important;
+    height: 95% !important;
+    touch-action: none;
+}
+
+.chart-fullscreen i {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #5f5e5e;
+}
+
+.chart-fullscreen p {
+    color: #5f5e5e;
+    position: absolute;
+    top: 7px;
+    right: 200px;
+}
+
+.charts i {
+    position: absolute;
+    margin-bottom: 20px;
+    right: 130px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #5f5e5e;
+}
+
+#chart-fullscreen canvas {
+    touch-action: none;
+    cursor: grab;
+}
+
+#chart-fullscreen canvas:active {
+    cursor: grabbing;
 }
 
 .average-hours {
