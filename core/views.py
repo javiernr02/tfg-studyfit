@@ -7,6 +7,10 @@ from collections import defaultdict
 # Create your views here.
 
 def format_duration(duration):
+    
+    if duration is None:
+        return None
+    
     total_seconds = int(duration.total_seconds())
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
