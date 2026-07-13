@@ -2,11 +2,15 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.formats import date_format
 import core.models as models
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from core.views import format_duration
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.http import JsonResponse
+import numpy as np
+import pandas as pd
+from .services.ai_service import get_hybrid_prediction, get_scatter_data_grouped, get_regression_curve, get_regression_curve_global
+from sklearn.linear_model import LinearRegression
 
 # Create your views here.
 
@@ -37,9 +41,9 @@ def balance_logic_streak(user):
         study_durations = timedelta()
         sport_durations = timedelta()
         
-        today_study_activities = models.StudyActivity.objects.filter(user=user,date=today)
+        today_study_activities = models.StudyActivity.objects.filter(user=user,date__date=today)
         
-        today_sport_activities = models.SportActivity.objects.filter(user=user,date=today)
+        today_sport_activities = models.SportActivity.objects.filter(user=user,date__date=today)
         
         for i in today_study_activities:
             study_durations += i.duration
@@ -98,7 +102,7 @@ def get_balance_data(user):
     
     today = timezone.now().date()
     
-    today_activities = user.activities.filter(date=today)
+    today_activities = user.activities.filter(date__date=today)
     
     study_durations = timedelta()
     sport_durations = timedelta()
@@ -113,9 +117,9 @@ def get_balance_data(user):
     streak_value = 0
     
     if today_activities:
-        today_study_activities = models.StudyActivity.objects.filter(user=user,date=today)
+        today_study_activities = models.StudyActivity.objects.filter(user=user,date__date=today)
         
-        today_sport_activities = models.SportActivity.objects.filter(user=user,date=today)
+        today_sport_activities = models.SportActivity.objects.filter(user=user,date__date=today)
         
         for i in today_study_activities:
             study_durations += i.duration
@@ -176,26 +180,6 @@ def get_trophies_data(user):
         'repeatable_sportsman_trophy': repeatable_sportsman_trophy
     }
     
-# Función principal balance que renderiza la página html con todos los datos calculados en las funciones anteriores,
-# además de lo relacionado con niveles y puntos de experiencia
-def balance(request):
-    user = models.CustomUser.objects.first()
-    
-    level = user.level
-    experience_points = user.experience_points
-    
-    remaining_points = 1000 - experience_points
-    
-    return render(request, 'balance.html', {
-        'user': user,
-        'level': level,
-        'experience_points': experience_points,
-        'remaining_points': remaining_points,
-        **get_balance_data(user),
-        **get_trophies_data(user)
-    })
-
-
 # Estadísticas equilibrio mente-cuerpo
 
 
@@ -260,17 +244,25 @@ def stats(request):
     # Filtros por periodo
     today = timezone.now().date()
     
+    start_week = timezone.make_aware(datetime.combine(today - timedelta(days=7), datetime.min.time()))
+    start_month = timezone.make_aware(datetime.combine(today - timedelta(days=30), datetime.min.time()))
+    start_year = timezone.make_aware(datetime.combine(today - timedelta(days=365), datetime.min.time()))
+    
     if period == 'week':
-        study_activities = study_activities.filter(date__gte=today - timedelta(days=7))
-        sport_activities = sport_activities.filter(date__gte=today - timedelta(days=7))
+        study_activities = study_activities.filter(date__gte=start_week)
+        sport_activities = sport_activities.filter(date__gte=start_week)
         
     elif period == 'month':
-        study_activities = study_activities.filter(date__gte=today - timedelta(days=30))
-        sport_activities = sport_activities.filter(date__gte=today - timedelta(days=30))
+        study_activities = study_activities.filter(date__gte=start_month)
+        sport_activities = sport_activities.filter(date__gte=start_month)
         
     elif period == 'year':
-        study_activities = study_activities.filter(date__gte=today - timedelta(days=365))
-        sport_activities = sport_activities.filter(date__gte=today - timedelta(days=365))
+        study_activities = study_activities.filter(date__gte=start_year)
+        sport_activities = sport_activities.filter(date__gte=start_year)
+    
+    elif period == 'global':
+        study_activities = study_activities
+        sport_activities = sport_activities
         
     study_data = (study_activities.annotate(day=TruncDate('date')).values('day').annotate(total_duration=Sum('duration')).order_by('day'))
     sport_data = (sport_activities.annotate(day=TruncDate('date')).values('day').annotate(total_duration=Sum('duration')).order_by('day'))
@@ -310,44 +302,56 @@ def stats(request):
     sport_total_time_formatted = format_duration(sport_total_time)
     
     # Cálculo de medias
-    first_study_activity = study_activities.order_by('date').values_list('date', flat=True).first()
+    first_study_activity = study_activities.order_by('date').first()
+    
     study_active_days = len(study_data)
-    if first_study_activity:
-        total_study_days = (today - first_study_activity).days + 1
-        
-        study_average_hours = (study_total_seconds / 3600) / total_study_days
-        
-        if study_active_days > 0:
-            study_active_average_hours = (study_total_seconds / 3600) / study_active_days
+    
+    if period in ['week', 'month', 'year']:
+        total_study_days = len(all_days)
+    else:
+        if first_study_activity:
+            total_study_days = (today - first_study_activity.date.date()).days + 1
         else:
-            study_active_average_hours = 0
-            
+            total_study_days = 1
+    
+    if study_total_seconds > 0:
+        study_average_hours = (study_total_seconds / 3600) / total_study_days
         study_average = timedelta(hours=study_average_hours)
-        study_active_average = timedelta(hours=study_active_average_hours)
     else:
         study_average = timedelta(0)
         
+    if study_active_days > 0:
+        study_active_average_hours = (study_total_seconds / 3600) / study_active_days
+        study_active_average = timedelta(hours=study_active_average_hours)
+    else:
         study_active_average = timedelta(0)
     
-    first_sport_activity = sport_activities.order_by('date').values_list('date', flat=True).first()
+    
+    first_sport_activity = sport_activities.order_by('date').first()
+    
     sport_active_days = len(sport_data)
-    if first_sport_activity:
-        total_sport_days = (today - first_sport_activity).days + 1
-        
-        sport_average_hours = (sport_total_seconds / 3600) / total_sport_days
-        
-        if sport_active_days > 0:
-            sport_active_average_hours = (sport_total_seconds / 3600) / sport_active_days
+    
+    if period in ['week', 'month', 'year']:
+        total_sport_days = len(all_days)
+    else:
+        if first_sport_activity:
+            total_sport_days = (today - first_sport_activity.date.date()).days + 1
         else:
-            sport_active_average_hours = 0
-        
+            total_sport_days = 1
+            
+    if sport_total_seconds > 0:
+        sport_average_hours = (sport_total_seconds / 3600) / total_sport_days
         sport_average = timedelta(hours=sport_average_hours)
-        sport_active_average = timedelta(hours=sport_active_average_hours)
     else:
         sport_average = timedelta(0)
-        
+    
+    if sport_active_days > 0:
+        sport_active_average_hours = (sport_total_seconds / 3600) / sport_active_days
+        sport_active_average = timedelta(hours=sport_active_average_hours)
+    else:
         sport_active_average = timedelta(0)
-        
+
+    
     # Cálculo de productividad
     productive_stats = {
         'best_day': get_most_productive(
@@ -358,7 +362,7 @@ def stats(request):
         )
     }
     
-    if period in ['month', 'year']:
+    if period in ['month', 'year', 'global']:
         productive_stats['best_week'] = get_most_productive(
             study_activities,
             sport_activities,
@@ -366,7 +370,7 @@ def stats(request):
             format_duration
         )
         
-    if period == 'year':
+    if period in ['year', 'global']:
         productive_stats['best_month'] = get_most_productive(
             study_activities,
             sport_activities,
@@ -391,6 +395,48 @@ def stats(request):
         'sport_average': format_duration(sport_average),
         'sport_active_average': format_duration(sport_active_average),
         'productive_stats': productive_stats
+    })
+    
+# Análisis inteligente equilibrio mente-cuerpo    
+def scatter_view(request):
+    user = models.CustomUser.objects.get(id=4)
+    
+    regression = get_regression_curve(user)
+    regression_global = get_regression_curve_global()
+
+    return JsonResponse({
+        "points": get_scatter_data_grouped(user),
+        "curve": regression["curve"],
+        "best": regression["best"],
+        "zone": regression["zone"],
+        "curve_global": regression_global["curve_global"]
+    })
+         
+# Función principal balance que renderiza la página html con todos los datos calculados en las funciones anteriores,
+# además de lo relacionado con niveles y puntos de experiencia
+def balance(request):
+    user = models.CustomUser.objects.get(id=3)
+    
+    level = user.level
+    experience_points = user.experience_points
+    
+    remaining_points = 1000 - experience_points
+    
+    hybrid_prediction = get_hybrid_prediction(user)
+    
+    return render(request, 'balance.html', {
+        'user': user,
+        'level': level,
+        'experience_points': experience_points,
+        'remaining_points': remaining_points,
+        
+        **get_balance_data(user),
+        **get_trophies_data(user),
+        
+        "prediction": hybrid_prediction.get("prediction"),
+        "global": hybrid_prediction.get("global"),
+        "personal": hybrid_prediction.get("personal"),
+        "mode": hybrid_prediction.get("mode")
     })
     
     
