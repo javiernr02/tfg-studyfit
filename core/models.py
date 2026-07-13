@@ -62,7 +62,11 @@ class Activity(models.Model):
     
     duration = models.DurationField()
     
-    date = models.DateField()
+    date = models.DateTimeField()
+    
+    @property
+    def end_time(self):
+        return self.date + self.duration
     
     class Meta:
         verbose_name = "Activity"
