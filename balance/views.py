@@ -397,7 +397,11 @@ def stats(request):
         'productive_stats': productive_stats
     })
     
-# Análisis inteligente equilibrio mente-cuerpo    
+# Análisis inteligente equilibrio mente-cuerpo
+
+# Obtención para el usuario correspondiente de los puntos para la gráfica de dispersión,
+# curva de regresión personal con zona recomendada de deporte y valor óptimo de horas-concentración, y
+# curva de regresión global de la aplicación  
 def scatter_view(request):
     user = models.CustomUser.objects.get(id=4)
     
@@ -413,7 +417,7 @@ def scatter_view(request):
     })
          
 # Función principal balance que renderiza la página html con todos los datos calculados en las funciones anteriores,
-# además de lo relacionado con niveles y puntos de experiencia
+# además de lo relacionado con niveles, puntos de experiencia y valor de predicción de la concentración
 def balance(request):
     user = models.CustomUser.objects.get(id=3)
     

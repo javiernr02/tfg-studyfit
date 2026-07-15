@@ -302,7 +302,8 @@ def get_regression_curve(user):
         "best": best,
         "zone": zone
     }
-    
+
+# Cálculo de los puntos (horas de deporte, concentración) de los usuarios de la aplicación
 def get_scatter_data_global():
 
     users = models.CustomUser.objects.all()
@@ -337,6 +338,8 @@ def get_scatter_data_global():
 
     return points
 
+# Cálculo de la función de regresión polinómica de grado 2 que toma los datos de los usuarios de la aplicación para mostrar 
+# la tendencia positiva y negativa entre horas de deporte y concentración
 def get_regression_curve_global():
     
     points_global = get_scatter_data_global()

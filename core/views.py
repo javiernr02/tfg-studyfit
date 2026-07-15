@@ -6,6 +6,7 @@ from collections import defaultdict
 
 # Create your views here.
 
+# Función de formateo de objeto 'duration' según su valor en cadena de texto personalizada
 def format_duration(duration):
     
     if duration is None:
@@ -22,6 +23,9 @@ def format_duration(duration):
     else:
         return f'{hours}h {minutes}min'
 
+# Renderización de la página principal de la aplicación con información sobre horas de deporte y estudio totales,
+# número de actividades en los últimos 7 días, y desglose de actividad según su tipo con información sobre sus horas
+# totales y número de actividades
 def home(request):
     user = models.CustomUser.objects.first()
     
