@@ -248,8 +248,12 @@ span {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 50px;
+    gap: 20px;
     margin-bottom: 50px;
+}
+
+.charts p {
+    font-size: 14px;
 }
 
 #lineChart {

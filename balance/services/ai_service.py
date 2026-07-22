@@ -11,6 +11,8 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from datetime import timedelta
+from django.core.cache import cache
+from django.utils import timezone
 
 MODEL_PATH = os.path.join(settings.BASE_DIR, "ai_models", "global_model.pkl")
 
@@ -340,8 +342,15 @@ def get_scatter_data_global():
     return points
 
 # Cálculo de la función de regresión polinómica de grado 2 que toma los datos de los usuarios de la aplicación para mostrar 
-# la tendencia positiva y negativa entre horas de deporte y concentración
+# la tendencia positiva y negativa entre horas de deporte y concentración.
+# No será necesario calcularlo si ya se encuentra en caché, con un tiempo de expiración de la versión de 24 horas, obteniendo
+# la fecha en la que se ha generado
 def get_regression_curve_global():
+    
+    cached = cache.get("global_regression")
+    
+    if cached:
+        return cached
     
     points_global = get_scatter_data_global()
     
@@ -371,7 +380,16 @@ def get_regression_curve_global():
         }
         for x, y in zip(x_curve.flatten(), y_curve)
     ]
-
-    return {
-        "curve_global": curve_global
+    
+    result = {
+        "curve_global": curve_global,
+        "generated_at": timezone.now()
     }
+    
+    cache.set(
+        "global_regression",
+        result,
+        timeout=60 * 60 * 24   # 24 horas para que caduque la versión global de la curva de regresión
+    )
+
+    return result

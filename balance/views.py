@@ -443,6 +443,7 @@ def balance(request):
     today_sport_hours_format = format_duration(timedelta(hours=today_sport_hours))
     
     regression = get_regression_curve(user)
+    regression_global = get_regression_curve_global()
         
     if regression["best"]:
         
@@ -495,6 +496,7 @@ def balance(request):
         'zone_width': zone_width,
         'zone_end': zone_end,
         'remaining_sport_hours': remaining_sport_hours,
+        'global_regression_date': regression_global['generated_at'],
         
         **get_balance_data(user),
         **get_trophies_data(user),
