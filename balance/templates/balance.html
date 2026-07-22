@@ -225,16 +225,15 @@
 
                 <p>Predicción: {{ prediction }}/10 </p>
                 <p>Modo: {{ mode }} </p>
-
-                <div class="charts">
-                    <div id="scatterLoading" class="scatter-loading">
-                        <div class="spinner"></div>
-                        <p>Analizando los datos y generando gráfica...</p>
-                    </div>
-                    <canvas id="scatterChart" style="display:none;"></canvas>
+            
+            <div class="charts">
+                <div id="scatterLoading" class="scatter-loading">
+                    <div class="spinner"></div>
+                    <p>Analizando los datos y generando gráfica...</p>
                 </div>
-                
+                <canvas id="scatterChart" style="display:none;"></canvas>
             </div>
+                
         </div>
     </div>
 </div>
@@ -628,12 +627,56 @@
                 loading.style.display = "none";
                 canvas.style.display = "block";
 
+                const legendPlugin = {
+                    id: "legendPlugin",
+
+                    afterEvent(chart, args) {
+                        const legend = chart.legend;
+
+                        if (!legend) {
+                            return;
+                        }
+
+                        const event = args.event;
+                        const canvas = chart.canvas;
+
+                        const descriptions = {
+                            "Sesión de Estudio": "Cada punto representa una sesión de estudio registrada con la concentración asociada y deporte previo realizado",
+                            "Tendencia Personal": "Curva estimada calculada a partir de tus sesiones de estudio",
+                            "Valor Óptimo": "Punto que indica las horas de deporte previas al estudio en el que se estima que puedes alcanzar tu concentración máxima",
+                            "Franja Óptima de Deporte": "Intervalo de horas de deporte previas al estudio en el que se estima valores de máxima concentración",
+                            "Tendencia General": "Curva estimada calculada a partir del modelo de sesiones de estudio de todos los usuarios",
+                        };
+
+                        let found = false;
+
+                        legend.legendHitBoxes.forEach((box, i) => {
+                            if (
+                                event.x >= box.left &&
+                                event.x <= box.left + box.width &&
+                                event.y >= box.top &&
+                                event.y <= box.top + box.height
+                            ) {
+                                const label = chart.data.datasets[i].label;
+                                canvas.title = descriptions[label] || "";
+                                canvas.style.cursor = "pointer";
+                                found = true;
+                            }
+                        });
+
+                        if (!found) {
+                            canvas.title = "";
+                            canvas.style.cursor = "default";
+                        }
+                    }
+                };
+
                 const zonePlugin = {
                     id: "zonePlugin",
 
                     beforeDraw(chart) {
 
-                        const zoneDataset = chart.data.datasets.find(x => x.label === "Deporte Recomendado");
+                        const zoneDataset = chart.data.datasets.find(x => x.label === "Franja Óptima de Deporte");
 
                         const zoneMeta = chart.getDatasetMeta(chart.data.datasets.indexOf(zoneDataset));
 
@@ -653,7 +696,7 @@
                         const x2 = scales.x.getPixelForValue(zone.max_x);
 
                         ctx.save();
-                        ctx.fillStyle = "rgba(8, 152, 35, 0.15)";
+                        ctx.fillStyle = "rgba(108, 0, 77, 0.15)";
                         ctx.fillRect(
                             x1,
                             chartArea.top,
@@ -666,17 +709,17 @@
 
                 scatterChart = new Chart(canvas, {
                     type: "scatter",
-                    plugins: [zonePlugin],
+                    plugins: [legendPlugin, zonePlugin],
                     data: {
                         datasets: [{
-                            label: "Sesiones de Estudio",
+                            label: "Sesión de Estudio",
                             data: data.points.map(p => ({
                                 x: p.sport_hours,
                                 y: p.concentration,
                                 sport_hours_format_duration: p.sport_hours_format_duration,
                                 sessions: p.sessions
                             })),
-                            backgroundColor: "rgba(36, 184, 141, 0.6)",
+                            backgroundColor: "rgba(108, 0, 77, 0.6)",
                             radius: function(context) {
                                 const sessions = context.raw.sessions;
 
@@ -684,35 +727,35 @@
                             }
                         },
                         {
-                            label: "Valor Óptimo",
-                            data: [data.best],
-                            backgroundColor: "rgba(72, 0, 108, 0.6)",
-                            pointRadius: 9
-                        },
-                        {
                             label: "Tendencia Personal",
                             data: data.curve,
                             type: "line",
-                            backgroundColor: "#AF52DD",
-                            borderColor: "#AF52DD",
+                            backgroundColor: "rgba(104, 0, 155, 0.8)",
+                            borderColor: "rgba(104, 0, 155, 0.8)",
                             pointRadius: 0,
                             fill: false
                         },
                         {
-                            label: "Tendencia Global",
+                            label: "Valor Óptimo",
+                            data: [data.best],
+                            backgroundColor: "rgba(53, 0, 79, 0.6)",
+                            pointRadius: 9
+                        },
+                        {
+                            label: "Franja Óptima de Deporte",
+                            data: [],
+                            backgroundColor: "rgba(108, 0, 77, 0.15)",
+                            borderColor: "rgba(108, 0, 77, 0.15)",
+                            pointRadius: 0
+                        },
+                        {
+                            label: "Tendencia General",
                             data: data.curve_global,
                             type: "line",
-                            backgroundColor: "#e98412",
-                            borderColor: "#e98412",
+                            backgroundColor: "rgba(233, 132, 18, 0.8)",
+                            borderColor: "rgba(233, 132, 18, 0.8)",
                             pointRadius: 0,
                             fill: false
-                        },
-                        {
-                            label: "Deporte Recomendado",
-                            data: [],
-                            backgroundColor: "rgba(8, 152, 35, 0.15)",
-                            borderColor: "rgba(8, 152, 35, 0.15)",
-                            pointRadius: 0
                         },
                         ]
                     },
@@ -721,7 +764,7 @@
                             x: { 
                                 title: { 
                                     display: true, 
-                                    text: "Horas de Deporte" 
+                                    text: "Horas de Deporte (previo al estudio)" 
                                 },
                                 grid: {
                                     display: false
@@ -755,28 +798,28 @@
 
                                         if (context.dataset.label === "Valor Óptimo") {
                                             return [
-                                                "Horas de deporte: " + point.sport_hours_format_duration,
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
                                                 "Concentración: " + point.y.toFixed(1) + "/10",
                                             ];
                                         }
 
                                         else if (context.dataset.label === "Tendencia Personal") {
                                             return [
-                                                "Horas de deporte: " + point.sport_hours_format_duration,
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
                                                 "Concentración personal estimada: " + point.y.toFixed(1) + "/10",
                                             ];
                                         }
 
                                         else if (context.dataset.label === "Tendencia Global") {
                                             return [
-                                                "Horas de deporte: " + point.sport_hours_format_duration,
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
                                                 "Concentración global estimada: " + point.y.toFixed(1) + "/10",
                                             ];
                                         }
                                         
                                         else {
                                             return [
-                                                "Horas de deporte: " + point.sport_hours_format_duration,
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
                                                 "Concentración: " + point.y + "/10",
                                                 "Sesiones: " + point.sessions
                                             ];
