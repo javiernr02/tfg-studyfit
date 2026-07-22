@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load l10n %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/balance.css' %}">
@@ -225,6 +226,67 @@
 
                 <p>Predicción: {{ prediction }}/10 </p>
                 <p>Modo: {{ mode }} </p>
+
+            </div>
+
+            {% if recommended_zone %}
+                <div class="recommended-container">
+                    <div class="title">
+                        <i class="fa-solid fa-bars-progress"></i>
+                        Progresión de Deporte Hoy
+                    </div>
+
+                    <div class="recommended-labels">
+                        <span>0min</span>
+
+                        <span class="zone-min"
+                            style="left: {% localize off %}{{ zone_start }}{% endlocalize %}%;">
+                            {{ min_zone_hours_format }}
+                        </span>
+
+                        <span class="zone-max"
+                            style="left: {% localize off %}{{ zone_end }}{% endlocalize %}%;">
+                            {{ max_zone_hours_format }}
+                        </span>
+
+                        <span>{{ max_hours_format }}</span>
+                    </div>
+
+                    <div class="recommended-bar">
+                        
+                        <div class="recommended-zone"
+                            style="left: {% localize off %}{{ zone_start }}{% endlocalize %}%;
+                                    width: {% localize off %}{{ zone_width }}{% endlocalize %}%;">
+                        </div>
+
+                        <div class="zone-indicator"
+                            style="left: {% localize off %}{{ zone_start }}{% endlocalize %}%;
+                                    width: {% localize off %}{{ zone_width }}{% endlocalize %}%;">
+                            <span>Franja Óptima de Deporte</span>
+                        </div>
+
+                        <div class="today-marker"
+                            style="left: {% localize off %}{{ progress }}{% endlocalize %}%;">
+                            <span>Hoy ({{ today_sport_hours_format }})</span>
+                        </div>
+
+                    </div>
+
+                    <div class="remaining-sport"
+                        title="Basado en la estimación calculada para alcanzar el óptimo de concentración">
+                        {% if remaining_sport_hours != "0 min" %}
+                            <i class="fa-solid fa-hourglass-half"></i>
+                            <span>Tiempo restante para el valor óptimo:</span>
+                            <strong>{{ remaining_sport_hours }}</strong>
+                        {% else %}
+                            <i class="fa-regular fa-circle-check"></i>
+                            <strong>¡Has alcanzado el valor óptimo de deporte!</strong>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            {% endif %}
             
             <div class="charts">
                 <div id="scatterLoading" class="scatter-loading">

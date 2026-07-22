@@ -300,7 +300,8 @@ def get_regression_curve(user):
     return {
         "curve": curve,
         "best": best,
-        "zone": zone
+        "zone": zone,
+        "max_sport_hours": float(X.max())
     }
 
 # Cálculo de los puntos (horas de deporte, concentración) de los usuarios de la aplicación

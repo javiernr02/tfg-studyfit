@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from .services.ai_service import get_hybrid_prediction, get_scatter_data_grouped, get_regression_curve, get_regression_curve_global
 from sklearn.linear_model import LinearRegression
+import math
 
 # Create your views here.
 
@@ -417,9 +418,13 @@ def scatter_view(request):
     })
          
 # Función principal balance que renderiza la página html con todos los datos calculados en las funciones anteriores,
-# además de lo relacionado con niveles, puntos de experiencia y valor de predicción de la concentración
+# además de lo relacionado con niveles, puntos de experiencia, valor de predicción de la concentración
+# y progreso dinámico del deporte realizado en el día actual
 def balance(request):
-    user = models.CustomUser.objects.get(id=3)
+    user = models.CustomUser.objects.get(id=4)
+    
+    today = timezone.now().date()
+    sport_durations = timedelta()
     
     level = user.level
     experience_points = user.experience_points
@@ -428,11 +433,68 @@ def balance(request):
     
     hybrid_prediction = get_hybrid_prediction(user)
     
+    today_sport_activities = models.SportActivity.objects.filter(user=user, date__date=today)
+    
+    for i in today_sport_activities:
+        sport_durations += i.duration
+    
+    today_sport_hours = sport_durations.total_seconds() / 3600
+    
+    today_sport_hours_format = format_duration(timedelta(hours=today_sport_hours))
+    
+    regression = get_regression_curve(user)
+        
+    if regression["best"]:
+        
+        best_sport_hours = regression["best"]["x"]
+        
+        remaining_sport_hours = max(0, best_sport_hours - today_sport_hours)
+        
+        remaining_sport_hours = format_duration(timedelta(hours=remaining_sport_hours))
+        
+        recommended_zone = regression["zone"]
+        
+    else:
+        remaining_sport_hours = None
+        
+        recommended_zone = None
+        
+    if recommended_zone:
+        max_hours = math.ceil(regression["max_sport_hours"])
+
+        progress = (today_sport_hours / max_hours) * 100
+        progress = max(0, min(progress, 100))
+
+        zone_start = (recommended_zone["min_x"] / max_hours) * 100
+        zone_width = ((recommended_zone["max_x"] - recommended_zone["min_x"]) / max_hours) * 100
+        zone_end = zone_start + zone_width
+        
+        max_hours_format = format_duration(timedelta(hours=max_hours))
+        
+        max_zone_hours_format = format_duration(timedelta(hours=recommended_zone["max_x"]))
+        
+        min_zone_hours_format = format_duration(timedelta(hours=recommended_zone["min_x"]))
+        
+    else:
+        progress = None
+        zone_start = None
+        zone_width = None
+    
     return render(request, 'balance.html', {
         'user': user,
         'level': level,
         'experience_points': experience_points,
         'remaining_points': remaining_points,
+        'today_sport_hours_format': today_sport_hours_format,
+        'recommended_zone': recommended_zone,
+        'max_hours_format': max_hours_format,
+        'max_zone_hours_format': max_zone_hours_format,
+        'min_zone_hours_format': min_zone_hours_format,
+        'progress': progress,
+        'zone_start': zone_start,
+        'zone_width': zone_width,
+        'zone_end': zone_end,
+        'remaining_sport_hours': remaining_sport_hours,
         
         **get_balance_data(user),
         **get_trophies_data(user),
