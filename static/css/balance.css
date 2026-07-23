@@ -550,6 +550,25 @@ span {
     color: #24B88D;
 }
 
+.concentration-prediction .info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.concentration-prediction .info p {
+    color: #5f5e5e;
+}
+
+.concentration-prediction .info span {
+    color: #24B88D;
+    font-weight: bold;
+}
+
+.concentration-prediction .info i {
+    color: #007cb2;
+}
+
 .scatter-loading {
     display: flex;
     flex-direction: column;

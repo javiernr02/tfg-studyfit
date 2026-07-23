@@ -224,8 +224,25 @@
                     Predicción de la Concentración
                 </div>
 
-                <p>Predicción: {{ prediction }}/10 </p>
-                <p>Modo: {{ mode }} </p>
+                <div class="info">
+                    <p>Se estima una concentración de <span>{{ prediction }}/10</span> para tu próxima sesión de estudio</p>
+                    {% if mode == "insufficient_data" %}
+                        <i 
+                            class="fa-solid fa-circle-info"
+                            title="La predicción no se puede calcular porque no hay datos globales">
+                        </i>
+                    {% elif mode == "global" %}
+                        <i
+                            class="fa-solid fa-circle-info"
+                            title="La predicción utiliza únicamente el modelo global ya que no hay datos personales">
+                        </i>
+                    {% else %}
+                        <i
+                            class="fa-solid fa-circle-info"
+                            title="La predicción utiliza el modelo híbrido que consiste en utilizar en el cálculo los datos de los usuarios del modelo global con tus propios datos">
+                        </i>
+                    {% endif %}
+                </div>
 
             </div>
 
