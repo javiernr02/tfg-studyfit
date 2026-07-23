@@ -74,14 +74,33 @@ def train_model():
     model.fit(X, y)
 
     joblib.dump(model, MODEL_PATH)
+    
+    cache.set(
+        "global_model",
+        model,
+        timeout=60 * 60 * 24 # 24 horas para que expire el modelo de la caché
+    )
 
-# Carga el modelo entrenado, si existe
+# Carga el modelo entrenado, si existe.
+# La primera petición carga el modelo que se guarda 24 horas en caché
 def load_model():
     
+    model = cache.get("global_model")
+
+    if model is not None:
+        return model
+
     if os.path.exists(MODEL_PATH):
-        
-        return joblib.load(MODEL_PATH)
-    
+        model = joblib.load(MODEL_PATH)
+
+        cache.set(
+            "global_model",
+            model,
+            timeout=60 * 60 * 24 # 24 horas para que expire el modelo de la caché
+        )
+
+        return model
+
     return None
 
 # Genera predicción de la concentración utilizando el modelo global entrenado y hábitos medios del usuario
