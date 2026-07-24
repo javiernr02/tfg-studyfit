@@ -428,8 +428,18 @@ def balance(request):
     
     level = user.level
     experience_points = user.experience_points
-    
-    remaining_points = 1000 - experience_points
+
+    MAX_LEVEL = 10
+    XP_PER_LEVEL = 1000
+
+    if level >= MAX_LEVEL:
+        level_progress = 100
+        current_level_xp = XP_PER_LEVEL
+        remaining_points = 0
+    else:
+        current_level_xp = experience_points - ((level - 1) * XP_PER_LEVEL)
+        remaining_points = XP_PER_LEVEL - current_level_xp
+        level_progress = (current_level_xp / XP_PER_LEVEL) * 100
     
     hybrid_prediction = get_hybrid_prediction(user)
     
@@ -485,7 +495,9 @@ def balance(request):
         'user': user,
         'level': level,
         'experience_points': experience_points,
+        'current_level_xp': current_level_xp,
         'remaining_points': remaining_points,
+        'level_progress': level_progress,
         'today_sport_hours_format': today_sport_hours_format,
         'recommended_zone': recommended_zone,
         'max_hours_format': max_hours_format,

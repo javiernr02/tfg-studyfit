@@ -40,7 +40,13 @@
     padding: 20px;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 25px;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid rgba(82, 221, 93, 0.3);
+    margin: 1px 0;
 }
 
 .repeatable-trophies-title {
@@ -176,27 +182,50 @@ span {
     font-weight: normal;
 }
 
-.level i {
-    color: #24B88D;
-}
-
 .level {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #0D4846;
-    font-size: 17px;
-    font-weight: bold;
+    align-items: flex-start;
+    gap: 10px;
     margin-bottom: 30px;
+    color: #0D4846;
 }
 
-.level span {
+.level i {
+    color: #24B88D;
+    margin-top: 2px;
+}
+
+.level-info {
+    flex: 1;
+}
+
+.level-title {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.level-title span {
     color: #5f5e5e;
     font-weight: normal;
 }
 
+.level-bar {
+    width: 280px;
+    height: 10px;
+    background: #e5e5e5;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.level-progress {
+    height: 100%;
+    background: #F5A208;
+    border-radius: 20px;
+    transition: width .4s ease;
+}
+
 .data {
-    margin-left: 20px;
     color: #0D4846;
     font-size: 17px;
     font-weight: bold;
@@ -208,10 +237,14 @@ span {
 }
 
 .data .remaining-points {
+    display: block;
+    margin-top: 2px;
     font-size: 15px;
 }
 
 .data .final-remaining-points {
+    display: block;
+    margin-top: 2px;
     font-size: 15px;
     color: #52DD5D;
     font-weight: bold;

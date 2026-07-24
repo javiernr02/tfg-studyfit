@@ -81,6 +81,8 @@
                 {% endif %}
             </div>
 
+            <hr>
+
             <div class="non-repeatable-trophies">
                 <div class="non-repeatable-trophies-title">
                     <i class="fa-brands fa-square-web-awesome-stroke"></i>
@@ -109,6 +111,8 @@
                 {% endfor %}
             </div>
 
+            <hr>
+
             <div class="streak">
                 <i class="fa-solid fa-fire"></i>
                 Racha (logros acumulables consecutivos cada día): <span>{{ streak_value }}</span>
@@ -116,14 +120,27 @@
 
             <div class="level">
                 <i class="fa-solid fa-star"></i>
-                Nivel: <span>{{ level }}</span>
-                <div class="data">
-                    Puntos de experiencia: <span>{{ experience_points }}</span>
-                    {% if level == 10 %}
-                        <span class="final-remaining-points">¡Enhorabuena has alcanzado el nivel máximo!</span>
-                    {% else %}
-                        <span class="remaining-points">(faltan {{ remaining_points }} puntos para el próximo nivel)</span>
-                    {% endif %}
+
+                <div class="level-info">
+                    <div class="level-title">
+                        Nivel: <span>{{ level }}</span>
+                    </div>
+
+                    <div class="level-bar">
+                        <div class="level-progress" style="width: {% localize off %}{{ level_progress }}{% endlocalize %}%;"></div>
+                    </div>
+
+                    <div class="data">
+
+                        {% if level == 10 %}
+                            <span class="final-remaining-points">¡Enhorabuena! Has alcanzado el nivel máximo</span>
+                        {% else %}
+                            <span class="remaining-points">{{ current_level_xp }}/1000 XP (faltan {{ remaining_points }} puntos para el próximo nivel)</span>
+                        {% endif %}
+
+                        <br>
+                        Puntos de experiencia: <span>{{ experience_points }}</span>
+                    </div>
                 </div>
             </div>
         </div>
