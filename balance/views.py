@@ -18,63 +18,11 @@ import math
 
 # Gamificación equilibrio mente-cuerpo
 
-
-# Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
-def balance_logic(study_total_minutes, sport_total_minutes):
-    
-    balance = False
-    
-    if sport_total_minutes > 0 and study_total_minutes / sport_total_minutes >= 2:
-            balance = True
-            
-    return balance
-
-# Racha en días que se cumple balance de horas de estudio y deporte
-# Se empieza por día actual y se va calculando para días anteriores
-# Si un día no existe balance se cancela la racha acumulada
-def balance_logic_streak(user):
-    
-    today = timezone.now().date()
-    balance_streak = 0
-    
-    while True:
-        
-        study_durations = timedelta()
-        sport_durations = timedelta()
-        
-        today_study_activities = models.StudyActivity.objects.filter(user=user,date__date=today)
-        
-        today_sport_activities = models.SportActivity.objects.filter(user=user,date__date=today)
-        
-        for i in today_study_activities:
-            study_durations += i.duration
-            
-        for i in today_sport_activities:
-            sport_durations += i.duration
-            
-        study_total_seconds = int(study_durations.total_seconds())
-        study_total_minutes = study_total_seconds / 60
-        
-        sport_total_seconds = int(sport_durations.total_seconds())
-        sport_total_minutes = sport_total_seconds / 60
-        
-        if not today_study_activities and not today_sport_activities:
-            break
-        
-        balance_value = balance_logic(study_total_minutes, sport_total_minutes)
-        
-        if balance_value:
-            balance_streak += 1
-            today -= timedelta(days=1)
-        else:
-            break
-        
-    return balance_streak
-
 # Racha en días que se consigue trofeos acumulables definidos (id=7, id=8)
 # Se empieza por día actual y se va calculando para días anteriores
 # Si un día no se han conseguido ambos trofeos se cancela la racha acumulada
-def streak(user):
+# Se guarda para pasarse como contexto en la función principal: balance
+def get_streak(user):
     
     today = timezone.now().date()
     streak = 0
@@ -94,64 +42,9 @@ def streak(user):
         else:
             break
         
-    return streak
-
-# Cálculo de las horas de estudio y deporte para el día actual, de si se cumple balance entre
-# días de estudio y deporte, racha de balance, racha de logros acumulables, y nivel y puntos de experiencia del usuario.
-# Todos estos datos se guardan para pasarse como contexto en la función principal: balance
-def get_balance_data(user):
-    
-    today = timezone.now().date()
-    
-    today_activities = user.activities.filter(date__date=today)
-    
-    study_durations = timedelta()
-    sport_durations = timedelta()
-    
-    today_study_activities = []
-    today_sport_activities = []
-    
-    balance_value = False
-    
-    balance_streak_value = 0
-    
-    streak_value = 0
-    
-    if today_activities:
-        today_study_activities = models.StudyActivity.objects.filter(user=user,date__date=today)
-        
-        today_sport_activities = models.SportActivity.objects.filter(user=user,date__date=today)
-        
-        for i in today_study_activities:
-            study_durations += i.duration
-            
-        for i in today_sport_activities:
-            sport_durations += i.duration
-            
-        study_total_seconds = int(study_durations.total_seconds())
-        study_total_minutes = study_total_seconds / 60
-        
-        sport_total_seconds = int(sport_durations.total_seconds())
-        sport_total_minutes = sport_total_seconds / 60
-        
-        balance_value = balance_logic(study_total_minutes, sport_total_minutes)
-        
-        balance_streak_value = balance_logic_streak(user)
-        
-        streak_value = streak(user)
-        
-    study_durations_format = format_duration(study_durations)
-    sport_durations_format = format_duration(sport_durations)
-        
     return {
-        'today_study_activities': today_study_activities,
-        'today_sport_activities': today_sport_activities,
-        'study_durations_format': study_durations_format,
-        'sport_durations_format': sport_durations_format,
-        'balance_value': balance_value,
-        'balance_streak_value': balance_streak_value,
-        'streak_value': streak_value
-    }
+            'streak': streak
+        }
 
 # Obtención de diferentes datos relacionados con los trofeos repetibles (acumulables) y no repetibles (exclusivos)
 # Todos estos datos se guardan para pasarse como contexto en la función principal: balance
@@ -423,76 +316,109 @@ def scatter_view(request):
 def balance(request):
     user = models.CustomUser.objects.get(id=4)
     
+    tab = request.GET.get("tab", "trophies")
+    
+    level = None
+    experience_points = None
+    current_level_xp = None
+    remaining_points = None
+    level_progress = None
+    
+    trophies_context = {}
+
+    today_sport_hours_format = None
+    recommended_zone = None
+    max_hours_format = None
+    max_zone_hours_format = None
+    min_zone_hours_format = None
+    progress = None
+    zone_start = None
+    zone_width = None
+    zone_end = None
+    remaining_sport_hours = None
+
+    regression_global = {"generated_at": None}
+    hybrid_prediction = {}
+    
     today = timezone.now().date()
     sport_durations = timedelta()
     
-    level = user.level
-    experience_points = user.experience_points
+    if tab == "trophies":
+        level = user.level
+        experience_points = user.experience_points
 
-    MAX_LEVEL = 10
-    XP_PER_LEVEL = 1000
+        MAX_LEVEL = 10
+        XP_PER_LEVEL = 1000
 
-    if level >= MAX_LEVEL:
-        level_progress = 100
-        current_level_xp = XP_PER_LEVEL
-        remaining_points = 0
-    else:
-        current_level_xp = experience_points - ((level - 1) * XP_PER_LEVEL)
-        remaining_points = XP_PER_LEVEL - current_level_xp
-        level_progress = (current_level_xp / XP_PER_LEVEL) * 100
+        if level >= MAX_LEVEL:
+            level_progress = 100
+            current_level_xp = XP_PER_LEVEL
+            remaining_points = 0
+        else:
+            current_level_xp = experience_points - ((level - 1) * XP_PER_LEVEL)
+            remaining_points = XP_PER_LEVEL - current_level_xp
+            level_progress = (current_level_xp / XP_PER_LEVEL) * 100
+            
+        trophies_context = {
+            **get_streak(user),
+            **get_trophies_data(user)
+        }
+            
+    elif tab == "analysis":
     
-    hybrid_prediction = get_hybrid_prediction(user)
-    
-    today_sport_activities = models.SportActivity.objects.filter(user=user, date__date=today)
-    
-    for i in today_sport_activities:
-        sport_durations += i.duration
-    
-    today_sport_hours = sport_durations.total_seconds() / 3600
-    
-    today_sport_hours_format = format_duration(timedelta(hours=today_sport_hours))
-    
-    regression = get_regression_curve(user)
-    regression_global = get_regression_curve_global()
+        hybrid_prediction = get_hybrid_prediction(user)
         
-    if regression["best"]:
+        today_sport_activities = models.SportActivity.objects.filter(user=user, date__date=today)
         
-        best_sport_hours = regression["best"]["x"]
+        for i in today_sport_activities:
+            sport_durations += i.duration
         
-        remaining_sport_hours = max(0, best_sport_hours - today_sport_hours)
+        today_sport_hours = sport_durations.total_seconds() / 3600
         
-        remaining_sport_hours = format_duration(timedelta(hours=remaining_sport_hours))
+        today_sport_hours_format = format_duration(timedelta(hours=today_sport_hours))
         
-        recommended_zone = regression["zone"]
-        
-    else:
-        remaining_sport_hours = None
-        
-        recommended_zone = None
-        
-    if recommended_zone:
-        max_hours = math.ceil(regression["max_sport_hours"])
+        regression = get_regression_curve(user)
+        regression_global = get_regression_curve_global()
+            
+        if regression["best"]:
+            
+            best_sport_hours = regression["best"]["x"]
+            
+            remaining_sport_hours = max(0, best_sport_hours - today_sport_hours)
+            
+            remaining_sport_hours = format_duration(timedelta(hours=remaining_sport_hours))
+            
+            recommended_zone = regression["zone"]
+            
+        else:
+            remaining_sport_hours = None
+            
+            recommended_zone = None
+            
+        if recommended_zone:
+            max_hours = math.ceil(regression["max_sport_hours"])
 
-        progress = (today_sport_hours / max_hours) * 100
-        progress = max(0, min(progress, 100))
+            progress = (today_sport_hours / max_hours) * 100
+            progress = max(0, min(progress, 100))
 
-        zone_start = (recommended_zone["min_x"] / max_hours) * 100
-        zone_width = ((recommended_zone["max_x"] - recommended_zone["min_x"]) / max_hours) * 100
-        zone_end = zone_start + zone_width
-        
-        max_hours_format = format_duration(timedelta(hours=max_hours))
-        
-        max_zone_hours_format = format_duration(timedelta(hours=recommended_zone["max_x"]))
-        
-        min_zone_hours_format = format_duration(timedelta(hours=recommended_zone["min_x"]))
-        
-    else:
-        progress = None
-        zone_start = None
-        zone_width = None
+            zone_start = (recommended_zone["min_x"] / max_hours) * 100
+            zone_width = ((recommended_zone["max_x"] - recommended_zone["min_x"]) / max_hours) * 100
+            zone_end = zone_start + zone_width
+            
+            max_hours_format = format_duration(timedelta(hours=max_hours))
+            
+            max_zone_hours_format = format_duration(timedelta(hours=recommended_zone["max_x"]))
+            
+            min_zone_hours_format = format_duration(timedelta(hours=recommended_zone["min_x"]))
+            
+        else:
+            progress = None
+            zone_start = None
+            zone_width = None
     
     return render(request, 'balance.html', {
         'user': user,
+        'tab': tab,
         'level': level,
         'experience_points': experience_points,
         'current_level_xp': current_level_xp,
@@ -510,8 +436,7 @@ def balance(request):
         'remaining_sport_hours': remaining_sport_hours,
         'global_regression_date': regression_global['generated_at'],
         
-        **get_balance_data(user),
-        **get_trophies_data(user),
+        **trophies_context,
         
         "prediction": hybrid_prediction.get("prediction"),
         "global": hybrid_prediction.get("global"),

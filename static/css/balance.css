@@ -1,9 +1,4 @@
-
-.balance-title {
-    text-align: center;
-    font-size: 30px;
-    color: #0D4846;
-}
+/* Pestañas pantalla principal balance */
 
 .balance-dashboard {
     display: flex;
@@ -12,12 +7,62 @@
     align-items: center;
 }
 
-.header {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-    text-align: center;
+.balance-dashboard .description {
+    color: #5f5e5e;
+    font-weight: bold;
 }
+
+.progress-tabs {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.progress-tabs a {
+    padding: 10px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #0D4846;
+    background: #f2f2f2;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.progress-tabs .trophies:hover {
+    background: #52DD5D;
+    color: white;
+    transform: scale(1.05);
+}
+
+.progress-tabs .trophies.active {
+    background: #52DD5D;
+    color: white;
+}
+
+.progress-tabs .statistics:hover {
+    background: #52BFDD;
+    color: white;
+    transform: scale(1.05);
+}
+
+.progress-tabs .statistics.active {
+    background: #52BFDD;
+    color: white;
+}
+
+.progress-tabs .analysis:hover {
+    background: #AF52DD;
+    color: white;
+    transform: scale(1.05);
+}
+
+.progress-tabs .analysis.active {
+    background: #AF52DD;
+    color: white;
+}
+
+/* Trofeos */
 
 .trophies-card {
     background-color: #FFFFFF;
@@ -149,24 +194,6 @@ span {
     color: #5f5e5e;
 }
 
-.initial-table {
-    border-collapse: collapse;
-}
-
-.initial-table td {
-    border: 1px solid #5f5e5e;
-    background-color: #bebebe;
-    padding: 10px;
-    text-align: center;
-    color: #0D4846;
-    font-weight: bold;
-    font-size: 17px;
-}
-
-.balance-value p {
-    color: #5f5e5e;
-}
-
 .streak i {
     color: #24B88D;
 }
@@ -249,6 +276,8 @@ span {
     color: #52DD5D;
     font-weight: bold;
 }
+
+/* Estadísticas */
 
 .statistics-card {
     background-color: #FFFFFF;
@@ -414,6 +443,8 @@ span {
     color: #0D4846;
     font-weight: bold;
 }
+
+/* Análisis inteligente */
 
 .smart-analysis-card {
     background-color: #FFFFFF;
@@ -600,6 +631,11 @@ span {
 
 .concentration-prediction .info i {
     color: #007cb2;
+}
+
+.remaining-sport span i {
+    color: #007cb2;
+    font-size: 16px;
 }
 
 .scatter-loading {

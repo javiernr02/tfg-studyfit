@@ -1,0 +1,359 @@
+{% load l10n %}
+
+<p class="description">Descubre recomendaciones personalizadas y predicciones de concentración generadas mediante modelos de regresión e inteligencia artificial</p>
+<div class="smart-analysis-card">
+    <div class="card-title">
+        <i class="fa-solid fa-robot"></i>
+        Análisis Inteligente
+    </div>
+    <div class="card-value">
+
+        <div class="concentration-prediction">
+            <div class="title">
+                <i class="fa-solid fa-book-open-reader"></i>
+                Predicción de la Concentración
+            </div>
+
+            <div class="info">
+                <p>Se estima una concentración de <span>{{ prediction }}/10</span> para tu próxima sesión de estudio</p>
+                {% if mode == "insufficient_data" %}
+                    <i 
+                        class="fa-solid fa-circle-info"
+                        title="La predicción no se puede calcular porque no hay datos globales">
+                    </i>
+                {% elif mode == "global" %}
+                    <i
+                        class="fa-solid fa-circle-info"
+                        title="La predicción utiliza únicamente el modelo global ya que no hay datos personales">
+                    </i>
+                {% else %}
+                    <i
+                        class="fa-solid fa-circle-info"
+                        title="La predicción utiliza el modelo híbrido que consiste en utilizar en el cálculo los datos de los usuarios del modelo global con tus propios datos">
+                    </i>
+                {% endif %}
+            </div>
+
+        </div>
+
+        {% if recommended_zone %}
+            <div class="recommended-container">
+                <div class="title">
+                    <i class="fa-solid fa-bars-progress"></i>
+                    Progresión de Deporte Hoy
+                </div>
+
+                <div class="recommended-labels">
+                    <span>0min</span>
+
+                    <span class="zone-min"
+                        style="left: {% localize off %}{{ zone_start }}{% endlocalize %}%;">
+                        {{ min_zone_hours_format }}
+                    </span>
+
+                    <span class="zone-max"
+                        style="left: {% localize off %}{{ zone_end }}{% endlocalize %}%;">
+                        {{ max_zone_hours_format }}
+                    </span>
+
+                    <span>{{ max_hours_format }}</span>
+                </div>
+
+                <div class="recommended-bar">
+                    
+                    <div class="recommended-zone"
+                        style="left: {% localize off %}{{ zone_start }}{% endlocalize %}%;
+                                width: {% localize off %}{{ zone_width }}{% endlocalize %}%;">
+                    </div>
+
+                    <div class="zone-indicator"
+                        style="left: {% localize off %}{{ zone_start }}{% endlocalize %}%;
+                                width: {% localize off %}{{ zone_width }}{% endlocalize %}%;">
+                        <span>Franja Óptima de Deporte</span>
+                    </div>
+
+                    <div class="today-marker"
+                        style="left: {% localize off %}{{ progress }}{% endlocalize %}%;">
+                        <span>Hoy ({{ today_sport_hours_format }})</span>
+                    </div>
+
+                </div>
+
+                <div class="remaining-sport">
+                    {% if remaining_sport_hours != "0 min" %}
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span>Tiempo restante para el valor óptimo:</span>
+                        <strong>{{ remaining_sport_hours }}</strong>
+                    {% else %}
+                        <i class="fa-regular fa-circle-check"></i>
+                        <strong>¡Has alcanzado el valor óptimo de deporte!</strong>
+                    {% endif %}
+                    <span>
+                        <i
+                            class="fa-solid fa-circle-info"
+                            title="Basado en la estimación calculada para alcanzar el óptimo de concentración">
+                        </i>
+                    </span>
+                </div>
+
+            </div>
+
+        {% endif %}
+        
+        <div class="charts">
+            <div id="scatterLoading" class="scatter-loading">
+                <div class="spinner"></div>
+                <p>Analizando los datos y generando gráfica...</p>
+            </div>
+            <canvas id="scatterChart" style="display:none;"></canvas>
+
+            <p>
+                Última actualización del modelo global (tendencia general):
+                {{ global_regression_date|date:"d/m/Y H:i" }}
+            </p>
+        </div>
+            
+    </div>
+</div>
+
+<script>
+
+    let scatterChart;
+
+    function loadScatter() {
+
+        fetch(`{% url 'scatter' %}`)
+            .then(response => response.json())
+            .then(data => {
+
+                const loading = document.getElementById("scatterLoading");
+                const canvas = document.getElementById("scatterChart");
+
+                scatterData = data;
+                
+                if (scatterChart) {
+                    scatterChart.destroy();
+                }
+
+                if (!data || data.length === 0) {
+                    loading.style.display = "flex";
+                    canvas.style.display = "none";
+                    return;
+                }
+
+                loading.style.display = "none";
+                canvas.style.display = "block";
+
+                const legendPlugin = {
+                    id: "legendPlugin",
+
+                    afterEvent(chart, args) {
+                        const legend = chart.legend;
+
+                        if (!legend) {
+                            return;
+                        }
+
+                        const event = args.event;
+                        const canvas = chart.canvas;
+
+                        const descriptions = {
+                            "Sesión de Estudio": "Cada punto representa una sesión de estudio registrada con la concentración asociada y deporte previo realizado",
+                            "Tendencia Personal": "Curva estimada calculada a partir de tus sesiones de estudio",
+                            "Valor Óptimo": "Punto que indica las horas de deporte previas al estudio en el que se estima que puedes alcanzar tu concentración máxima",
+                            "Franja Óptima de Deporte": "Intervalo de horas de deporte previas al estudio en el que se estima valores de máxima concentración",
+                            "Tendencia General": "Curva estimada calculada a partir del modelo de sesiones de estudio de todos los usuarios",
+                        };
+
+                        let found = false;
+
+                        legend.legendHitBoxes.forEach((box, i) => {
+                            if (
+                                event.x >= box.left &&
+                                event.x <= box.left + box.width &&
+                                event.y >= box.top &&
+                                event.y <= box.top + box.height
+                            ) {
+                                const label = chart.data.datasets[i].label;
+                                canvas.title = descriptions[label] || "";
+                                canvas.style.cursor = "pointer";
+                                found = true;
+                            }
+                        });
+
+                        if (!found) {
+                            canvas.title = "";
+                            canvas.style.cursor = "default";
+                        }
+                    }
+                };
+
+                const zonePlugin = {
+                    id: "zonePlugin",
+
+                    beforeDraw(chart) {
+
+                        const zoneDataset = chart.data.datasets.find(x => x.label === "Franja Óptima de Deporte");
+
+                        const zoneMeta = chart.getDatasetMeta(chart.data.datasets.indexOf(zoneDataset));
+
+                        if (zoneMeta.hidden) {
+                            return;
+                        }
+
+                        const zone = scatterData.zone;
+
+                        if (!zone) {
+                            return;
+                        }
+
+                        const {ctx, chartArea, scales} = chart;
+
+                        const x1 = scales.x.getPixelForValue(zone.min_x);
+                        const x2 = scales.x.getPixelForValue(zone.max_x);
+
+                        ctx.save();
+                        ctx.fillStyle = "rgba(108, 0, 77, 0.15)";
+                        ctx.fillRect(
+                            x1,
+                            chartArea.top,
+                            x2 - x1,
+                            chartArea.bottom - chartArea.top
+                        );
+                        ctx.restore();
+                    }
+                };
+
+                scatterChart = new Chart(canvas, {
+                    type: "scatter",
+                    plugins: [legendPlugin, zonePlugin],
+                    data: {
+                        datasets: [{
+                            label: "Sesión de Estudio",
+                            data: data.points.map(p => ({
+                                x: p.sport_hours,
+                                y: p.concentration,
+                                sport_hours_format_duration: p.sport_hours_format_duration,
+                                sessions: p.sessions
+                            })),
+                            backgroundColor: "rgba(108, 0, 77, 0.6)",
+                            radius: function(context) {
+                                const sessions = context.raw.sessions;
+
+                                return Math.min(Math.sqrt(sessions) + 2, 9);
+                            }
+                        },
+                        {
+                            label: "Tendencia Personal",
+                            data: data.curve,
+                            type: "line",
+                            backgroundColor: "rgba(104, 0, 155, 0.8)",
+                            borderColor: "rgba(104, 0, 155, 0.8)",
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: "Valor Óptimo",
+                            data: [data.best],
+                            backgroundColor: "rgba(53, 0, 79, 0.6)",
+                            pointRadius: 9
+                        },
+                        {
+                            label: "Franja Óptima de Deporte",
+                            data: [],
+                            backgroundColor: "rgba(108, 0, 77, 0.15)",
+                            borderColor: "rgba(108, 0, 77, 0.15)",
+                            pointRadius: 0
+                        },
+                        {
+                            label: "Tendencia General",
+                            data: data.curve_global,
+                            type: "line",
+                            backgroundColor: "rgba(233, 132, 18, 0.8)",
+                            borderColor: "rgba(233, 132, 18, 0.8)",
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            x: { 
+                                title: { 
+                                    display: true, 
+                                    text: "Horas de Deporte (previo al estudio)" 
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: { 
+                                title: { 
+                                    display: true, 
+                                    text: "Concentración" 
+                                },
+                                grid: {
+                                    display: false
+                                },
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return value + "/10";
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: () => {
+                                        return '';
+                                    },
+                                    label: function(context) {
+                                        const point = context.raw;
+
+                                        if (context.dataset.label === "Valor Óptimo") {
+                                            return [
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
+                                                "Concentración: " + point.y.toFixed(1) + "/10",
+                                            ];
+                                        }
+
+                                        else if (context.dataset.label === "Tendencia Personal") {
+                                            return [
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
+                                                "Concentración personal estimada: " + point.y.toFixed(1) + "/10",
+                                            ];
+                                        }
+
+                                        else if (context.dataset.label === "Tendencia Global") {
+                                            return [
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
+                                                "Concentración global estimada: " + point.y.toFixed(1) + "/10",
+                                            ];
+                                        }
+                                        
+                                        else {
+                                            return [
+                                                "Horas de deporte (previo al estudio): " + point.sport_hours_format_duration,
+                                                "Concentración: " + point.y + "/10",
+                                                "Sesiones: " + point.sessions
+                                            ];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        loadScatter();
+
+    });
+
+</script>

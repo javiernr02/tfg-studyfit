@@ -1,15 +1,45 @@
 
+.balance-title {
+    text-align: center;
+    font-size: 30px;
+    color: #0D4846;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    text-align: center;
+}
+
+.balance-value p {
+    color: #5f5e5e;
+}
+
+.initial-table {
+    border-collapse: collapse;
+}
+
+.initial-table td {
+    border: 1px solid #bebebe;
+    background-color: #f2f2f2;
+    padding: 10px;
+    text-align: center;
+    color: #0D4846;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.initial-table i {
+    color: #007cb2;
+    font-size: 16px;
+}
+
 .dashboard {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     margin-top: 30px;
-}
-
-.home-title {
-    text-align: center;
-    font-size: 30px;
-    color: #0D4846;
 }
 
 .card {
