@@ -8,14 +8,14 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
 
    ```bash
    git clone https://github.com/javiernr02/tfg-studyfit.git
-3) Instalar Python 3.12.10 https://www.python.org/downloads/windows/
+2) Instalar Python 3.12.10 https://www.python.org/downloads/windows/
     - Configurar variable de entorno, en PATH añadir: ubicacion_python\Python\Python312\Scripts
     - Añadir también en PATH: ubicacion_python\Python\Python312\
     - En cmd comprobar versión:
       
       ```bash
       python --version
-4) Crear entorno virtual venv en la raíz del proyecto:
+3) Crear entorno virtual venv en la raíz del proyecto:
     - Crear entorno virtual:
       
       ```bash
@@ -25,7 +25,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
       ```bash
       venv\Scripts\activate
     - Ctrl + shift + p -> Select Interpreter -> verificar que esté el de venv seleccionado
-5) Instalar requisitos:
+4) Instalar requisitos:
     - Actualizar instalador de paquetes pip:
   
       ```bash
@@ -34,7 +34,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```bash
       pip install -r requirements.txt
-6) Instalación base de datos PostgreSQL 18.3 https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+5) Instalación base de datos PostgreSQL 18.3 https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
     - Configurar variable de entorno, en PATH añadir: ubicacion_postgresql\PostgreSQL\18\bin
     - En cmd comprobar versión:
   
@@ -64,20 +64,20 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```sql
       \q
-7) Editar archivo de configuración
+6) Editar archivo de configuración
     - Copiar contenido .env.example en nuevo archivo .env
-    - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 5)
-6) Preparación base de datos
+    - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 6)
+7) Preparación base de datos
     - Nos ubicamos en raíz del proyecto
-    - Ejecutar migraciones detectando cambios en los modelos:
+    - Crea archivos de migraciones por los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones por el desarrollador):
   
       ```bash
       python manage.py makemigrations
-    - Ejecutar esos cambios y crear el schema en la BD:
+    - Aplica las migraciones generadas a la BD:
   
       ```bash
       python manage.py migrate
-    - Poblar la BD con los datos mediante el script creado:
+    - Poblar la BD con los datos, usando el script aleatorio y reproducible mediante seed fijado creado (esperar hasta que se muestre mensaje de confirmación):
 
       ```bash
       python manage.py seed
@@ -89,13 +89,18 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```bash
       python manage.py createsuperuser
-7) Ejecución de la aplicación
+8) Entrenamiento del modelo de IA
+    - Ejecutar el siguiente comando (esperar hasta que se muestre mensaje de confirmación) para que se genere el archivo en la carpeta del proyecto 'ai_models':
+
+      ```bash
+      python manage.py train_model
+9) Ejecución de la aplicación
     - Ejecutar servidor:
   
       ```bash
       python manage.py runserver
     - Navegar al despliegue en local: http://127.0.0.1:8000/
-    - Comprobar correcto funcionamiento de la aplicación
+    - Comprobar el correcto funcionamiento de la aplicación
 
 ## Autor 👤
 

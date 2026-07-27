@@ -4,13 +4,51 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
 
-<div class="home-title">
+<div class="balance-title">
+    <i class="fa-solid fa-clipboard-list"></i>
     Resumen
 </div>
+<div class="header">
+    <div class="balance-value">
+        {% if balance_value %}
+            <p>¡Buen equilibrio hoy!</p>
+        {% elif not study_activities and not sport_activities %}
+            <p>Para calcular el equilibrio de hoy necesitas registrar actividades</p>
+        {% else %}
+            <p>Tienes que equilibrar tus horas de estudio y deporte</p>
+        {% endif %}
+    </div>
+
+    <table class="initial-table">
+        <tr>
+            <td>Estudio (Hoy):
+                {% if today_study_activities %}
+                    {{ study_durations_format }}
+                {% else %}
+                    0h
+                {% endif %}
+            </td>
+            <td>Deporte (Hoy):
+                {% if today_sport_activities %}
+                    {{ sport_durations_format }}
+                {% else %}
+                    0h
+                {% endif %}
+            </td>
+            <td>Equilibrio: {{ balance_streak_value }} días
+                <i
+                    class="fa-solid fa-circle-info"
+                    title="Días consecutivos que se mantiene la proporción de equilibrio de que las horas de estudio sean al menos el doble de las horas de deporte">
+                </i>
+            </td>
+        </tr>
+    </table>
+</div>
+
 <div class="dashboard">
     <div class="card">
         <div class="card-title">
-            <i class="fa-solid fa-book"></i>
+            <i class="fa-solid fa-clock"></i>
             Horas de Estudio
         </div>
         <div class="card-value">
@@ -19,7 +57,7 @@
     </div>
     <div class="card">
         <div class="card-title">
-            <i class="fa-solid fa-heart-pulse"></i>
+            <i class="fa-regular fa-clock"></i>
             Horas de Deporte
         </div>
         <div class="card-value">

@@ -7,6 +7,9 @@ html, body {
 }
 
 body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background-color: #FFFFFF;
     background-image: radial-gradient(
         circle at center,
@@ -17,22 +20,15 @@ body {
     );
 }
 
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
 header {
-    height: 110px;
-    position: fixed;
+    position: static;
     top: 0;
-    left: 0;
     width: 100%;
+    z-index: 1000;
 }
 
 nav.navbar {
-    flex: 1;
+    height: 110px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -101,6 +97,7 @@ nav.navbar .nav-links a {
     color: #828282;
     font-weight: 600;
     white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 .rounded-button {
@@ -126,20 +123,24 @@ nav.navbar .nav-links a {
 
 main {
     flex: 1;
-    padding: 20px;
-    margin-top: 110px;
+    padding: 20px 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 footer {
+    flex-shrink: 0;
     background-color: #0D4846;
     color: #FFFFFF;
-    padding: 0 30px;
+    padding: 20px 30px;
     height: 100px;
-    width: 100vw;
+    width: 100%;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: auto;
 }
 
 .footer-left {
@@ -172,6 +173,34 @@ nav.footer-links a {
 nav.footer-links a:hover {
     text-decoration: underline;
 }
+
+.top-button {
+    position: fixed;
+    right: 30px;
+    bottom: 110px;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    opacity: 0;
+    pointer-events: none;
+    color: #24B88D;
+    font-size: 1.5rem;
+    transition: transform 0.2s opacity 0.2s;
+}
+
+.top-button:hover {
+    color: #197c60;
+    transform: scale(1.1);
+}
+
+.top-button.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Responsive */
 
 @media (max-width: 950px) {
     .logo span {

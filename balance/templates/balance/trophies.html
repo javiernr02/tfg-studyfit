@@ -1,0 +1,103 @@
+{% load static %}
+{% load l10n %}
+
+<p class="description">Consulta los logros acumulables y exclusivos y el progreso hacia nuevos objetivos de gamificación</p>
+<div class="trophies-card">
+    <div class="card-title">
+        <i class="fa-solid fa-trophy"></i>
+        Logros
+    </div>
+    <div class="card-value">
+        <div class="repeatable-trophies">
+            <div class="repeatable-trophies-title">
+                <i class="fa-solid fa-arrows-spin"></i>
+                Logros Acumulables (Hoy) <span>- {{ repeatable_trophies_count }} trofeos en total</span>
+            </div>
+            {% if repeatable_student_trophy_obtained_today %}
+                <div class="trophy-obtained-today">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
+                </div>
+            {% else %}
+                <div class="trophy-not-obtained-today">
+                    <i class="fa-regular fa-circle-xmark"></i>
+                    <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
+                </div>
+            {% endif %}
+            {% if repeatable_sportsman_trophy_obtained_today %}
+                <div class="trophy-obtained-today">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <p>{{ repeatable_sportsman_trophy.title }}: <span>{{ repeatable_sportsman_trophy.description }}</span></p>
+                </div>
+            {% else %}
+                <div class="trophy-not-obtained-today">
+                    <i class="fa-regular fa-circle-xmark"></i>
+                    <p>{{ repeatable_sportsman_trophy.title }}: <span>{{ repeatable_sportsman_trophy.description }}</span></p>
+                </div>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <div class="non-repeatable-trophies">
+            <div class="non-repeatable-trophies-title">
+                <i class="fa-brands fa-square-web-awesome-stroke"></i>
+                Logros Exclusivos <span>- {{ non_repeatable_trophies_count }} trofeos en total</span>
+            </div>
+            {% if non_repeatable_trophies %}
+                {% for i in non_repeatable_trophies %}
+                    <div class="trophy">
+                        <img src="{% static i.trophy.icon %}" alt="Icono">
+                        {{ i.trophy.title }}: <span>{{ i.trophy.description }}</span>
+                        <span class="trophy-date">(fecha de obtención: {{ i.obtained_at|date:"d/m/Y H:i" }})</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aún no has ganado ningún trofeo exclusivo</p>
+            {% endif %}
+            <div class="non-obtained-non-repeatable-trophies-title">
+                <i class="fa-solid fa-lock"></i>
+                Trofeos por desbloquear
+            </div>
+            {% for i in non_obtained_non_repeatable_trophies %}
+                <div class="non-obtained-trophy">
+                    <img src="{% static i.icon %}" alt="Icono">
+                    {{ i.title }}: <span>{{ i.description }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <div class="streak">
+            <i class="fa-solid fa-fire"></i>
+            Racha (logros acumulables consecutivos cada día): <span>{{ streak_value }}</span>
+        </div>
+
+        <div class="level">
+            <i class="fa-solid fa-star"></i>
+
+            <div class="level-info">
+                <div class="level-title">
+                    Nivel: <span>{{ level }}</span>
+                </div>
+
+                <div class="level-bar">
+                    <div class="level-progress" style="width: {% localize off %}{{ level_progress }}{% endlocalize %}%;"></div>
+                </div>
+
+                <div class="data">
+
+                    {% if level == 10 %}
+                        <span class="final-remaining-points">¡Enhorabuena! Has alcanzado el nivel máximo</span>
+                    {% else %}
+                        <span class="remaining-points">{{ current_level_xp }}/1000 XP (faltan {{ remaining_points }} puntos para el próximo nivel)</span>
+                    {% endif %}
+
+                    <br>
+                    Puntos de experiencia: <span>{{ experience_points }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

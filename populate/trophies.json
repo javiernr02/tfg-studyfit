@@ -5,6 +5,7 @@
         "fields": {
             "title": "Primer Paso",
             "description": "Registra tu primera actividad",
+            "icon": "images/trophies/PrimerPaso.png",
             "points": 10,
             "is_repeatable": false
         }
@@ -16,6 +17,7 @@
         "fields": {
             "title": "Disciplina",
             "description": "Mantente 5 días seguidos activo con al menos 2h cada día",
+            "icon": "images/trophies/Disciplina.png",
             "points": 15,
             "is_repeatable": false
         }
@@ -27,6 +29,7 @@
         "fields": {
             "title": "Máquina",
             "description": "Registra 20 actividades",
+            "icon": "images/trophies/Maquina.png",
             "points": 30,
             "is_repeatable": false
         }
@@ -38,6 +41,7 @@
         "fields": {
             "title": "Maestro del Estudio",
             "description": "Acumula un total de 100 horas de estudio",
+            "icon": "images/trophies/Maestro.png",
             "points": 50,
             "is_repeatable": false
         }
@@ -49,6 +53,7 @@
         "fields": {
             "title": "Atleta",
             "description": "Registra 15 entrenamientos deportivos",
+            "icon": "images/trophies/Atleta.png",
             "points": 40,
             "is_repeatable": false
         }
@@ -60,6 +65,7 @@
         "fields": {
             "title": "Potenciando la Mente",
             "description": "Registra 8 horas de estudio en un día",
+            "icon": "images/trophies/Potenciando.png",
             "points": 50,
             "is_repeatable": false
         }

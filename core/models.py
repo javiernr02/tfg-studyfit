@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -8,11 +9,15 @@ class Trophy(models.Model):
     
     description = models.TextField(blank=True)
 
-    icon = models.ImageField(upload_to='trophies/', null=True, blank=True)
+    icon = models.CharField(max_length=255, null=True, blank=True)
     
     points = models.PositiveIntegerField(default=1)
 
     is_repeatable = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name = "Trophy"
+        verbose_name_plural = "Trophies"
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -31,6 +36,10 @@ class CustomUser(AbstractUser):
     level = models.PositiveIntegerField(default=1)
     
     trophies = models.ManyToManyField(Trophy, through='UserTrophy')
+    
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
 
 # Tabla intermedia para relacionar usuarios con trofeos
 class UserTrophy(models.Model):
@@ -38,7 +47,11 @@ class UserTrophy(models.Model):
     
     trophy = models.ForeignKey(Trophy, on_delete=models.CASCADE)
     
-    obtained_at = models.DateTimeField(auto_now_add=True)
+    obtained_at = models.DateTimeField()
+    
+    class Meta:
+        verbose_name = "User trophy"
+        verbose_name_plural = "User trophies"
     
 class Activity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='activities')
@@ -49,7 +62,15 @@ class Activity(models.Model):
     
     duration = models.DurationField()
     
-    date = models.DateField()
+    date = models.DateTimeField()
+    
+    @property
+    def end_time(self):
+        return self.date + self.duration
+    
+    class Meta:
+        verbose_name = "Activity"
+        verbose_name_plural = "Activities"
     
 class SubjectCategory(models.TextChoices):
     SCIENCES = 'sciences', 'Ciencias'
@@ -65,6 +86,12 @@ class Subject(models.Model):
     
 class StudyActivity(Activity):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
+    
+    concentration = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
+    
+    class Meta:
+        verbose_name = "Study activity"
+        verbose_name_plural = "Study activities"
     
 class SportType(models.TextChoices):
     WALK = 'walk', 'Caminata'
@@ -88,16 +115,20 @@ class SportActivity(Activity):
     distance = models.FloatField(null=True, blank=True)
     
     intensity = models.CharField(max_length=20, choices=Intensity.choices)
+    
+    # Atributo derivado calculado según tipo de deporte seleccionado
+    sport_category = models.CharField(max_length=20, editable=False)
 
-# Atributo derivado calculado según tipo de deporte seleccionado
-sport_category = models.CharField(max_length=20, blank=False, editable=False)
+    def save(self, *args, **kwargs):
+        if self.sport_type in ['weights']:
+            self.sport_category = 'Fuerza'
+        elif self.sport_type in ['pilates', 'yoga']:
+            self.sport_category = 'Flexibilidad'
+        else:
+            self.sport_category = 'Cardio'
 
-def save(self, *args, **kwargs):
-    if self.sport_type in ['weights']:
-        self.sport_category = 'Fuerza'
-    elif self.sport_type in ['pilates', 'yoga']:
-        self.sport_category = 'Flexibilidad'
-    else:
-        self.sport_category = 'Cardio'
-
-    super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+    
+    class Meta:
+        verbose_name = "Sport activity"
+        verbose_name_plural = "Sport activities"
