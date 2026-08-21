@@ -52,11 +52,11 @@ class Command(BaseCommand):
                 
             xp = (base_level - 1) * 1000 + random.randint(0, 999)
                         
-            gender = random.choices(models.CustomUser.GENDER_CHOICES, weights=[45, 45, 10])[0][0]
+            gender = random.choices(list(models.Gender), weights=[45, 45, 10])[0]
             
-            if gender == 'H':
+            if gender == models.Gender.MAN:
                 first_name = fake.first_name_male()
-            elif gender == 'M':
+            elif gender == models.Gender.WOMEN:
                 first_name = fake.first_name_female()
             else:
                 first_name = fake.first_name()
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 email = f'{username}@email.com',
                 password = 'studyfit',
                 birth_date = birt_date,
-                gender = gender,
+                gender = gender.value,
                 experience_points = xp,
                 level = base_level
             )
