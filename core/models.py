@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 
 # Create your models here.
 
@@ -11,31 +15,49 @@ class Trophy(models.Model):
 
     icon = models.CharField(max_length=255, null=True, blank=True)
     
-    points = models.PositiveIntegerField(default=1)
+    points = models.PositiveIntegerField(default=10, validators=[MinValueValidator(10), MaxValueValidator(50)])
 
     is_repeatable = models.BooleanField(default=False)
     
     class Meta:
         verbose_name = "Trophy"
         verbose_name_plural = "Trophies"
+        
+class Gender(models.TextChoices):
+    MAN = 'H', 'Hombre'
+    WOMEN = 'M', 'Mujer'
+    OTHER = 'O', 'Otro'
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     
     birth_date = models.DateField(null=True, blank=True)
     
-    GENDER_CHOICES = [
-        ('H', 'Hombre'),
-        ('M', 'Mujer'),
-        ('O', 'Otro'),
-    ]
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=False, blank=False)
+    gender = models.CharField(max_length=1, choices=Gender.choices, null=False, blank=False)
     
     experience_points = models.PositiveIntegerField(default=0)
     
-    level = models.PositiveIntegerField(default=1)
+    level = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(10)])
     
     trophies = models.ManyToManyField(Trophy, through='UserTrophy')
+    
+    def clean(self):
+        super().clean()
+
+        if self.birth_date is not None:
+            today = timezone.now().date()
+
+            minimum_birth_date = today - relativedelta(years=120)
+            maximum_birth_date = today - relativedelta(years=16)
+            
+            if self.birth_date > today:
+                raise ValidationError({'birth_date':'La fecha de nacimiento no puede ser futura'})
+
+            if self.birth_date < minimum_birth_date:
+                raise ValidationError({'birth_date':'La fecha de nacimiento no puede ser anterior a 120 años'})
+
+            if self.birth_date > maximum_birth_date:
+                raise ValidationError({'birth_date':'El usuario debe tener al menos 16 años'})
     
     class Meta:
         verbose_name = "User"
@@ -60,7 +82,7 @@ class Activity(models.Model):
     
     description = models.TextField(blank=True)
     
-    duration = models.DurationField()
+    duration = models.DurationField(validators=[MinValueValidator(timedelta(0))])
     
     date = models.DateTimeField()
     
@@ -83,6 +105,9 @@ class Subject(models.Model):
     name = models.CharField(max_length=100)
     
     subjectCategory = models.CharField(max_length=20, choices=SubjectCategory.choices)
+    
+    def __str__(self):
+        return self.name
     
 class StudyActivity(Activity):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
@@ -112,17 +137,22 @@ class Intensity(models.TextChoices):
 class SportActivity(Activity):
     sport_type = models.CharField(max_length=20, choices=SportType.choices)
     
-    distance = models.FloatField(null=True, blank=True)
+    distance = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0)])
     
-    intensity = models.CharField(max_length=20, choices=Intensity.choices)
+    intensity = models.CharField(null=True, blank=True, max_length=20, choices=Intensity.choices)
     
     # Atributo derivado calculado según tipo de deporte seleccionado
     sport_category = models.CharField(max_length=20, editable=False)
+    
+    def clean(self):
+        super().clean()
+        if self.sport_type in [SportType.WEIGHTS, SportType.PILATES, SportType.YOGA] and self.distance is not None:
+            raise ValidationError({'distance': 'La distancia solo puede indicarse para actividades de cardio'})
 
     def save(self, *args, **kwargs):
-        if self.sport_type in ['weights']:
+        if self.sport_type == SportType.WEIGHTS:
             self.sport_category = 'Fuerza'
-        elif self.sport_type in ['pilates', 'yoga']:
+        elif self.sport_type in [SportType.PILATES, SportType.YOGA]:
             self.sport_category = 'Flexibilidad'
         else:
             self.sport_category = 'Cardio'
