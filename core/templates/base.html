@@ -24,13 +24,28 @@
 
             <div class="nav-links">
                 <div class="features-links">
+                    <div class="dropdown">
+                        <a href="#" class="rounded-button dropdown-button" id="dropdown-button">
+                            <i class="fa-solid fa-plus"></i>
+                            Registrar Actividad
+                            <i id="chevron-down" class="fa-solid fa-chevron-down"></i>
+                        </a>
+
+                        <div class="dropdown-menu">
+                            <a href="#" id="study-button">
+                                <i class="fa-solid fa-book"></i>
+                                Actividad de estudio
+                            </a>
+
+                            <a href="#" id="sport-button">
+                                <i class="fa-solid fa-person-running"></i>
+                                Actividad deportiva
+                            </a>
+                        </div>
+                    </div>
                     <a href="{% url 'balance' %}" class="rounded-button">
                         <i class="fa-solid fa-arrow-trend-up"></i>
                         Progreso
-                    </a>
-                    <a href="{% url 'home' %}" class="rounded-button">
-                        <i class="fa-solid fa-plus"></i>
-                        Registrar Actividad
                     </a>
                 </div>
                 <a href="{% url 'home' %}" class="button">
@@ -66,8 +81,13 @@
             title="Volver arriba">
         </i>
     </button>
+    
+    {% include "modals/study_modal.html" %}
+    {% include "modals/sport_modal.html" %}
 
     <script>
+        // Botón para volver arriba
+
         const button = document.getElementById("topButton");
 
         window.addEventListener("scroll", () => {
@@ -85,6 +105,100 @@
                 behavior: "smooth"
             });
         });
+
+        // Desplegable de registrar actividad
+
+        const dropdownButton = document.querySelector(".dropdown-button");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+        const studyButton = document.getElementById("study-button");
+        const sportButton = document.getElementById("sport-button");
+        const studyModal = document.getElementById("study-modal");
+        const sportModal = document.getElementById("sport-modal");
+        const studyClose = document.getElementById("study-close");
+        const sportClose = document.getElementById("sport-close");
+        
+        const studyForm = studyModal.querySelector("form");
+        const studySubmit = document.getElementById("study-submit");
+
+        const sportForm = sportModal.querySelector("form");
+        const sportSubmit = document.getElementById("sport-submit");
+
+        function openModal(modal) {
+            modal.classList.add("show");
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove("show");
+        }
+
+        function closeDropdown() {
+            dropdownMenu.classList.remove("show");
+        }
+
+        dropdownButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+        });
+
+        dropdownMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener("click", () => {
+            closeDropdown();
+        });
+
+        studyButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeDropdown();
+            openModal(studyModal);
+        });
+
+        sportButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeDropdown();
+            openModal(sportModal);
+        });
+        
+        studyClose.addEventListener("click", () => {
+            closeModal(studyModal);
+        });
+        
+        sportClose.addEventListener("click", () => {
+            closeModal(sportModal);
+        });
+        
+        studyModal.addEventListener("click", (e) => {
+            if (e.target === studyModal) {
+                closeModal(studyModal);
+            }
+        });
+        
+        sportModal.addEventListener("click", (e) => {
+            if (e.target === sportModal) {
+                closeModal(sportModal);
+            }
+        });
+        
+        studyForm.addEventListener("submit", () => {
+            studySubmit.disabled = true;
+            studySubmit.textContent = "Guardando...";
+        });
+
+        sportForm.addEventListener("submit", () => {
+            sportSubmit.disabled = true;
+            sportSubmit.textContent = "Guardando...";
+        });
+        
+        {% if open_study_modal %}
+            openModal(studyModal);
+        {% endif %}
+
+        {% if open_sport_modal %}
+            openModal(sportModal);
+        {% endif %}
+
     </script>
 
 </body>
