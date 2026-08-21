@@ -112,7 +112,8 @@ class Subject(models.Model):
 class StudyActivity(Activity):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
     
-    concentration = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
+    concentration = models.PositiveSmallIntegerField(validators=[MinValueValidator(0, message="La concentración debe mayor o igual a 0"), 
+        MaxValueValidator(10, message="La concentración debe ser menor o igual a 10")])
     
     class Meta:
         verbose_name = "Study activity"
@@ -137,7 +138,7 @@ class Intensity(models.TextChoices):
 class SportActivity(Activity):
     sport_type = models.CharField(max_length=20, choices=SportType.choices)
     
-    distance = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0)])
+    distance = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0, message="La distancia no debe ser negativa")])
     
     intensity = models.CharField(null=True, blank=True, max_length=20, choices=Intensity.choices)
     
