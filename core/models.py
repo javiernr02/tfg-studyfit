@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
-from datetime import date, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
@@ -100,19 +100,37 @@ class SubjectCategory(models.TextChoices):
     HUMANITIES = 'humanities', 'Humanidades'
     LANGUAGES = 'languages', 'Idiomas'
     PROGRAMMING = 'programming', 'Programación'
+    OTHER = 'other', 'Otro'
+    
+class StudyType(models.TextChoices):
+    THEORY = 'theory', 'Teoría'
+    PRACTICE = 'practice', 'Práctica'
+    OTHER = 'other', 'Otro'
     
 class Subject(models.Model):
     name = models.CharField(max_length=100)
     
-    subjectCategory = models.CharField(max_length=20, choices=SubjectCategory.choices)
+    subject_category = models.CharField(max_length=20, choices=SubjectCategory.choices)
+    
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='subjects')
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'name'],
+                name='unique_subject_per_user'
+            )
+        ]
     
     def __str__(self):
         return self.name
     
 class StudyActivity(Activity):
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_activities')
+    subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name='study_activities')
     
-    concentration = models.PositiveSmallIntegerField(validators=[MinValueValidator(0, message="La concentración debe mayor o igual a 0"), 
+    study_type = models.CharField(max_length=10, choices=StudyType.choices)
+    
+    concentration = models.PositiveSmallIntegerField(validators=[MinValueValidator(0, message="La concentración debe ser mayor o igual a 0"), 
         MaxValueValidator(10, message="La concentración debe ser menor o igual a 10")])
     
     class Meta:
