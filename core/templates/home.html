@@ -12,8 +12,8 @@
     <div class="balance-value">
         {% if balance_value %}
             <p>¡Buen equilibrio hoy!</p>
-        {% elif not study_activities and not sport_activities %}
-            <p>Para calcular el equilibrio de hoy necesitas registrar actividades</p>
+        {% elif not today_study_activities and not today_sport_activities %}
+            <p>Para calcular el equilibrio de hoy necesitas registrar actividades de estudio y deporte</p>
         {% else %}
             <p>Tienes que equilibrar tus horas de estudio y deporte</p>
         {% endif %}
