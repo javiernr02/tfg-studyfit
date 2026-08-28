@@ -1,37 +1,31 @@
 [
     {
-        "model": "core.subject",
-        "pk": 1,
-        "fields": { "name": "Matemáticas", "subjectCategory": "sciences" }
+        "name": "Matemáticas", 
+        "subject_category": "sciences"
     },
     
     {
-        "model": "core.subject",
-        "pk": 2,
-        "fields": { "name": "Física", "subjectCategory": "sciences" }
+        "name": "Física", 
+        "subject_category": "sciences"
     },
     
     {
-        "model": "core.subject",
-        "pk": 3,
-        "fields": { "name": "Economía", "subjectCategory": "socials" }
+        "name": "Economía", 
+        "subject_category": "socials"
     },
     
     {
-        "model": "core.subject",
-        "pk": 4,
-        "fields": { "name": "Inglés", "subjectCategory": "languages" }
+        "name": "Inglés", 
+        "subject_category": "languages"
     },
     
     {
-        "model": "core.subject",
-        "pk": 5,
-        "fields": { "name": "Python", "subjectCategory": "programming" }
+        "name": "Python", 
+        "subject_category": "programming"
     },
 
     {
-        "model": "core.subject",
-        "pk": 6,
-        "fields": { "name": "Filosofía", "subjectCategory": "humanities" }
+        "name": "Filosofía", 
+        "subject_category": "humanities"
     }
 ]
