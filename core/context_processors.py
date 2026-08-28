@@ -1,8 +1,9 @@
-from .forms import StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm
+from .forms import StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
 
 def activity_forms(request):
     study_form = StudyActivityForm()
     sport_form = SportActivityForm()
+    subject_form = SubjectForm()
     open_study_modal = False
     open_sport_modal = False
 
@@ -24,6 +25,7 @@ def activity_forms(request):
         "live_study_form": LiveStudyActivityForm(),
         "sport_form": sport_form,
         "live_sport_form": LiveSportActivityForm(),
+        "subject_form": subject_form,
         "open_study_modal": open_study_modal,
         "open_sport_modal": open_sport_modal,
     }

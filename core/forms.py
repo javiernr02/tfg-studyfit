@@ -1,0 +1,278 @@
+from django import forms
+import core.models as models
+from django.utils import timezone
+import unicodedata
+
+class StudyActivityForm(forms.ModelForm):
+    start_time = forms.TimeField(
+        label="Hora de inicio *",
+        widget=forms.TimeInput(
+            attrs={"type": "time"}
+        ),
+        error_messages={
+            "required": "La hora de inicio es obligatoria"
+        }
+    )
+
+    end_time = forms.TimeField(
+        label="Hora de fin *",
+        widget=forms.TimeInput(
+            attrs={"type": "time"}
+        ),
+        error_messages={
+            "required": "La hora de fin es obligatoria"
+        }
+    )
+    
+    concentration = forms.IntegerField(
+        label="Concentración *",
+        error_messages={
+            "required": "La concentración es obligatoria"
+        },
+        widget=forms.NumberInput(
+            attrs={
+                "step": "1",
+                "min": "0",
+                "max": "10"
+            }
+        )
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        user = models.CustomUser.objects.first()
+        
+        self.fields["subject"].queryset = models.Subject.objects.filter(user=user)
+
+    class Meta:
+        model = models.StudyActivity
+        fields = ["title", "description", "date", "start_time", "end_time", "subject", "study_type", "concentration"]
+        labels = {
+            "title": "Título *",
+            "description": "Descripción",
+            "date": "Fecha *",
+            "subject": "Asignatura *",
+            "study_type": "Tipo de estudio *"
+        }
+        error_messages = {
+            "title": {
+                "required": "El título es obligatorio"
+            },
+            "date": {
+                "required": "La fecha es obligatoria"
+            },
+            "subject": {
+                "required": "La asignatura es obligatoria"
+            },
+            "study_type": {
+                "required": "El tipo de estudio es obligatorio"
+            },
+        }
+        widgets = {
+            "date": forms.DateInput(
+                attrs={"type": "date"}
+            ),
+        }
+        
+    def clean(self):
+        cleaned_data = super().clean()
+
+        date = cleaned_data.get("date")
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+        
+        today = timezone.localdate()
+        now = timezone.localtime()
+        
+        if date:
+            date_only = date.date()
+        
+            if date_only > today:
+                
+                raise forms.ValidationError("La fecha no puede ser posterior a la fecha actual")
+            
+            elif date_only == today and start_time and end_time:
+                
+                current_time = now.time()
+                
+                if start_time > current_time:
+                    raise forms.ValidationError("La hora de inicio no puede ser posterior a la hora actual")
+
+                if end_time > current_time:
+                    raise forms.ValidationError("La hora de fin no puede ser posterior a la hora actual")
+                
+
+            if start_time and end_time and end_time <= start_time:
+                
+                raise forms.ValidationError("La hora de fin debe ser posterior a la hora de inicio")
+                    
+        return cleaned_data
+
+class LiveStudyActivityForm(forms.ModelForm):
+    class Meta:
+        model = models.StudyActivity
+        fields = ["title", "description", "subject", "concentration"]
+        labels = {
+            "title": "Título",
+            "description": "Descripción",
+            "subject": "Asignatura",
+            "concentration": "Concentración"
+        }
+        
+class SubjectForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Subject
+        fields = ["name", "subject_category"]
+
+        labels = {
+            "name": "Nombre *",
+            "subject_category": "Categoría *",
+        }
+        error_messages = {
+            "name": {
+                "required": "El nombre es obligatorio"
+            },
+            "subject_category": {
+                "required": "La categoría es obligatoria"
+            },
+        }
+        
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        user = models.CustomUser.objects.first()
+
+        normalized_name = ''.join(
+            c for c in unicodedata.normalize('NFD', name)
+            if unicodedata.category(c) != 'Mn'
+        ).lower().strip()
+
+        for subject in models.Subject.objects.filter(user=user):
+            subject_normalized = ''.join(
+                c for c in unicodedata.normalize('NFD', subject.name)
+                if unicodedata.category(c) != 'Mn'
+            ).lower().strip()
+
+            if subject_normalized == normalized_name:
+                raise forms.ValidationError("Ya existe una asignatura con ese nombre")
+
+        return name
+
+class SportActivityForm(forms.ModelForm):
+    start_time = forms.TimeField(
+        label="Hora de inicio *",
+        widget=forms.TimeInput(
+            attrs={"type": "time"}
+            ),
+        error_messages={
+            "required": "La hora de inicio es obligatoria"
+            }
+    )
+    
+    end_time = forms.TimeField(
+        label="Hora de fin *",
+        widget=forms.TimeInput(
+            attrs={"type": "time"}
+        ),
+        error_messages={
+            "required": "La hora de fin es obligatoria"
+        }
+    )
+    
+    distance = forms.FloatField(
+        label="Distancia (km)",
+        required=False,
+        widget=forms.NumberInput(
+            attrs={
+                "step": "0.01",
+                "min": "0"
+            }
+        )
+    )
+        
+    class Meta:
+        model = models.SportActivity
+        fields = ["title", "description", "date", "start_time", "end_time", "sport_type", "distance", "intensity"]
+        labels = {
+            "title": "Título *",
+            "description": "Descripción",
+            "date": "Fecha *",
+            "sport_type": "Tipo de deporte *",
+            "intensity": "Intensidad"
+        }
+        error_messages = {
+            "title": {
+                "required": "El título es obligatorio"
+            },
+            "date": {
+                "required": "La fecha es obligatoria"
+            },
+            "sport_type": {
+                "required": "El tipo de deporte es obligatorio"
+            },
+        }
+        widgets = {
+            "date": forms.DateInput(
+                attrs={"type": "date"}
+            ),
+        }
+        
+    def clean(self):
+        cleaned_data = super().clean()
+
+        date = cleaned_data.get("date")
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+        
+        sport_type = cleaned_data.get("sport_type")
+        distance = cleaned_data.get("distance")
+        
+        cardio_types = [
+            models.SportType.WALK,
+            models.SportType.RUN,
+            models.SportType.BIKE,
+            models.SportType.HIIT,
+        ]
+        
+        if sport_type in cardio_types and distance is None:
+            raise forms.ValidationError("La distancia es obligatoria para actividades de cardio")
+        
+        today = timezone.localdate()
+        now = timezone.localtime()
+        
+        if date:
+            date_only = date.date()
+        
+            if date_only > today:
+                
+                raise forms.ValidationError("La fecha no puede ser posterior a la fecha actual")
+            
+            elif date_only == today and start_time and end_time:
+                
+                current_time = now.time()
+                
+                if start_time > current_time:
+                    raise forms.ValidationError("La hora de inicio no puede ser posterior a la hora actual")
+
+                if end_time > current_time:
+                    raise forms.ValidationError("La hora de fin no puede ser posterior a la hora actual")
+                
+
+            if start_time and end_time and end_time <= start_time:
+                
+                raise forms.ValidationError("La hora de fin debe ser posterior a la hora de inicio")
+                    
+        return cleaned_data
+        
+class LiveSportActivityForm(forms.ModelForm):
+    class Meta:
+        model = models.SportActivity
+        fields = ["title", "description", "sport_type", "distance", "intensity"]
+        labels = {
+            "title": "Título",
+            "description": "Descripción",
+            "sport_type": "Tipo de deporte",
+            "distance": "Distancia",
+            "intensity": "Intensidad"
+        }

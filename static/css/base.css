@@ -84,7 +84,7 @@ nav.navbar .nav-links a {
 
 .button:hover {
     color: #197c60;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .button span {
@@ -101,6 +101,7 @@ nav.navbar .nav-links a {
 }
 
 .rounded-button {
+    all: unset;
     color: #FFFFFF;
     background-color: #24B88D;
     padding: 0.5rem 1rem;
@@ -109,6 +110,7 @@ nav.navbar .nav-links a {
     font-weight: 600;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     font-size: 1rem;
     cursor: pointer;
@@ -119,6 +121,73 @@ nav.navbar .nav-links a {
     color: #FFFFFF;
     background-color: #197c60;
     transform: scale(1.05);
+}
+
+#study-submit {
+    margin: 20px auto 0;
+}
+
+#subject-submit {
+    margin: 20px auto 0;
+}
+
+#sport-submit {
+    margin: 20px auto 0;
+}
+
+.create-subject-button {
+    all: unset;
+    color: #FFFFFF;
+    background-color: #0D4846;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.create-subject-button:hover {
+    color: #FFFFFF;
+    background-color: #0a3332;
+    transform: scale(1.05);
+}
+
+#id_subject {
+    display: inline-block;
+}
+
+#delete-subject-button {
+    margin-left: 5px;
+    width: 22px;
+    height: 22px;
+    background: #999fa5;
+    padding: 0;
+    cursor: pointer;
+    border: 1px solid #333;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+    transition: background-color 0.2s;
+}
+
+#delete-subject-button:hover {
+    background: #5f5e5e;
+    border: 1px solid #000;
+}
+
+#delete-subject-button i {
+    color: white;
+    font-size: 8px;
+    line-height: 1;
 }
 
 main {
@@ -174,6 +243,8 @@ nav.footer-links a:hover {
     text-decoration: underline;
 }
 
+/* Botón para volver arriba */
+
 .top-button {
     position: fixed;
     right: 30px;
@@ -198,6 +269,217 @@ nav.footer-links a:hover {
 .top-button.show {
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Desplegable de registrar actividad */
+
+.dropdown {
+    position: relative;
+    display: flex;
+}
+
+.dropdown-button {
+    cursor: pointer;
+    border: none;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    min-width: 230px;
+    background: white;
+    border-radius: 12px;
+    display: none;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.dropdown-menu a {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: left;
+    color: #5f5e5e;
+}
+
+.dropdown-menu a:hover {
+    background: rgba(36, 184, 141, 0.1);
+    color: #24B88D;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+#chevron-down {
+    font-size: 11px;
+}
+
+/* Modales */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    overflow-y: auto;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    width: 420px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    border-radius: 12px;
+    background: white;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 5px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    flex: 1;
+}
+
+#icon-title {
+    color: #24B88D;
+    font-size: 20px;
+}
+
+.close-button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #828282;
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.close-button i {
+    font-size: 20px;
+}
+
+.close-button:hover {
+    color: #5f5e5e;
+    transform: scale(1.1);
+}
+
+.errors {
+    margin-top: 8px;
+}
+
+.mandatory {
+    font-size: 13px;
+}
+
+.modal-error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+}
+
+.errorlist {
+    display: none;
+}
+
+textarea[name="description"] {
+    height: 70px;
+    resize: vertical;
+}
+
+.modal input,
+.modal select,
+.modal textarea {
+    border: 1px solid #999fa5;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #fff;
+    color: #333;
+}
+
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+    outline: none;
+    border-color: #24B88D;
+    box-shadow: 0 0 0 2px rgba(36, 184, 141, 0.15);
+}
+
+.messages {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.message {
+    padding: 12px 18px;
+    border-radius: 6px;
+    background: #52DD5D;
+    border: 1px solid #47c652;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.message.show {
+    animation: message-down 1s ease-out forwards;
+}
+
+.message.hide {
+    animation: message-fade-out 0.7s ease-out forwards;
+}
+
+@keyframes message-down {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes message-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
 /* Responsive */

@@ -56,6 +56,17 @@
         </nav>
     </header>
 
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    <i class="fa-regular fa-circle-check"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <main>
         {% block content %}
         {% endblock %}
@@ -83,9 +94,29 @@
     </button>
     
     {% include "modals/study_modal.html" %}
+    {% include "modals/subject_modal.html" %}
     {% include "modals/sport_modal.html" %}
 
     <script>
+
+        // Mensajes
+
+        const messages = document.querySelectorAll(".message");
+
+        messages.forEach(message => {
+            message.classList.add("show");
+
+            setTimeout(() => {
+                message.classList.remove("show");
+                message.classList.add("hide");
+
+                setTimeout(() => {
+                    message.remove();
+                }, 700);
+
+            }, 3000);
+        });
+
         // Botón para volver arriba
 
         const button = document.getElementById("topButton");
@@ -113,12 +144,20 @@
         const studyButton = document.getElementById("study-button");
         const sportButton = document.getElementById("sport-button");
         const studyModal = document.getElementById("study-modal");
+        const subjectModal = document.getElementById("subject-modal");
         const sportModal = document.getElementById("sport-modal");
         const studyClose = document.getElementById("study-close");
+        const subjectClose = document.getElementById("subject-close");
         const sportClose = document.getElementById("sport-close");
         
         const studyForm = studyModal.querySelector("form");
         const studySubmit = document.getElementById("study-submit");
+        
+        const createSubjectButton = document.getElementById("create-subject-button");
+        const subjectForm = document.getElementById("subject-form");
+        const subjectSubmit = document.getElementById("subject-submit");
+        const subjectSelect = document.getElementById("id_subject");
+        const subjectErrors = document.getElementById("subject-errors");
 
         const sportForm = sportModal.querySelector("form");
         const sportSubmit = document.getElementById("sport-submit");
@@ -198,6 +237,152 @@
         {% if open_sport_modal %}
             openModal(sportModal);
         {% endif %}
+
+        // Creación de asignatura
+
+        subjectSelect.parentNode.insertAdjacentElement("afterend", createSubjectButton);
+        
+        createSubjectButton.addEventListener("click", () => {
+            openModal(subjectModal);
+        });
+
+        subjectClose.addEventListener("click", () => {
+            closeModal(subjectModal);
+        });
+        
+        subjectModal.addEventListener("click", (e) => {
+            if (e.target === subjectModal) {
+                closeModal(subjectModal);
+            }
+        });
+        
+        subjectForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            subjectErrors.innerHTML = "";
+
+            subjectSubmit.disabled = true;
+
+            const formData = new FormData(subjectForm);
+
+            try {
+                const response = await fetch(subjectForm.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    // Nueva opción en el desplegable
+                    const option = document.createElement("option");
+
+                    option.value = data.id;
+                    option.textContent = data.name;
+
+                    subjectSelect.appendChild(option);
+
+                    // Seleccionarla automáticamente
+                    subjectSelect.value = data.id;
+                    
+                    closeModal(subjectModal);
+
+                } if (data.errors) {
+
+                    for (const fieldErrors of Object.values(data.errors)) {
+
+                        for (const error of fieldErrors) {
+
+                            const errorDiv = document.createElement("div");
+
+                            errorDiv.className = "modal-error";
+
+                            errorDiv.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>${error.message}`;
+
+                            subjectErrors.appendChild(errorDiv);
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error al crear la asignatura:", error);
+            }
+
+            subjectSubmit.disabled = false;
+
+            subjectSubmit.innerHTML = '<i class="fa-regular fa-floppy-disk"></i> Crear';
+            
+        });
+
+        // Eliminación de asignatura
+
+        const subjectContainer = subjectSelect.parentNode;
+
+        const deleteSubjectButton = document.createElement("button");
+
+        deleteSubjectButton.type = "button";
+        deleteSubjectButton.id = "delete-subject-button";
+        deleteSubjectButton.title = "Eliminar la asignatura seleccionada";
+
+        deleteSubjectButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+        subjectContainer.appendChild(deleteSubjectButton);
+        
+        deleteSubjectButton.addEventListener("click", async () => {
+
+            const subjectId = subjectSelect.value;
+
+            if (!subjectId) {
+                return;
+            }
+
+            const subjectName =
+                subjectSelect.options[subjectSelect.selectedIndex].textContent;
+
+            const confirmed = confirm(`¿Seguro que quieres eliminar la asignatura "${subjectName}"?`);
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `/subject/delete/${subjectId}/`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    const option = subjectSelect.querySelector(`option[value="${subjectId}"]`);
+
+                    if (option) {
+                        option.remove();
+                    }
+
+                    subjectSelect.value = "";
+
+                } else {
+
+                    alert(data.error);
+                }
+
+            } catch (error) {
+
+                console.error("Error al eliminar la asignatura:", error);
+            }
+        });
 
     </script>
 

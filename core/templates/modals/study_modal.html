@@ -1,0 +1,56 @@
+<div class="modal-overlay" id="study-modal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+            <i id="icon-title" class="fa-solid fa-book"></i>
+            <h2>Registrar Actividad de Estudio</h2>
+
+            <button type="button" class="close-button" id="study-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+        
+        {% if study_form.errors %}
+            <div class="errors">
+                {% for error in study_form.non_field_errors %}
+                    <div class="modal-error">
+                        <i class="fa-regular fa-circle-xmark"></i>
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+                {% for field in study_form %}
+                    {% for error in field.errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'create_study_activity' %}" novalidate>
+            {% csrf_token %}
+
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+            {{ study_form.as_p }}
+
+            <button type="button" class="create-subject-button" id="create-subject-button">
+                <i class="fa-solid fa-plus"></i>
+                Crear asignatura
+            </button>
+
+            <button type="submit" class="rounded-button" id="study-submit">
+                <i class="fa-regular fa-floppy-disk"></i>
+                Guardar
+            </button>
+        </form>
+
+    </div>
+
+</div>
