@@ -6,45 +6,165 @@
             <i id="icon-title" class="fa-solid fa-person-running"></i>
             <h2>Registrar Actividad Deportiva</h2>
 
-            <button type="button" class="close-button" id="sport-close">
+            <button type="button" class="close-button" id="sport-close" title="Cerrar">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
+        <div class="activity-mode">
+            <button type="button" class="activity-mode-button active" id="sport-finished-mode">
+                📄 Actividad finalizada
+            </button>
+
+            <button type="button" class="activity-mode-button" id="sport-live-mode">
+                🔴 Actividad en directo
+            </button>
+        </div>
+
         <p class="mandatory">* Campo obligatorio</p>
+        
+        <div id="sport-finished-content">
 
-        {% if sport_form.errors %}
-            <div class="errors">
-                {% for error in sport_form.non_field_errors %}
-                    <div class="modal-error">
-                        <i class="fa-regular fa-circle-xmark"></i>
-                        {{ error }}
-                    </div>
-                {% endfor %}
-
-                {% for field in sport_form %}
-                    {% for error in field.errors %}
+            {% if sport_form.errors %}
+                <div class="errors">
+                    {% for error in sport_form.non_field_errors %}
                         <div class="modal-error">
                             <i class="fa-regular fa-circle-xmark"></i>
                             {{ error }}
                         </div>
                     {% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
 
-        <form method="post" action="{% url 'create_sport_activity' %}" novalidate>
-            {% csrf_token %}
+                    {% for field in sport_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <form method="post" action="{% url 'create_sport_activity' %}" novalidate>
+                {% csrf_token %}
 
-            {{ sport_form.as_p }}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
-            <button type="submit" class="rounded-button" id="sport-submit">
-                <i class="fa-regular fa-floppy-disk"></i>
-                Guardar
-            </button>
-        </form>
+                {{ sport_form.as_p }}
+
+                <div class="final-buttons">
+                    <button type="submit" class="rounded-button" id="sport-submit">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Guardar
+                    </button>
+
+                    <button type="button" class="cancel-button" id="sport-cancel" title="Elimina todos los datos de la actividad">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="sport-live-content" class="activity-content-hidden">
+
+            {% if live_sport_form.errors %}
+                <div class="errors">
+                    {% for error in live_sport_form.non_field_errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% for field in live_sport_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'create_live_sport_activity' %}" novalidate>
+
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" name="start_datetime" id="sport-live-start-datetime" value="{{ live_sport_start_datetime|default:'' }}">
+                <input type="hidden" name="end_datetime" id="sport-live-end-datetime" value="{{ live_sport_end_datetime|default:'' }}">
+                <input type="hidden" name="paused_duration" id="sport-live-paused-duration" value="{{ live_sport_paused_duration|default:'0' }}">
+                
+                <p>
+                    {{ live_sport_form.title.label_tag }}
+                    {{ live_sport_form.title }}
+                </p>
+
+                <p>
+                    {{ live_sport_form.description.label_tag }}
+                    {{ live_sport_form.description }}
+                </p>
+
+                <p>
+                    {{ live_sport_form.sport_type.label_tag }}
+                    {{ live_sport_form.sport_type }}
+                </p>
+
+                <div id="sport-live-distance" style="display: none;">
+                    <p>
+                        {{ live_sport_form.distance.label_tag }}
+                        {{ live_sport_form.distance }}
+                    </p>
+                </div>
+
+                <p>
+                    {{ live_sport_form.intensity.label_tag }}
+                    {{ live_sport_form.intensity }}
+                </p>
+
+                <div class="live-timer">
+                    <div class="timer-display" id="sport-live-timer">
+                        00:00:00
+                    </div>
+
+                    <div class="timer-controls">
+                        <button type="button" class="rounded-button" id="sport-live-start">
+                            <i class="fa-solid fa-play"></i>
+                            Iniciar
+                        </button>
+
+                        <button type="button" class="rounded-button" id="sport-live-pause" style="display: none;">
+                            <i class="fa-solid fa-pause"></i>
+                            Pausar
+                        </button>
+
+                        <button type="button" class="rounded-button" id="sport-live-resume" style="display: none;">
+                            <i class="fa-solid fa-play"></i>
+                            Continuar
+                        </button>
+
+                        <button type="button" class="rounded-button" id="sport-live-finish" style="display: none;">
+                            <i class="fa-solid fa-stop"></i>
+                            Finalizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="live-final-buttons">
+                    <button type="submit" class="rounded-button" id="sport-live-submit" style="display: none;">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Guardar
+                    </button>
+
+                    <button type="button" class="cancel-button" id="sport-live-cancel" title="Elimina todos los datos de la actividad">
+                        Cancelar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 

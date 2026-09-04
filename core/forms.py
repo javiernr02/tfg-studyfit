@@ -110,14 +110,46 @@ class StudyActivityForm(forms.ModelForm):
         return cleaned_data
 
 class LiveStudyActivityForm(forms.ModelForm):
+    concentration = forms.IntegerField(
+        label="Concentración *",
+        error_messages={
+            "required": "La concentración es obligatoria"
+        },
+        widget=forms.NumberInput(
+            attrs={
+                "step": "1",
+                "min": "0",
+                "max": "10"
+            }
+        )
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        user = models.CustomUser.objects.first()
+        
+        self.fields["subject"].queryset = models.Subject.objects.filter(user=user)
+    
     class Meta:
         model = models.StudyActivity
-        fields = ["title", "description", "subject", "concentration"]
+        fields = ["title", "description", "subject", "study_type", "concentration"]
         labels = {
-            "title": "Título",
+            "title": "Título *",
             "description": "Descripción",
-            "subject": "Asignatura",
-            "concentration": "Concentración"
+            "subject": "Asignatura *",
+            "study_type": "Tipo de estudio *"
+        }
+        error_messages = {
+            "title": {
+                "required": "El título es obligatorio"
+            },
+            "subject": {
+                "required": "La asignatura es obligatoria"
+            },
+            "study_type": {
+                "required": "El tipo de estudio es obligatorio"
+            },
         }
         
 class SubjectForm(forms.ModelForm):
@@ -164,10 +196,10 @@ class SportActivityForm(forms.ModelForm):
         label="Hora de inicio *",
         widget=forms.TimeInput(
             attrs={"type": "time"}
-            ),
+        ),
         error_messages={
             "required": "La hora de inicio es obligatoria"
-            }
+        }
     )
     
     end_time = forms.TimeField(
@@ -266,13 +298,47 @@ class SportActivityForm(forms.ModelForm):
         return cleaned_data
         
 class LiveSportActivityForm(forms.ModelForm):
+    distance = forms.FloatField(
+        label="Distancia (km)",
+        required=False,
+        widget=forms.NumberInput(
+            attrs={
+                "step": "0.01",
+                "min": "0"
+            }
+        )
+    )
+    
     class Meta:
         model = models.SportActivity
         fields = ["title", "description", "sport_type", "distance", "intensity"]
         labels = {
-            "title": "Título",
+            "title": "Título *",
             "description": "Descripción",
-            "sport_type": "Tipo de deporte",
-            "distance": "Distancia",
+            "sport_type": "Tipo de deporte *",
             "intensity": "Intensidad"
         }
+        error_messages = {
+            "title": {
+                "required": "El título es obligatorio"
+            },
+            "sport_type": {
+                "required": "El tipo de deporte es obligatorio"
+            },
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        sport_type = cleaned_data.get("sport_type")
+        distance = cleaned_data.get("distance")
+        
+        cardio_types = [
+            models.SportType.WALK,
+            models.SportType.RUN,
+            models.SportType.BIKE,
+            models.SportType.HIIT,
+        ]
+        
+        if sport_type in cardio_types and distance is None:
+            raise forms.ValidationError("La distancia es obligatoria para actividades de cardio")

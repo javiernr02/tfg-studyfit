@@ -8,6 +8,7 @@ from datetime import datetime
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import ProtectedError
+from django.utils.dateparse import parse_datetime
 
 
 # Create your views here.
@@ -225,6 +226,7 @@ def create_study_activity(request):
         # Formulario inválido
         request.session["study_form_data"] = request.POST.dict()
         request.session["open_study_modal"] = True
+        request.session["open_live_study"] = False
                 
         return redirect(request.POST.get("next", "home"))
     
@@ -283,6 +285,57 @@ def delete_subject(request, subject_id):
     return JsonResponse({
         "success": False
     }, status=405)
+    
+# Creación de actividad de estudio en directo y cálculo de su duración, con gestión de errores en caso de fallar
+# o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+def create_live_study_activity(request):
+    if request.method == "POST":
+        form = LiveStudyActivityForm(request.POST)
+
+        if form.is_valid():
+            activity = form.save(commit=False)
+            activity.user = models.CustomUser.objects.first()
+
+            start_datetime = parse_datetime(request.POST.get("start_datetime"))
+
+            end_datetime = parse_datetime(request.POST.get("end_datetime"))
+
+            paused_duration = timedelta(milliseconds=int(request.POST.get("paused_duration", 0)))
+
+            activity.date = start_datetime
+            
+            activity.duration = (end_datetime - start_datetime - paused_duration)
+
+            activity.save()
+            
+            messages.success(request, "Actividad de estudio registrada correctamente")
+
+            return redirect(request.POST.get("next", "home"))
+        
+        # Formulario inválido
+        request.session["live_study_form_data"] = request.POST.dict()
+        request.session["open_study_modal"] = True
+        request.session["open_live_study"] = True
+        request.session["live_study_finished"] = True
+
+        return redirect(request.POST.get("next", "home"))
+
+    return redirect("home")
+
+# Eliminar datos rellenados en la actividad de estudio finalizada
+def cancel_study_activity(request):
+    request.session.pop("study_form_data", None)
+    request.session.pop("open_study_modal", None)
+
+    return JsonResponse({"success": True})
+
+# Eliminar datos rellenados y variables del cronómetro en la actividad de estudio en directo
+def cancel_live_study_activity(request):
+    request.session.pop("live_study_form_data", None)
+    request.session.pop("open_study_modal", None)
+    request.session.pop("open_live_study", None)
+
+    return JsonResponse({"success": True})
 
 # Creación de actividad deportiva con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
@@ -314,8 +367,60 @@ def create_sport_activity(request):
         # Formulario inválido
         request.session["sport_form_data"] = request.POST.dict()
         request.session["open_sport_modal"] = True
+        request.session["open_live_sport"] = False
                 
         return redirect(request.POST.get("next", "home"))
 
     return redirect("home")
+
+# Creación de actividad de deporte en directo y cálculo de su duración, con gestión de errores en caso de fallar
+# o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+def create_live_sport_activity(request):
+    if request.method == "POST":
+        form = LiveSportActivityForm(request.POST)
+
+        if form.is_valid():
+            activity = form.save(commit=False)
+            activity.user = models.CustomUser.objects.first()
+
+            start_datetime = parse_datetime(request.POST.get("start_datetime"))
+
+            end_datetime = parse_datetime(request.POST.get("end_datetime"))
+
+            paused_duration = timedelta(milliseconds=int(request.POST.get("paused_duration", 0)))
+
+            activity.date = start_datetime
+            
+            activity.duration = (end_datetime - start_datetime - paused_duration)
+
+            activity.save()
+            
+            messages.success(request, "Actividad de deporte registrada correctamente")
+
+            return redirect(request.POST.get("next", "home"))
+        
+        # Formulario inválido
+        request.session["live_sport_form_data"] = request.POST.dict()
+        request.session["open_sport_modal"] = True
+        request.session["open_live_sport"] = True
+        request.session["live_sport_finished"] = True
+
+        return redirect(request.POST.get("next", "home"))
+
+    return redirect("home")
+
+# Eliminar datos rellenados en la actividad de deporte finalizada
+def cancel_sport_activity(request):
+    request.session.pop("sport_form_data", None)
+    request.session.pop("open_sport_modal", None)
+
+    return JsonResponse({"success": True})
+
+# Eliminar datos rellenados y variables del cronómetro en la actividad de deporte en directo
+def cancel_live_sport_activity(request):
+    request.session.pop("live_sport_form_data", None)
+    request.session.pop("open_sport_modal", None)
+    request.session.pop("open_live_sport", None)
+
+    return JsonResponse({"success": True})
     

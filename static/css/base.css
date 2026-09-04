@@ -123,10 +123,6 @@ nav.navbar .nav-links a {
     transform: scale(1.05);
 }
 
-#study-submit {
-    margin: 20px auto 0;
-}
-
 #subject-submit {
     margin: 20px auto 0;
 }
@@ -162,7 +158,7 @@ nav.navbar .nav-links a {
     display: inline-block;
 }
 
-#delete-subject-button {
+.delete-subject-button {
     margin-left: 5px;
     width: 22px;
     height: 22px;
@@ -179,15 +175,31 @@ nav.navbar .nav-links a {
     transition: background-color 0.2s;
 }
 
-#delete-subject-button:hover {
+.delete-subject-button:hover {
     background: #5f5e5e;
     border: 1px solid #000;
 }
 
-#delete-subject-button i {
+.delete-subject-button i {
     color: white;
     font-size: 8px;
     line-height: 1;
+}
+
+#study-live-pause {
+    background-color: #d92336;
+}
+
+#study-live-pause:hover {
+    background-color: #ba2130;
+}
+
+#sport-live-pause {
+    background-color: #d92336;
+}
+
+#sport-live-pause:hover {
+    background-color: #ba2130;
 }
 
 main {
@@ -322,6 +334,53 @@ nav.footer-links a:hover {
     font-size: 11px;
 }
 
+#dropdown-button.live-active {
+    position: relative;
+    z-index: 1;
+}
+
+#dropdown-button.live-active::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #e53935,
+        #ff6b6b,
+        #e53935,
+        transparent
+    );
+    background-size: 300% 100%;
+    animation: liveBorder 15s linear infinite;
+    z-index: -1;
+}
+
+#dropdown-button.live-active::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: inherit;
+    z-index: -1;
+}
+
+#dropdown-button.live-paused::before {
+    animation: none;
+    background: #2196f3;
+}
+
+@keyframes liveBorder {
+    0% {
+        background-position: 300% 0;
+    }
+    
+    100% {
+        background-position: -300% 0;
+    }
+}
+
 /* Modales */
 
 .modal-overlay {
@@ -432,6 +491,134 @@ textarea[name="description"] {
     outline: none;
     border-color: #24B88D;
     box-shadow: 0 0 0 2px rgba(36, 184, 141, 0.15);
+}
+
+.activity-mode {
+    margin-top: 10px;
+}
+
+.activity-mode-button {
+    all: unset;
+    margin-left: 5px;
+    height: 30px;
+    background: #f2f2f2;
+    padding: 0 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #999fa5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+    color: #0D4846;
+    font-size: 15px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.activity-mode-button:hover {
+    background: #24B88D;
+    color: white;
+}
+
+.activity-mode-button.active {
+    background: #24B88D;
+    color: white;
+}
+
+.activity-content-hidden {
+    display: none;
+}
+
+.live-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#study-live-timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 243px;
+    height: 60px;
+    box-sizing: border-box;
+    border: 1px solid rgba(36, 184, 141, 0.5);
+    border-radius: 10px;
+    background: rgba(36, 184, 141, 0.08);
+    margin-bottom: 10px;
+    color: #0D4846;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+
+#sport-live-timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 243px;
+    height: 60px;
+    box-sizing: border-box;
+    border: 1px solid rgba(36, 184, 141, 0.5);
+    border-radius: 10px;
+    background: rgba(36, 184, 141, 0.08);
+    margin-bottom: 10px;
+    color: #0D4846;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.final-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.live-final-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.cancel-button {
+    all: unset;
+    color: #FFFFFF;
+    background-color: #828282;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.cancel-button:hover {
+    color: #FFFFFF;
+    background-color: #5f5e5e;
+    transform: scale(1.05);
 }
 
 .messages {

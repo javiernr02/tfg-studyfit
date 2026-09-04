@@ -6,50 +6,213 @@
             <i id="icon-title" class="fa-solid fa-book"></i>
             <h2>Registrar Actividad de Estudio</h2>
 
-            <button type="button" class="close-button" id="study-close">
+            <button type="button" class="close-button" id="study-close" title="Cerrar">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <p class="mandatory">* Campo obligatorio</p>
-        
-        {% if study_form.errors %}
-            <div class="errors">
-                {% for error in study_form.non_field_errors %}
-                    <div class="modal-error">
-                        <i class="fa-regular fa-circle-xmark"></i>
-                        {{ error }}
-                    </div>
-                {% endfor %}
+        <div class="activity-mode">
+            <button type="button" class="activity-mode-button active" id="study-finished-mode">
+                📄 Actividad finalizada
+            </button>
 
-                {% for field in study_form %}
-                    {% for error in field.errors %}
+            <button type="button" class="activity-mode-button" id="study-live-mode">
+                🔴 Actividad en directo
+            </button>
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+
+        <div id="study-finished-content">
+            
+            {% if study_form.errors %}
+                <div class="errors">
+                    {% for error in study_form.non_field_errors %}
                         <div class="modal-error">
                             <i class="fa-regular fa-circle-xmark"></i>
                             {{ error }}
                         </div>
                     {% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
 
-        <form method="post" action="{% url 'create_study_activity' %}" novalidate>
-            {% csrf_token %}
+                    {% for field in study_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <form method="post" action="{% url 'create_study_activity' %}" novalidate>
+                {% csrf_token %}
 
-            {{ study_form.as_p }}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
-            <button type="button" class="create-subject-button" id="create-subject-button">
-                <i class="fa-solid fa-plus"></i>
-                Crear asignatura
-            </button>
+                <p>
+                    {{ study_form.title.label_tag }}
+                    {{ study_form.title }}
+                </p>
 
-            <button type="submit" class="rounded-button" id="study-submit">
-                <i class="fa-regular fa-floppy-disk"></i>
-                Guardar
-            </button>
-        </form>
+                <p>
+                    {{ study_form.description.label_tag }}
+                    {{ study_form.description }}
+                </p>
+
+                <p>
+                    {{ study_form.date.label_tag }}
+                    {{ study_form.date }}
+                </p>
+
+                <p>
+                    {{ study_form.start_time.label_tag }}
+                    {{ study_form.start_time }}
+                </p>
+
+                <p>
+                    {{ study_form.end_time.label_tag }}
+                    {{ study_form.end_time }}
+                </p>
+
+                <p>
+                    {{ study_form.subject.label_tag }}
+                    {{ study_form.subject }}
+                </p>
+
+                <button type="button" class="create-subject-button">
+                    <i class="fa-solid fa-plus"></i>
+                    Crear asignatura
+                </button>
+
+                <p>
+                    {{ study_form.study_type.label_tag }}
+                    {{ study_form.study_type }}
+                </p>
+
+                <p>
+                    {{ study_form.concentration.label_tag }}
+                    {{ study_form.concentration }}
+                </p>
+
+                <div class="final-buttons">
+                    <button type="submit" class="rounded-button" id="study-submit">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Guardar
+                    </button>
+                    
+                    <button type="button" class="cancel-button" id="study-cancel" title="Elimina todos los datos de la actividad">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="study-live-content" class="activity-content-hidden">
+            
+            {% if live_study_form.errors %}
+                <div class="errors">
+                    {% for error in live_study_form.non_field_errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% for field in live_study_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'create_live_study_activity' %}" novalidate>
+
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" name="start_datetime" id="study-live-start-datetime" value="{{ live_study_start_datetime|default:'' }}">
+                <input type="hidden" name="end_datetime" id="study-live-end-datetime" value="{{ live_study_end_datetime|default:'' }}">
+                <input type="hidden" name="paused_duration" id="study-live-paused-duration" value="{{ live_study_paused_duration|default:'0' }}">
+                
+                <p>
+                    {{ live_study_form.title.label_tag }}
+                    {{ live_study_form.title }}
+                </p>
+
+                <p>
+                    {{ live_study_form.description.label_tag }}
+                    {{ live_study_form.description }}
+                </p>
+
+                <p>
+                    {{ live_study_form.subject.label_tag }}
+                    {{ live_study_form.subject }}
+                </p>
+
+                <button type="button" class="create-subject-button">
+                    <i class="fa-solid fa-plus"></i>
+                    Crear asignatura
+                </button>
+
+                <p>
+                    {{ live_study_form.study_type.label_tag }}
+                    {{ live_study_form.study_type }}
+                </p>
+
+                <div id="study-live-concentration" style="display: none;">
+                    <p>
+                        {{ live_study_form.concentration.label_tag }}
+                        {{ live_study_form.concentration }}
+                    </p>
+                </div>
+
+                <div class="live-timer">
+                    <div class="timer-display" id="study-live-timer">
+                        00:00:00
+                    </div>
+
+                    <div class="timer-controls">
+                        <button type="button" class="rounded-button" id="study-live-start">
+                            <i class="fa-solid fa-play"></i>
+                            Iniciar
+                        </button>
+
+                        <button type="button" class="rounded-button" id="study-live-pause" style="display: none;">
+                            <i class="fa-solid fa-pause"></i>
+                            Pausar
+                        </button>
+
+                        <button type="button" class="rounded-button" id="study-live-resume" style="display: none;">
+                            <i class="fa-solid fa-play"></i>
+                            Continuar
+                        </button>
+
+                        <button type="button" class="rounded-button" id="study-live-finish" style="display: none;">
+                            <i class="fa-solid fa-stop"></i>
+                            Finalizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="live-final-buttons">
+                    <button type="submit" class="rounded-button" id="study-live-submit" style="display: none;">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Guardar
+                    </button>
+
+                    <button type="button" class="cancel-button" id="study-live-cancel" title="Elimina todos los datos de la actividad">
+                        Cancelar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 
