@@ -7,8 +7,8 @@
     <title>{% block title %}StudyFit{% endblock %}</title>
     <script src="https://kit.fontawesome.com/436fbb8bf4.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&display=swap">
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" id="favicon">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" id="shortcut-favicon">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 
@@ -24,13 +24,28 @@
 
             <div class="nav-links">
                 <div class="features-links">
+                    <div class="dropdown">
+                        <a href="#" class="rounded-button dropdown-button" id="dropdown-button">
+                            <i class="fa-solid fa-plus"></i>
+                            Registrar Actividad
+                            <i id="chevron-down" class="fa-solid fa-chevron-down"></i>
+                        </a>
+
+                        <div class="dropdown-menu">
+                            <a href="#" id="study-button">
+                                <i class="fa-solid fa-book"></i>
+                                Actividad de estudio
+                            </a>
+
+                            <a href="#" id="sport-button">
+                                <i class="fa-solid fa-person-running"></i>
+                                Actividad deportiva
+                            </a>
+                        </div>
+                    </div>
                     <a href="{% url 'balance' %}" class="rounded-button">
                         <i class="fa-solid fa-arrow-trend-up"></i>
                         Progreso
-                    </a>
-                    <a href="{% url 'home' %}" class="rounded-button">
-                        <i class="fa-solid fa-plus"></i>
-                        Registrar Actividad
                     </a>
                 </div>
                 <a href="{% url 'home' %}" class="button">
@@ -40,6 +55,17 @@
             </div>
         </nav>
     </header>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    <i class="fa-regular fa-circle-check"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <main>
         {% block content %}
@@ -66,8 +92,33 @@
             title="Volver arriba">
         </i>
     </button>
+    
+    {% include "modals/study_modal.html" %}
+    {% include "modals/subject_modal.html" %}
+    {% include "modals/sport_modal.html" %}
 
     <script>
+
+        // Mensajes
+
+        const messages = document.querySelectorAll(".message");
+
+        messages.forEach(message => {
+            message.classList.add("show");
+
+            setTimeout(() => {
+                message.classList.remove("show");
+                message.classList.add("hide");
+
+                setTimeout(() => {
+                    message.remove();
+                }, 700);
+
+            }, 3000);
+        });
+
+        // Botón para volver arriba
+
         const button = document.getElementById("topButton");
 
         window.addEventListener("scroll", () => {
@@ -85,6 +136,817 @@
                 behavior: "smooth"
             });
         });
+
+        // Desplegable de registrar actividad
+
+        const dropdownButton = document.querySelector(".dropdown-button");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+        const studyButton = document.getElementById("study-button");
+        const sportButton = document.getElementById("sport-button");
+        const studyModal = document.getElementById("study-modal");
+        const subjectModal = document.getElementById("subject-modal");
+        const sportModal = document.getElementById("sport-modal");
+        const studyClose = document.getElementById("study-close");
+        const subjectClose = document.getElementById("subject-close");
+        const sportClose = document.getElementById("sport-close");
+        
+        const studyForm = studyModal.querySelector("form");
+        const studySubmit = document.getElementById("study-submit");
+        
+        const createSubjectButton = document.querySelectorAll(".create-subject-button");
+        const subjectForm = document.getElementById("subject-form");
+        const subjectSubmit = document.getElementById("subject-submit");
+        const subjectSelect = document.querySelectorAll("#study-finished-content select[name='subject'], #study-live-content select[name='subject']");
+        const subjectErrors = document.getElementById("subject-errors");
+
+        const sportForm = sportModal.querySelector("form");
+        const sportSubmit = document.getElementById("sport-submit");
+
+        function openModal(modal) {
+            modal.classList.add("show");
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove("show");
+        }
+
+        function closeDropdown() {
+            dropdownMenu.classList.remove("show");
+        }
+
+        dropdownButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+        });
+
+        dropdownMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener("click", () => {
+            closeDropdown();
+        });
+
+        studyButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeDropdown();
+            openModal(studyModal);
+        });
+
+        sportButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeDropdown();
+            openModal(sportModal);
+        });
+        
+        studyClose.addEventListener("click", () => {
+            closeModal(studyModal);
+        });
+        
+        sportClose.addEventListener("click", () => {
+            closeModal(sportModal);
+        });
+        
+        studyModal.addEventListener("click", (e) => {
+            if (e.target === studyModal) {
+                closeModal(studyModal);
+            }
+        });
+        
+        sportModal.addEventListener("click", (e) => {
+            if (e.target === sportModal) {
+                closeModal(sportModal);
+            }
+        });
+        
+        studyForm.addEventListener("submit", () => {
+            studySubmit.disabled = true;
+            studySubmit.textContent = "Guardando...";
+        });
+
+        sportForm.addEventListener("submit", () => {
+            sportSubmit.disabled = true;
+            sportSubmit.textContent = "Guardando...";
+        });
+
+        // Creación de asignatura
+
+        createSubjectButton.forEach(button => {
+            button.addEventListener("click", () => {
+                openModal(subjectModal);
+            });
+        });
+
+        subjectClose.addEventListener("click", () => {
+            closeModal(subjectModal);
+        });
+        
+        subjectModal.addEventListener("click", (e) => {
+            if (e.target === subjectModal) {
+                closeModal(subjectModal);
+            }
+        });
+        
+        subjectForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            subjectErrors.innerHTML = "";
+
+            subjectSubmit.disabled = true;
+
+            const formData = new FormData(subjectForm);
+
+            try {
+                const response = await fetch(subjectForm.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    subjectSelect.forEach(select => {
+
+                        // Nueva opción en el desplegable
+                        const option = document.createElement("option");
+
+                        option.value = data.id;
+                        option.textContent = data.name;
+
+                        select.appendChild(option);
+                    });
+
+                    // Seleccionarla automáticamente en todos los desplegables
+                    subjectSelect.forEach(select => {
+                        select.value = data.id;
+                    });
+
+                    subjectForm.reset();
+                    
+                    closeModal(subjectModal);
+
+                } else if (data.errors) {
+
+                    for (const fieldErrors of Object.values(data.errors)) {
+
+                        for (const error of fieldErrors) {
+
+                            const errorDiv = document.createElement("div");
+
+                            errorDiv.className = "modal-error";
+
+                            errorDiv.innerHTML = `<i class="fa-regular fa-circle-xmark"></i>${error.message}`;
+
+                            subjectErrors.appendChild(errorDiv);
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error al crear la asignatura:", error);
+            }
+
+            subjectSubmit.disabled = false;
+
+            subjectSubmit.innerHTML = '<i class="fa-regular fa-floppy-disk"></i> Crear';
+            
+        });
+
+        // Eliminación de asignatura
+
+        subjectSelect.forEach(select => {
+            const subjectContainer = select.parentNode;
+
+            const deleteSubjectButton = document.createElement("button");
+
+            deleteSubjectButton.type = "button";
+            deleteSubjectButton.className = "delete-subject-button";
+            deleteSubjectButton.title = "Eliminar la asignatura seleccionada";
+
+            deleteSubjectButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+            subjectContainer.appendChild(deleteSubjectButton);
+            
+            deleteSubjectButton.addEventListener("click", async () => {
+
+                const subjectId = select.value;
+
+                if (!subjectId) {
+                    return;
+                }
+
+                const subjectName = select.options[select.selectedIndex].textContent;
+
+                const confirmed = confirm(`¿Seguro que quieres eliminar la asignatura "${subjectName}"?`);
+
+                if (!confirmed) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(
+                        `/subject/delete/${subjectId}/`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                                "X-Requested-With": "XMLHttpRequest"
+                            }
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (data.success) {
+
+                        subjectSelect.forEach(select => {
+                            const option = select.querySelector(`option[value="${subjectId}"]`);
+
+                            if (option) {
+                                option.remove();
+                            }
+
+                            select.value = "";
+                        });
+
+                    } else {
+
+                        alert(data.error);
+                    }
+
+                } catch (error) {
+
+                    console.error("Error al eliminar la asignatura:", error);
+                }
+
+            });
+
+        });
+
+        // Botones de modo de registro de actividad
+        
+        const studyFinishedMode = document.getElementById("study-finished-mode");
+        const studyLiveMode = document.getElementById("study-live-mode");
+
+        const studyFinishedContent = document.getElementById("study-finished-content");
+        const studyLiveContent = document.getElementById("study-live-content");
+
+        function showStudyMode(mode) {
+            if (mode === "live") {
+                studyLiveMode.classList.add("active");
+                studyFinishedMode.classList.remove("active");
+                
+                studyLiveContent.classList.remove("activity-content-hidden");
+                studyFinishedContent.classList.add("activity-content-hidden");
+            }
+            else {
+                studyFinishedMode.classList.add("active");
+                studyLiveMode.classList.remove("active");
+                
+                studyFinishedContent.classList.remove("activity-content-hidden");
+                studyLiveContent.classList.add("activity-content-hidden");
+            }
+        }
+
+        studyFinishedMode.addEventListener("click", () => {
+            showStudyMode("finished");
+        });
+        
+        studyLiveMode.addEventListener("click", () => {
+            showStudyMode("live");
+        });
+
+        const sportFinishedMode = document.getElementById("sport-finished-mode");
+        const sportLiveMode = document.getElementById("sport-live-mode");
+
+        const sportFinishedContent = document.getElementById("sport-finished-content");
+        const sportLiveContent = document.getElementById("sport-live-content");
+
+        function showSportMode(mode) {
+            if (mode === "live") {
+                sportLiveMode.classList.add("active");
+                sportFinishedMode.classList.remove("active");
+                
+                sportLiveContent.classList.remove("activity-content-hidden");
+                sportFinishedContent.classList.add("activity-content-hidden");
+            }
+            else {
+                sportFinishedMode.classList.add("active");
+                sportLiveMode.classList.remove("active");
+                
+                sportFinishedContent.classList.remove("activity-content-hidden");
+                sportLiveContent.classList.add("activity-content-hidden");
+            }
+        }
+
+        sportFinishedMode.addEventListener("click", () => {
+            showSportMode("finished");
+        });
+        
+        sportLiveMode.addEventListener("click", () => {
+            showSportMode("live");
+        });
+
+        // Lógica de botón cancelar para actividad finalizada
+        
+        const studyCancel = document.getElementById("study-cancel");
+        const studyFinishedForm = document.querySelector("#study-finished-content form");
+        
+        studyCancel.addEventListener("click", async () => {
+
+            await fetch("{% url 'cancel_study_activity' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("#study-finished-content input[name='csrfmiddlewaretoken']").value
+                }
+            });
+
+            window.location.reload();
+
+        });
+
+        const sportCancel = document.getElementById("sport-cancel");
+        const sportFinishedForm = document.querySelector("#sport-finished-content form");
+        
+        sportCancel.addEventListener("click", async () => {
+
+            await fetch("{% url 'cancel_sport_activity' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("#sport-finished-content input[name='csrfmiddlewaretoken']").value
+                }
+            });
+
+            window.location.reload();
+
+        });
+        
+        // Cronómetro
+        
+        const favicon = document.getElementById("favicon");
+        const shortcutFavicon = document.getElementById("shortcut-favicon");
+        const originalFavicon = "{% static 'images/favicon.ico' %}";
+        const originalTitle = document.title;
+        
+        const faviconLive = "{% static 'images/faviconLive.ico' %}";
+        const faviconPause = "{% static 'images/faviconPause.ico' %}";
+
+        const studyLiveTimer = document.getElementById("study-live-timer");
+        const studyLiveStart = document.getElementById("study-live-start");
+        const studyLivePause = document.getElementById("study-live-pause");
+        const studyLiveResume = document.getElementById("study-live-resume");
+        const studyLiveFinish = document.getElementById("study-live-finish");
+        const studyLiveStartDatetime = document.getElementById("study-live-start-datetime");
+        const studyLiveEndDatetime = document.getElementById("study-live-end-datetime");
+        const studyLivePausedDuration = document.getElementById("study-live-paused-duration");
+        const studyLiveConcentration = document.getElementById("study-live-concentration");
+        const studyLiveSubmit = document.getElementById("study-live-submit");
+        const studyLiveCancel = document.getElementById("study-live-cancel");
+        const studyLiveForm = document.querySelector("#study-live-content form");
+
+        let studyLiveStartTime = null;
+        let studyLiveElapsedTime = 0;
+        let studyLiveInterval = null;
+        let studyLivePausedDurationValue = 0;
+        let studyLivePauseStartTime = null;
+
+        const sportLiveTimer = document.getElementById("sport-live-timer");
+        const sportLiveStart = document.getElementById("sport-live-start");
+        const sportLivePause = document.getElementById("sport-live-pause");
+        const sportLiveResume = document.getElementById("sport-live-resume");
+        const sportLiveFinish = document.getElementById("sport-live-finish");
+        const sportLiveStartDatetime = document.getElementById("sport-live-start-datetime");
+        const sportLiveEndDatetime = document.getElementById("sport-live-end-datetime");
+        const sportLivePausedDuration = document.getElementById("sport-live-paused-duration");
+        const sportLiveDistance = document.getElementById("sport-live-distance");
+        const sportLiveSubmit = document.getElementById("sport-live-submit");
+        const sportLiveCancel = document.getElementById("sport-live-cancel");
+        const sportLiveForm = document.querySelector("#sport-live-content form");
+
+        let sportLiveStartTime = null;
+        let sportLiveElapsedTime = 0;
+        let sportLiveInterval = null;
+        let sportLivePausedDurationValue = 0;
+        let sportLivePauseStartTime = null;
+
+        // Función para cambiar favicon
+        
+        function changeFavicon(faviconPath) {
+            favicon.href = faviconPath;
+            shortcutFavicon.href = faviconPath;
+        }
+
+        // Formato de visualización del tiempo
+
+        function formatLiveTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        }
+        
+        // Lógica iniciar/continuar
+
+        function startStudyLiveInterval() {
+
+            changeFavicon(faviconLive);
+
+            studyLiveInterval = setInterval(() => {
+
+                const currentTime = Date.now();
+
+                const totalElapsedTime = studyLiveElapsedTime + (currentTime - studyLiveStartTime);
+
+                studyLiveTimer.textContent = formatLiveTime(totalElapsedTime);
+
+                document.title = `${formatLiveTime(totalElapsedTime)} · StudyFit`;
+
+            }, 250);
+        }
+
+        function startSportLiveInterval() {
+
+            changeFavicon(faviconLive);
+
+            sportLiveInterval = setInterval(() => {
+
+                const currentTime = Date.now();
+
+                const totalElapsedTime = sportLiveElapsedTime + (currentTime - sportLiveStartTime);
+
+                sportLiveTimer.textContent = formatLiveTime(totalElapsedTime);
+
+                document.title = `${formatLiveTime(totalElapsedTime)} · StudyFit`;
+
+            }, 250);
+        }
+
+        // Lógica de botón iniciar
+        
+        studyLiveStart.addEventListener("click", () => {
+
+            const startDatetime = new Date();
+            
+            studyLiveStartDatetime.value = startDatetime.toISOString();
+            
+            studyLiveStartTime = startDatetime.getTime();
+
+            document.getElementById("dropdown-button").classList.add("live-active");
+
+            startStudyLiveInterval();
+
+            studyLiveStart.style.display = "none";
+            studyLivePause.style.display = "inline-flex";
+            studyLiveFinish.style.display = "inline-flex";
+        });
+
+        sportLiveStart.addEventListener("click", () => {
+
+            const startDatetime = new Date();
+            
+            sportLiveStartDatetime.value = startDatetime.toISOString();
+            
+            sportLiveStartTime = startDatetime.getTime();
+
+            document.getElementById("dropdown-button").classList.add("live-active");
+
+            startSportLiveInterval();
+
+            sportLiveStart.style.display = "none";
+            sportLivePause.style.display = "inline-flex";
+            sportLiveFinish.style.display = "inline-flex";
+        });
+
+        // Lógica de botón pausar
+
+        studyLivePause.addEventListener("click", () => {
+
+            const currentTime = Date.now();
+
+            studyLiveElapsedTime += currentTime - studyLiveStartTime;
+
+            studyLivePauseStartTime = currentTime;
+
+            studyLiveStartTime = null;
+
+            clearInterval(studyLiveInterval);
+
+            studyLiveInterval = null;
+
+            changeFavicon(faviconPause);
+            document.getElementById("dropdown-button").classList.add("live-paused");
+            
+            document.title = `${formatLiveTime(studyLiveElapsedTime)} · StudyFit`;
+
+            studyLivePause.style.display = "none";
+            studyLiveResume.style.display = "inline-flex";
+        });
+
+        sportLivePause.addEventListener("click", () => {
+
+            const currentTime = Date.now();
+
+            sportLiveElapsedTime += currentTime - sportLiveStartTime;
+
+            sportLivePauseStartTime = currentTime;
+
+            sportLiveStartTime = null;
+
+            clearInterval(sportLiveInterval);
+
+            sportLiveInterval = null;
+
+            changeFavicon(faviconPause);
+            document.getElementById("dropdown-button").classList.add("live-paused");
+            
+            document.title = `${formatLiveTime(sportLiveElapsedTime)} · StudyFit`;
+
+            sportLivePause.style.display = "none";
+            sportLiveResume.style.display = "inline-flex";
+        });
+
+        // Lógica de botón continuar
+
+        studyLiveResume.addEventListener("click", () => {
+
+            const currentTime = Date.now();
+
+            studyLivePausedDurationValue += currentTime - studyLivePauseStartTime;
+
+            studyLivePauseStartTime = null;
+
+            studyLiveStartTime = currentTime;
+
+            document.getElementById("dropdown-button").classList.remove("live-paused");
+
+            startStudyLiveInterval();
+
+            studyLiveResume.style.display = "none";
+            studyLivePause.style.display = "inline-flex";
+        });
+
+        sportLiveResume.addEventListener("click", () => {
+
+            const currentTime = Date.now();
+
+            sportLivePausedDurationValue += currentTime - sportLivePauseStartTime;
+
+            sportLivePauseStartTime = null;
+
+            sportLiveStartTime = currentTime;
+
+            document.getElementById("dropdown-button").classList.remove("live-paused");
+
+            startSportLiveInterval();
+
+            sportLiveResume.style.display = "none";
+            sportLivePause.style.display = "inline-flex";
+        });
+
+        // Lógica de botón finalizar
+
+        studyLiveFinish.addEventListener("click", () => {
+
+            const endDatetime = new Date();
+
+            if (studyLivePauseStartTime !== null) {
+                studyLivePausedDurationValue += endDatetime.getTime() - studyLivePauseStartTime;
+
+                studyLivePauseStartTime = null;
+            }
+
+            if (studyLiveStartTime !== null) {
+                studyLiveElapsedTime += endDatetime.getTime() - studyLiveStartTime;
+
+                studyLiveStartTime = null;
+            }
+
+            studyLiveEndDatetime.value = endDatetime.toISOString();
+
+            studyLivePausedDuration.value = studyLivePausedDurationValue;
+
+            clearInterval(studyLiveInterval);
+
+            studyLiveInterval = null;
+
+            studyLiveTimer.textContent = formatLiveTime(studyLiveElapsedTime);
+            
+            studyLivePause.style.display = "none";
+            studyLiveResume.style.display = "none";
+            studyLiveFinish.style.display = "none";
+            
+            studyLiveConcentration.style.display = "block";
+            studyLiveSubmit.style.display = "inline-flex";
+
+            changeFavicon(originalFavicon);
+            document.title = originalTitle;
+            document.getElementById("dropdown-button").classList.remove("live-active");
+            document.getElementById("dropdown-button").classList.remove("live-paused");
+
+
+            console.log("Duración:", studyLiveElapsedTime);
+        });
+        
+        sportLiveFinish.addEventListener("click", () => {
+
+            const endDatetime = new Date();
+
+            if (sportLivePauseStartTime !== null) {
+                sportLivePausedDurationValue += endDatetime.getTime() - sportLivePauseStartTime;
+
+                sportLivePauseStartTime = null;
+            }
+
+            if (sportLiveStartTime !== null) {
+                sportLiveElapsedTime += endDatetime.getTime() - sportLiveStartTime;
+
+                sportLiveStartTime = null;
+            }
+
+            sportLiveEndDatetime.value = endDatetime.toISOString();
+
+            sportLivePausedDuration.value = sportLivePausedDurationValue;
+
+            clearInterval(sportLiveInterval);
+
+            sportLiveInterval = null;
+
+            sportLiveTimer.textContent = formatLiveTime(sportLiveElapsedTime);
+            
+            sportLivePause.style.display = "none";
+            sportLiveResume.style.display = "none";
+            sportLiveFinish.style.display = "none";
+            
+            sportLiveDistance.style.display = "block";
+            sportLiveSubmit.style.display = "inline-flex";
+
+            changeFavicon(originalFavicon);
+            document.title = originalTitle;
+            document.getElementById("dropdown-button").classList.remove("live-active");
+            document.getElementById("dropdown-button").classList.remove("live-paused");
+
+
+            console.log("Duración:", sportLiveElapsedTime);
+        });
+
+        // Lógica de botón cancelar para actividad en directo
+        
+        studyLiveCancel.addEventListener("click", async () => {
+
+            clearInterval(studyLiveInterval);
+
+            studyLiveInterval = null;
+            studyLiveStartTime = null;
+            studyLiveElapsedTime = 0;
+            studyLivePausedDurationValue = 0;
+            studyLivePauseStartTime = null;
+            
+            changeFavicon(originalFavicon);
+            document.title = originalTitle;
+            document.getElementById("dropdown-button").classList.remove("live-active");
+            document.getElementById("dropdown-button").classList.remove("live-paused");
+
+            await fetch("{% url 'cancel_live_study_activity' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("#study-live-content input[name='csrfmiddlewaretoken']").value
+                }
+            });
+
+            window.location.reload();
+
+        });
+
+        sportLiveCancel.addEventListener("click", async () => {
+
+            clearInterval(sportLiveInterval);
+
+            sportLiveInterval = null;
+            sportLiveStartTime = null;
+            sportLiveElapsedTime = 0;
+            sportLivePausedDurationValue = 0;
+            sportLivePauseStartTime = null;
+            
+            changeFavicon(originalFavicon);
+            document.title = originalTitle;
+            document.getElementById("dropdown-button").classList.remove("live-active");
+            document.getElementById("dropdown-button").classList.remove("live-paused");
+
+            await fetch("{% url 'cancel_live_sport_activity' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("#sport-live-content input[name='csrfmiddlewaretoken']").value
+                }
+            });
+
+            window.location.reload();
+
+        });
+
+        // Restaurar datos de actividad tras finalizar su registro
+
+        function restoreLiveStudyFinished() {
+            const startDatetime = studyLiveStartDatetime.value;
+            const endDatetime = studyLiveEndDatetime.value;
+            const pausedDuration = Number(studyLivePausedDuration.value || 0);
+
+            if (!startDatetime || !endDatetime) {
+                return;
+            }
+
+            const startTime = new Date(startDatetime).getTime();
+            const endTime = new Date(endDatetime).getTime();
+
+            studyLiveElapsedTime = (endTime - startTime) - pausedDuration;
+
+            studyLivePausedDurationValue = pausedDuration;
+            studyLiveStartTime = null;
+            studyLivePauseStartTime = null;
+            studyLiveInterval = null;
+            
+            studyLiveTimer.textContent = formatLiveTime(studyLiveElapsedTime);
+
+            studyLiveStart.style.display = "none";
+            studyLivePause.style.display = "none";
+            studyLiveResume.style.display = "none";
+            studyLiveFinish.style.display = "none";
+
+            studyLiveConcentration.style.display = "block";
+
+            studyLiveSubmit.style.display = "inline-flex";
+        }
+
+        function restoreLiveSportFinished() {
+            const startDatetime = sportLiveStartDatetime.value;
+            const endDatetime = sportLiveEndDatetime.value;
+            const pausedDuration = Number(sportLivePausedDuration.value || 0);
+
+            if (!startDatetime || !endDatetime) {
+                return;
+            }
+
+            const startTime = new Date(startDatetime).getTime();
+            const endTime = new Date(endDatetime).getTime();
+
+            sportLiveElapsedTime = (endTime - startTime) - pausedDuration;
+
+            sportLivePausedDurationValue = pausedDuration;
+            sportLiveStartTime = null;
+            sportLivePauseStartTime = null;
+            sportLiveInterval = null;
+            
+            sportLiveTimer.textContent = formatLiveTime(sportLiveElapsedTime);
+
+            sportLiveStart.style.display = "none";
+            sportLivePause.style.display = "none";
+            sportLiveResume.style.display = "none";
+            sportLiveFinish.style.display = "none";
+
+            sportLiveDistance.style.display = "block";
+
+            sportLiveSubmit.style.display = "inline-flex";
+        }
+
+        // Lógica de acciones según contexto de context processors
+
+        {% if open_study_modal %}
+            openModal(studyModal);
+            
+            {% if open_live_study %}
+                showStudyMode("live");
+                
+                {% if live_study_finished %}
+                    restoreLiveStudyFinished();
+                {% endif %}
+
+            {% else %}
+                showStudyMode("finished");
+            {% endif %}
+        {% endif %}
+
+        {% if open_sport_modal %}
+            openModal(sportModal);
+
+            {% if open_live_sport %}
+                showSportMode("live");
+                
+                {% if live_sport_finished %}
+                    restoreLiveSportFinished();
+                {% endif %}
+
+            {% else %}
+                showSportMode("finished");
+            {% endif %}
+        {% endif %}
+
     </script>
 
 </body>

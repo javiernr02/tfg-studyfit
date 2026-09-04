@@ -13,7 +13,8 @@
 }
 
 .balance-value p {
-    color: #5f5e5e;
+    color: #24B88D;
+    text-shadow: 0 0 4px rgba(36, 184, 141, 0.15);
 }
 
 .initial-table {

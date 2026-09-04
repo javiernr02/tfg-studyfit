@@ -8,7 +8,7 @@ import core.models as models
 import unicodedata
 import re
 from statistics import median
-
+import json
 SEED = 2026
 random.seed(SEED)
 
@@ -31,9 +31,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         
         # Carga de datos fixtures
-        self.stdout.write('Loading fixtures...')
+        self.stdout.write('Loading fixture...')
         
-        call_command('loaddata', 'populate/subjects.json')
         call_command('loaddata', 'populate/trophies.json')
         
         # Creación de usuarios
@@ -52,11 +51,11 @@ class Command(BaseCommand):
                 
             xp = (base_level - 1) * 1000 + random.randint(0, 999)
                         
-            gender = random.choices(models.CustomUser.GENDER_CHOICES, weights=[45, 45, 10])[0][0]
+            gender = random.choices(list(models.Gender), weights=[45, 45, 10])[0]
             
-            if gender == 'H':
+            if gender == models.Gender.MAN:
                 first_name = fake.first_name_male()
-            elif gender == 'M':
+            elif gender == models.Gender.WOMEN:
                 first_name = fake.first_name_female()
             else:
                 first_name = fake.first_name()
@@ -77,14 +76,24 @@ class Command(BaseCommand):
                 email = f'{username}@email.com',
                 password = 'studyfit',
                 birth_date = birt_date,
-                gender = gender,
+                gender = gender.value,
                 experience_points = xp,
                 level = base_level
             )
 
             users.append(user)
+            
+        with open("populate/subjects.json", encoding="utf-8") as file:
+            subject_data = json.load(file)
 
-        subjects = list(models.Subject.objects.all())
+        for user in users:
+            for subject in subject_data:
+                models.Subject.objects.create(
+                    user=user,
+                    name=subject["name"],
+                    subject_category=subject["subject_category"]
+                )
+                
         trophies = list(models.Trophy.objects.all())
         
         days = [timezone.now().date() - timedelta(days=i) for i in range(400)]
@@ -182,7 +191,9 @@ class Command(BaseCommand):
                         sport_intensity = None
                     
                     sport_minutes = sport_activities_by_day[user.id].get(i, 0)
-                        
+                    
+                    subjects = list(models.Subject.objects.filter(user=user))
+                    
                     for activity_by_day in range(study_activities_by_day):
                         subject = random.choice(subjects)
                         
@@ -217,6 +228,9 @@ class Command(BaseCommand):
                                 
                         else:
                             study_datetime = timezone.make_aware(datetime.combine(i, time(random.randint(7, 21), random.randint(0, 59))))
+                            
+                        # Tipo de estudio
+                        study_type = random.choices(population=list(models.StudyType), weights=[49, 45, 6])[0]
                         
                         # Usuario con concentración predeterminada para probar funcionalidades
                         if user == users[0]:
@@ -259,6 +273,7 @@ class Command(BaseCommand):
                             duration = timedelta(minutes=duration),
                             date = study_datetime,
                             subject = subject,
+                            study_type=study_type.value,
                             concentration = concentration
                         )
                         

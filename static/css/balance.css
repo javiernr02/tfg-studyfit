@@ -357,7 +357,13 @@ span {
     right: 20px;
     font-size: 30px;
     cursor: pointer;
+    color: #828282;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.chart-fullscreen i:hover {
     color: #5f5e5e;
+    transform: scale(1.1);
 }
 
 .chart-fullscreen p {
@@ -372,7 +378,13 @@ span {
     right: 115px;
     font-size: 30px;
     cursor: pointer;
+    color: #828282;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.charts i:hover {
     color: #5f5e5e;
+    transform: scale(1.1);
 }
 
 #chart-fullscreen canvas {
