@@ -55,12 +55,11 @@ nav.navbar .logo img {
 
 nav.navbar .nav-links {
     display: flex;
-    gap: 10px;
 }
 
 nav.navbar .nav-links .features-links {
     display: flex;
-    gap: 30px;
+    gap: 20px;
 }
 
 nav.navbar .nav-links a {

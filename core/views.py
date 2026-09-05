@@ -184,17 +184,18 @@ def home(request):
             
         last_7_days = timezone.now() - timedelta(days=7)
         last_activities = activities.filter(date__gte=last_7_days).count()
-    return render(request, 'home.html', 
-                  {'user': user,
-                   'activities': activities, 
-                   'study_durations_format': study_durations_format, 
-                   'sport_durations_format': sport_durations_format, 
-                   'last_activities': last_activities,
-                   'study_activities_by_subjects_format': study_activities_by_subjects_format,
-                   'sport_activities_by_sport_types_format': sport_activities_by_sport_types_format,
-                   
-                   **get_balance_data(user)
-                   })
+        
+    return render(request, 'home.html', {
+        'user': user,
+        'activities': activities, 
+        'study_durations_format': study_durations_format, 
+        'sport_durations_format': sport_durations_format, 
+        'last_activities': last_activities,
+        'study_activities_by_subjects_format': study_activities_by_subjects_format,
+        'sport_activities_by_sport_types_format': sport_activities_by_sport_types_format,
+        
+        **get_balance_data(user)
+    })
 
 # Creación de actividad de estudio con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
@@ -423,4 +424,37 @@ def cancel_live_sport_activity(request):
     request.session.pop("open_live_sport", None)
 
     return JsonResponse({"success": True})
+
+def activity_history(request):
+    user = models.CustomUser.objects.first()
+
+    study_activities = models.StudyActivity.objects.filter(user=user)
+    
+    sport_activities = models.SportActivity.objects.filter(user=user)
+
+    activities = []
+
+    for activity in study_activities:
+        activities.append({
+            "type": "study",
+            "activity": activity,
+            "start_datetime": activity.date,
+            "end_datetime": activity.date + activity.duration,
+            "duration": timedelta(seconds=int(activity.duration.total_seconds())),
+        })
+
+    for activity in sport_activities:
+        activities.append({
+            "type": "sport",
+            "activity": activity,
+            "start_datetime": activity.date,
+            "end_datetime": activity.date + activity.duration,
+            "duration": timedelta(seconds=int(activity.duration.total_seconds())),
+        })
+        
+    activities.sort(key=lambda activity: activity["start_datetime"], reverse=True)
+
+    return render(request, 'activity_history.html', {
+        "activities": activities,
+    })
     

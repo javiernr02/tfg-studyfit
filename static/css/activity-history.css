@@ -1,0 +1,55 @@
+
+.history-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 30px;
+    color: #0D4846;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.activity-card {
+    background: #fff;
+    border-radius: 15px;
+    border: 1px solid #e8e8e8;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #24B88D;
+}
+
+.title h2 {
+    margin: 0;
+}
+
+.type {
+    margin: 15px 0 5px;
+}
+
+.activity-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.item-info span {
+    font-size: 13px;
+    color: #5f5e5e;
+}
+
+.item-info strong {
+    font-size: 14px;
+}

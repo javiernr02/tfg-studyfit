@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/activity-history.css' %}">
+
+<div class="history-title">
+    <i class="fa-solid fa-rectangle-list"></i>
+    Historial de Actividades
+</div>
+
+{% for item in activities %}
+
+    <div class="activity-card">
+
+        {% if item.type == "study" %}
+        
+            <div class="title">
+                <i class="fa-solid fa-book"></i>
+                <h2>{{ item.activity.title }}</h2>
+            </div>
+
+            <p class="type">Estudio</p>
+
+            <p>{{ item.activity.description }}</p>
+
+            <div class="activity-info">
+
+                <div class="item-info">
+                    <span>Fecha</span>
+                    <strong>{{ item.start_datetime|date:"d/m/Y" }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Inicio</span>
+                    <strong>{{ item.start_datetime|time:"H:i" }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Fin</span>
+                    <strong>{{ item.end_datetime|time:"H:i" }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Duración</span>
+                    <strong>{{ item.duration }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Asignatura</span>
+                    <strong>{{ item.activity.subject }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Tipo</span>
+                    <strong>{{ item.activity.get_study_type_display }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Concentración</span>
+                    <strong>{{ item.activity.concentration }}/10</strong>
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="title">
+                <i class="fa-solid fa-person-running"></i>
+                <h2>{{ item.activity.title }}</h2>
+            </div>
+
+            <p class="type">Deporte</p>
+            
+            <p>{{ item.activity.description }}</p>
+
+            <div class="activity-info">
+
+                <div class="item-info">
+                    <span>Fecha</span>
+                    <strong>{{ item.start_datetime|date:"d/m/Y" }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Inicio</span>
+                    <strong>{{ item.start_datetime|time:"H:i" }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Fin</span>
+                    <strong>{{ item.end_datetime|time:"H:i" }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Duración</span>
+                    <strong>{{ item.duration }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Tipo</span>
+                    <strong>{{ item.activity.get_sport_type_display }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Intensidad</span>
+                    <strong>{{ item.activity.get_intensity_display }}</strong>
+                </div>
+
+                <div class="item-info">
+                    <span>Distancia (km)</span>
+                    <strong>{{ item.activity.distance }}</strong>
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+{% endfor %}
+
+{% endblock %}
