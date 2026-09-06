@@ -23,14 +23,14 @@
         <tr>
             <td>Estudio (Hoy):
                 {% if today_study_activities %}
-                    {{ study_durations_format }}
+                    {{ today_study_durations_format }}
                 {% else %}
                     0h
                 {% endif %}
             </td>
             <td>Deporte (Hoy):
                 {% if today_sport_activities %}
-                    {{ sport_durations_format }}
+                    {{ today_sport_durations_format }}
                 {% else %}
                     0h
                 {% endif %}
@@ -80,10 +80,11 @@
         </div>
         <div class="activities-content">
             <div class="card-column">
-                <div class="card-title">
+                <div class="card-title-type">
                     <i class="fa-solid fa-book"></i>
                     Estudio
                 </div>
+                
                 <div class="card-value">
                     <div class="row-title">
                         <span>Asignatura</span>
@@ -100,10 +101,11 @@
                 </div>
             </div>
             <div class="card-column">
-                <div class="card-title">
+                <div class="card-title-type">
                     <i class="fa-solid fa-person-running"></i>
                     Deporte
                 </div>
+
                 <div class="card-value">
                     <div class="row-title">
                         <span>Tipo de Deporte</span>

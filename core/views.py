@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -122,14 +123,14 @@ def get_balance_data(user):
         
         balance_streak_value = balance_logic_streak(user)
                 
-    study_durations_format = format_duration(study_durations)
-    sport_durations_format = format_duration(sport_durations)
+    today_study_durations_format = format_duration(study_durations)
+    today_sport_durations_format = format_duration(sport_durations)
         
     return {
         'today_study_activities': today_study_activities,
         'today_sport_activities': today_sport_activities,
-        'study_durations_format': study_durations_format,
-        'sport_durations_format': sport_durations_format,
+        'today_study_durations_format': today_study_durations_format,
+        'today_sport_durations_format': today_sport_durations_format,
         'balance_value': balance_value,
         'balance_streak_value': balance_streak_value
     }
@@ -163,7 +164,7 @@ def home(request):
             sport_durations += i.duration
             sport_activities_by_sport_types[sport_type]["duration"] += i.duration
             sport_activities_by_sport_types[sport_type]["count"] += 1
-            
+                
         study_durations_format = format_duration(study_durations)
         sport_durations_format = format_duration(sport_durations)
         
@@ -187,9 +188,9 @@ def home(request):
         
     return render(request, 'home.html', {
         'user': user,
-        'activities': activities, 
-        'study_durations_format': study_durations_format, 
-        'sport_durations_format': sport_durations_format, 
+        'activities': activities,
+        'study_durations_format': study_durations_format,
+        'sport_durations_format': sport_durations_format,
         'last_activities': last_activities,
         'study_activities_by_subjects_format': study_activities_by_subjects_format,
         'sport_activities_by_sport_types_format': sport_activities_by_sport_types_format,
@@ -431,6 +432,11 @@ def activity_history(request):
     study_activities = models.StudyActivity.objects.filter(user=user)
     
     sport_activities = models.SportActivity.objects.filter(user=user)
+    
+    study_activities_count = study_activities.count()
+    sport_activities_count = sport_activities.count()
+    
+    total_activities_count = study_activities_count + sport_activities_count
 
     activities = []
 
@@ -453,8 +459,37 @@ def activity_history(request):
         })
         
     activities.sort(key=lambda activity: activity["start_datetime"], reverse=True)
+    
+    # Paginación
+    
+    paginator = Paginator(activities, 100)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    
+    current_page = page_obj.number
+    total_pages = paginator.num_pages
+    
+    page_numbers = []
+    
+    for num in range(1, total_pages + 1):
+        
+        if (num <= 2 or num > total_pages - 2 or abs(num - current_page) <= 1):
+            page_numbers.append(num)
+            
+    display_pages = []
+    
+    for i, num in enumerate(page_numbers):
+        
+        if i > 0 and num > page_numbers[i - 1] + 1:
+            display_pages.append("...")
+            
+        display_pages.append(num)
 
     return render(request, 'activity_history.html', {
-        "activities": activities,
+        'page_obj': page_obj,
+        'display_pages': display_pages,
+        'study_activities_count': study_activities_count,
+        'sport_activities_count': sport_activities_count,
+        'total_activities_count': total_activities_count,
     })
     

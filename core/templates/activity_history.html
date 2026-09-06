@@ -9,7 +9,13 @@
     Historial de Actividades
 </div>
 
-{% for item in activities %}
+<div class="header">
+    <div class="activities-info">
+        <p>Se encontraron {{ total_activities_count }} actividades</p>
+    </div>
+</div>
+
+{% for item in page_obj %}
 
     <div class="activity-card">
 
@@ -118,5 +124,39 @@
     </div>
 
 {% endfor %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+
+    <div class="pagination">
+
+        {% if page_obj.has_previous %}
+            <a href="?page=1"><<</a>
+            <a href="?page={{ page_obj.previous_page_number }}"><</a>
+        {% else %}
+            <span class="disabled"><<</span>
+            <span class="disabled"><</span>
+        {% endif %}
+
+        {% for num in display_pages %}
+            {% if num == "..." %}
+                <span>...</span>
+            {% elif num == page_obj.number %}
+                <span class="current"> {{ num }}</span>
+            {% else %}
+                <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">></a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">>></a>
+        {% else %}
+            <span class="disabled">></span>
+            <span class="disabled">>></span>
+        {% endif %}
+
+    </div>
+    
+{% endif %}
 
 {% endblock %}

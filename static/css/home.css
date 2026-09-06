@@ -60,7 +60,7 @@
 }
 
 .card .card-title {
-    color: #5f5e5e;
+    color: #24B88D;
     display: flex;
     gap: 5px;
     font-size: 20px;
@@ -97,7 +97,7 @@
 }
 
 .activities-card .card-title {
-    color: #5f5e5e;
+    color: #24B88D;
     display: flex;
     gap: 5px;
     font-size: 20px;
@@ -105,6 +105,19 @@
 }
 
 .activities-card .card-title i {
+    color: #24B88D;
+    font-size: 20px;
+}
+
+.activities-card .card-title-type {
+    color: #5f5e5e;
+    display: flex;
+    gap: 5px;
+    font-size: 20px;
+    align-items: center;
+}
+
+.activities-card .card-title-type i {
     color: #24B88D;
     font-size: 20px;
 }

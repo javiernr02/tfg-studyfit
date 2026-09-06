@@ -53,3 +53,58 @@
 .item-info strong {
     font-size: 14px;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 25px;
+}
+
+.pagination a,
+.pagination span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 35px;
+    height: 35px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.pagination a {
+    color: #333;
+    border: 1px solid #e8e8e8;
+    background: white;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.pagination a:hover {
+    background-color: #f5f5f5;
+    border-color: #d8d8d8;
+}
+
+.pagination .current {
+    background-color: #0D4846;
+    color: white;
+}
+
+.pagination .disabled {
+    color: #bbb;
+    border: 1px solid #eee;
+    background-color: #fafafa;
+}
+
+.pagination span:not(.current):not(.disabled) {
+    border: none;
+    color: #666;
+}
+
+.header {
+    margin-top: 30px;
+    padding: 0 8px;
+}
