@@ -426,6 +426,9 @@ def cancel_live_sport_activity(request):
 
     return JsonResponse({"success": True})
 
+# Consultar actividades registradas por el usuario mostradas según paginación pudiendo
+# navegar entre las distintas páginas. Además, se pueden filtrar según distintos parámetros,
+# mostrando el número de actividades encontradas
 def activity_history(request):
     user = models.CustomUser.objects.first()
 
@@ -433,11 +436,85 @@ def activity_history(request):
     
     sport_activities = models.SportActivity.objects.filter(user=user)
     
-    study_activities_count = study_activities.count()
-    sport_activities_count = sport_activities.count()
+    subjects = models.Subject.objects.filter(user=user)
     
-    total_activities_count = study_activities_count + sport_activities_count
+    # Parámetros de filtros
 
+    activity_type = request.GET.get("type", "all")
+    sort = request.GET.get("sort", "newest")
+
+    subject_id = request.GET.get("subject")
+    study_type = request.GET.get("study_type")
+
+    concentration_min = request.GET.get("concentration_min")
+    concentration_max = request.GET.get("concentration_max")
+
+    sport_type = request.GET.get("sport_type")
+
+    distance_min = request.GET.get("distance_min")
+    distance_max = request.GET.get("distance_max")
+
+    intensity = request.GET.get("intensity")
+
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    
+    # Filtros por tipo de actividad
+    
+    if activity_type == "study":
+        sport_activities = models.SportActivity.objects.none()
+        
+    elif activity_type == "sport":
+        study_activities = models.StudyActivity.objects.none()
+        
+    # Filtros de estudio
+
+    if activity_type == "study":
+        if subject_id:
+            study_activities = study_activities.filter(subject_id=subject_id)
+
+        if study_type:
+            study_activities = study_activities.filter(study_type=study_type)
+
+        if concentration_min:
+            study_activities = study_activities.filter(concentration__gte=concentration_min)
+            
+        if concentration_max:
+            study_activities = study_activities.filter(concentration__lte=concentration_max)
+    
+    # Filtros de deporte
+
+    if activity_type == "sport":
+        if sport_type:
+            sport_activities = sport_activities.filter(sport_type=sport_type)
+            
+        if intensity:
+            sport_activities = sport_activities.filter(intensity=intensity)
+
+        if distance_min:
+            sport_activities = sport_activities.filter(distance__gte=distance_min)
+
+        if distance_max:
+            sport_activities = sport_activities.filter(distance__lte=distance_max)
+            
+    # Filtros de fechas
+
+    if date_from:
+        start_datetime = timezone.make_aware(datetime.combine(datetime.strptime(date_from, "%Y-%m-%d").date(), datetime.min.time()))
+        
+        study_activities = study_activities.filter(date__gte=start_datetime)
+        
+        sport_activities = sport_activities.filter(date__gte=start_datetime)
+
+    if date_to:
+        
+        end_datetime = timezone.make_aware(datetime.combine(datetime.strptime(date_to, "%Y-%m-%d").date() + timedelta(days=1), datetime.min.time()))
+        
+        study_activities = study_activities.filter(date__lt=end_datetime)
+        
+        sport_activities = sport_activities.filter(date__lt=end_datetime)
+        
+    
     activities = []
 
     for activity in study_activities:
@@ -458,13 +535,29 @@ def activity_history(request):
             "duration": timedelta(seconds=int(activity.duration.total_seconds())),
         })
         
-    activities.sort(key=lambda activity: activity["start_datetime"], reverse=True)
+    # Filtros de ordenación
+    
+    if sort == "oldest":
+        activities.sort(key=lambda activity: activity["start_datetime"])
+    else:
+        activities.sort(key=lambda activity: activity["start_datetime"], reverse=True)
+        
+    # Contador
+    
+    total_activities_count = len(activities)
     
     # Paginación
     
     paginator = Paginator(activities, 100)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+    
+    query_params = request.GET.copy()
+    
+    if "page" in query_params:
+        query_params.pop("page")
+        
+    query = query_params.urlencode()
     
     current_page = page_obj.number
     total_pages = paginator.num_pages
@@ -488,8 +581,25 @@ def activity_history(request):
     return render(request, 'activity_history.html', {
         'page_obj': page_obj,
         'display_pages': display_pages,
-        'study_activities_count': study_activities_count,
-        'sport_activities_count': sport_activities_count,
+        'subjects': subjects,
         'total_activities_count': total_activities_count,
+        
+        'activity_type': activity_type,
+        'sort': sort,
+        'subject_id': subject_id,
+        'study_type': study_type,
+        'concentration_min': concentration_min,
+        'concentration_max': concentration_max,
+        'sport_type': sport_type,
+        'distance_min': distance_min,
+        'distance_max': distance_max,
+        'intensity': intensity,
+        'date_from': date_from,
+        'date_to': date_to,
+        'query': query,
+        
+        'study_type_choices': models.StudyType.choices,
+        'sport_type_choices': models.SportType.choices,
+        'intensity_choices': models.Intensity.choices
     })
     
