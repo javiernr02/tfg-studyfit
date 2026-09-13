@@ -280,7 +280,7 @@
             </div>
 
 
-            <div class="final-buttons">
+            <div class="filters-final-buttons">
                 
                 <button type="submit">
                     <i class="fa-solid fa-check"></i>
@@ -307,110 +307,344 @@
 
 {% for item in page_obj %}
 
-    <div class="activity-card">
+    <div id="activity-{{ item.activity.id }}" class="activity-card {% if edit_activity_id == item.activity.id %}editing{% endif %}">
 
-        {% if item.type == "study" %}
-        
-            <div class="title">
-                <i class="fa-solid fa-book"></i>
-                <h2>{{ item.activity.title }}</h2>
-            </div>
+        <div class="activity-actions">
+            <button type="button" class="edit-activity-button" title="Editar">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
 
-            <p class="type">Estudio</p>
+            <button type="button" class="cancel-edit-activity-button" title="Cancelar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
 
-            <p>{{ item.activity.description }}</p>
-
-            <div class="activity-info">
-
-                <div class="item-info">
-                    <span>Fecha</span>
-                    <strong>{{ item.start_datetime|date:"d/m/Y" }}</strong>
-                </div>
-
-                <div class="item-info">
-                    <span>Inicio</span>
-                    <strong>{{ item.start_datetime|time:"H:i" }}</strong>
-                </div>
-
-                <div class="item-info">
-                    <span>Fin</span>
-                    <strong>{{ item.end_datetime|time:"H:i" }}</strong>
-                </div>
-
-                <div class="item-info">
-                    <span>Duración</span>
-                    <strong>{{ item.duration }}</strong>
-                </div>
-
-                <div class="item-info">
-                    <span>Asignatura</span>
-                    <strong>{{ item.activity.subject }}</strong>
-                </div>
-
-                <div class="item-info">
-                    <span>Tipo</span>
-                    <strong>{{ item.activity.get_study_type_display }}</strong>
-                </div>
-
-                <div class="item-info">
-                    <span>Concentración</span>
-                    <strong>{{ item.activity.concentration }}/10</strong>
-                </div>
-
-            </div>
-
-        {% else %}
-
-            <div class="title">
-                <i class="fa-solid fa-person-running"></i>
-                <h2>{{ item.activity.title }}</h2>
-            </div>
-
-            <p class="type">Deporte</p>
+            <button type="submit" class="save-activity-button" title="Guardar" form="edit-activity-{{ item.activity.id }}">
+                <i class="fa-regular fa-floppy-disk"></i>
+            </button>
             
-            <p>{{ item.activity.description }}</p>
+            <form method="post" class="delete-activity-form" action="{% url 'delete_activity' item.activity.id %}">
 
-            <div class="activity-info">
+                {% csrf_token %}
 
-                <div class="item-info">
-                    <span>Fecha</span>
-                    <strong>{{ item.start_datetime|date:"d/m/Y" }}</strong>
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                
+                <button type="submit" class="delete-activity-button" title="Eliminar">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="activity-normal-content">
+
+            {% if item.type == "study" %}
+            
+                <div class="title">
+                    <i class="fa-solid fa-book"></i>
+                    <h2>{{ item.activity.title }}</h2>
                 </div>
 
-                <div class="item-info">
-                    <span>Inicio</span>
-                    <strong>{{ item.start_datetime|time:"H:i" }}</strong>
+                <p class="type">Estudio</p>
+
+                <p>{{ item.activity.description }}</p>
+
+                <div class="activity-info">
+
+                    <div class="item-info">
+                        <span>Fecha</span>
+                        <strong>{{ item.start_datetime|date:"d/m/Y" }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Inicio</span>
+                        <strong>{{ item.start_datetime|time:"H:i" }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Fin</span>
+                        <strong>{{ item.end_datetime|time:"H:i" }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Duración</span>
+                        <strong>{{ item.duration }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Asignatura</span>
+                        <strong>{{ item.activity.subject }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Tipo</span>
+                        <strong>{{ item.activity.get_study_type_display }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Concentración</span>
+                        <strong>{{ item.activity.concentration }}/10</strong>
+                    </div>
+
                 </div>
 
-                <div class="item-info">
-                    <span>Fin</span>
-                    <strong>{{ item.end_datetime|time:"H:i" }}</strong>
+            {% else %}
+
+                <div class="title">
+                    <i class="fa-solid fa-person-running"></i>
+                    <h2>{{ item.activity.title }}</h2>
                 </div>
 
-                <div class="item-info">
-                    <span>Duración</span>
-                    <strong>{{ item.duration }}</strong>
+                <p class="type">Deporte</p>
+                
+                <p>{{ item.activity.description }}</p>
+
+                <div class="activity-info">
+
+                    <div class="item-info">
+                        <span>Fecha</span>
+                        <strong>{{ item.start_datetime|date:"d/m/Y" }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Inicio</span>
+                        <strong>{{ item.start_datetime|time:"H:i" }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Fin</span>
+                        <strong>{{ item.end_datetime|time:"H:i" }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Duración</span>
+                        <strong>{{ item.duration }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Tipo</span>
+                        <strong>{{ item.activity.get_sport_type_display }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Intensidad</span>
+                        <strong>{{ item.activity.get_intensity_display }}</strong>
+                    </div>
+
+                    <div class="item-info">
+                        <span>Distancia (km)</span>
+                        <strong>{{ item.activity.distance }}</strong>
+                    </div>
+
                 </div>
 
-                <div class="item-info">
-                    <span>Tipo</span>
-                    <strong>{{ item.activity.get_sport_type_display }}</strong>
+            {% endif %}
+            
+        </div>
+
+        <div class="activity-edit-content">
+
+            <p class="mandatory">* Campo obligatorio</p>
+
+            {% if edit_activity_errors and edit_activity_errors.activity_id == item.activity.id %}
+                <div class="edit-errors">
+                    {% for field, field_errors in edit_activity_errors.errors.items %}
+                        {% for error in field_errors %}
+                            <div class="edit-modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error.message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
                 </div>
+            {% endif %}
 
-                <div class="item-info">
-                    <span>Intensidad</span>
-                    <strong>{{ item.activity.get_intensity_display }}</strong>
-                </div>
+            {% if item.type == "study" %}
 
-                <div class="item-info">
-                    <span>Distancia (km)</span>
-                    <strong>{{ item.activity.distance }}</strong>
-                </div>
+                <form method="post" id="edit-activity-{{ item.activity.id }}" action="{% url 'edit_activity' item.activity.id %}" novalidate>
 
-            </div>
+                    {% csrf_token %}
 
-        {% endif %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
+                    <div class="edit-info edit-title">
+                        <label>Título *</label>
+                        <input type="text" name="title" value="{{ item.activity.title }}">
+                    </div>
+
+                    <div class="edit-info edit-description">
+                        <label>Descripción</label>
+                        <textarea name="description">{{ item.activity.description }}</textarea>
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Fecha *</label>
+
+                        <input type="date"
+                            name="date"
+                            value="{{ item.start_datetime|date:'Y-m-d' }}">
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Hora de inicio *</label>
+
+                        <input type="time"
+                            name="start_time"
+                            value="{{ item.start_datetime|time:'H:i' }}">
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Hora de fin *</label>
+
+                        <input type="time"
+                            name="end_time"
+                            value="{{ item.end_datetime|time:'H:i' }}">
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Asignatura *</label>
+                        <select name="subject">
+
+                            {% for subject in subjects %}
+
+                                <option value="{{ subject.id }}"
+                                    {% if subject.id == item.activity.subject_id %}
+                                        selected
+                                    {% endif %}>
+                                    {{ subject.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Tipo *</label>
+
+                        <select name="study_type">
+
+                            {% for value, label in study_type_choices %}
+
+                                <option value="{{ value }}"
+                                    {% if item.activity.study_type == value %}
+                                        selected
+                                    {% endif %}>
+                                    {{ label }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Concentración *</label>
+
+                        <input type="number"
+                            name="concentration"
+                            min="0"
+                            max="10"
+                            value="{{ item.activity.concentration }}">
+                    </div>
+                    
+                </form>
+
+            {% else %}
+
+                <form method="post" id="edit-activity-{{ item.activity.id }}" action="{% url 'edit_activity' item.activity.id %}" novalidate>
+
+                    {% csrf_token %}
+
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                    <div class="edit-info edit-title">
+                        <label>Título *</label>
+                        <input type="text" name="title" value="{{ item.activity.title }}">
+                    </div>
+
+                    <div class="edit-info edit-description">
+                        <label>Descripción</label>
+                        <textarea name="description">{{ item.activity.description }}</textarea>
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Fecha *</label>
+
+                        <input type="date"
+                            name="date"
+                            value="{{ item.start_datetime|date:'Y-m-d' }}">
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Hora de inicio *</label>
+
+                        <input type="time"
+                            name="start_time"
+                            value="{{ item.start_datetime|time:'H:i' }}">
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Hora de fin *</label>
+
+                        <input type="time"
+                            name="end_time"
+                            value="{{ item.end_datetime|time:'H:i' }}">
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Tipo *</label>
+                        <select name="sport_type">
+
+                            {% for value, label in sport_type_choices %}
+
+                                <option value="{{ value }}"
+                                    {% if item.activity.sport_type == value %}
+                                        selected
+                                    {% endif %}>
+                                    {{ label }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Intensidad</label>
+
+                        <select name="intensity">
+
+                            {% for value, label in intensity_choices %}
+
+                                <option value="{{ value }}"
+                                    {% if item.activity.intensity == value %}
+                                        selected
+                                    {% endif %}>
+                                    {{ label }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <div class="edit-info">
+                        <label>Distancia</label>
+
+                        <input type="number"
+                            name="distance"
+                            min="0"
+                            step="0.01"
+                            value="{{ item.activity.distance|stringformat:'g' }}">
+                    </div>
+                    
+                </form>
+                
+            {% endif %}
+        
+        </div>
+        
     </div>
 
 {% endfor %}
@@ -450,6 +684,8 @@
 {% endif %}
 
 <script>
+
+    // Filtros de actividades
     
     const filtersButton = document.getElementById("filters-button");
     const filtersPanel = document.getElementById("filters-panel");
@@ -489,6 +725,68 @@
                 input.disabled = true;
             }
         });
+    });
+
+    // Edición de actividades
+    
+    document.querySelectorAll(".edit-activity-button").forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            const card = button.closest(".activity-card");
+
+            card.classList.add("editing");
+
+        });
+
+    });
+
+    // Volver a actividad tras guardarla o volver a actividad con error tras intentar guardar
+    
+    const scrollActivityId = "{{ scroll_activity_id|default:'' }}";
+    const editActivityId = "{{ edit_activity_id|default:'' }}";
+
+    const scrollEditActivityId = editActivityId || scrollActivityId;
+    
+    if (scrollEditActivityId) {
+        const activityCard = document.getElementById(`activity-${scrollEditActivityId}`);
+        
+        if (activityCard) {
+            activityCard.scrollIntoView({
+                behavior: "instant",
+                block: "center"
+            });
+        }
+    }
+
+    // Cancelar edición de actividades
+    
+    document.querySelectorAll(".cancel-edit-activity-button").forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            const card = button.closest(".activity-card");
+
+            card.classList.remove("editing");
+
+        });
+
+    });
+
+    // Eliminación de actividades
+    
+    document.querySelectorAll(".delete-activity-form").forEach(function(form) {
+        
+        form.addEventListener("submit", function(event) {
+            
+            const confirmed = confirm("¿Quieres eliminar esta actividad?\n\nEsta acción no se puede deshacer");
+            
+            if (!confirmed) {
+                event.preventDefault();
+            }
+        
+        });
+    
     });
 
 </script>

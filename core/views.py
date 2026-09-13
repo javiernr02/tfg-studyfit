@@ -438,6 +438,10 @@ def activity_history(request):
     
     subjects = models.Subject.objects.filter(user=user)
     
+    edit_activity_id = request.session.pop("edit_activity_id", None)
+    edit_activity_errors = request.session.pop("edit_activity_errors", None)
+    scroll_activity_id = request.session.pop("scroll_activity_id", None)
+    
     # Parámetros de filtros
 
     activity_type = request.GET.get("type", "all")
@@ -600,6 +604,83 @@ def activity_history(request):
         
         'study_type_choices': models.StudyType.choices,
         'sport_type_choices': models.SportType.choices,
-        'intensity_choices': models.Intensity.choices
+        'intensity_choices': models.Intensity.choices,
+        
+        'edit_activity_id': edit_activity_id,
+        'edit_activity_errors': edit_activity_errors,
+        'scroll_activity_id': scroll_activity_id
     })
+    
+# Editar los datos de una actividad registrada, gestionando los errores si no fuera posible actualizarla
+def edit_activity(request, activity_id):
+    
+    activity = get_object_or_404(
+        models.Activity,
+        id=activity_id,
+        user=models.CustomUser.objects.first()
+    )
+
+    if hasattr(activity, "studyactivity"):
+        activity = activity.studyactivity
+        form_class = StudyActivityForm
+
+    elif hasattr(activity, "sportactivity"):
+        activity = activity.sportactivity
+        form_class = SportActivityForm
+
+    else:
+        return redirect("activity_history")
+
+    if request.method == "POST":
+
+        form = form_class(
+            request.POST,
+            instance=activity
+        )
+
+        if form.is_valid():
+            activity = form.save(commit=False)
+            
+            date = form.cleaned_data["date"]
+            start_time = form.cleaned_data["start_time"]
+            end_time = form.cleaned_data["end_time"]
+            
+            start_datetime = timezone.make_aware(datetime.combine(date.date(), start_time))
+
+            end_datetime = timezone.make_aware(datetime.combine(date.date(), end_time))
+
+            activity.date = start_datetime
+            activity.duration = end_datetime - start_datetime
+
+            activity.save()
+            
+            request.session["scroll_activity_id"] = activity.id
+            
+            messages.success(request, "Actividad actualizada correctamente")
+        else:
+            request.session["edit_activity_errors"] = {
+                "activity_id": activity.id,
+                "errors": form.errors.get_json_data()
+            }
+            
+            request.session["edit_activity_id"] = activity.id
+
+    return redirect(request.POST.get("next", "activity_history"))
+
+# Eliminar actividad registrada
+def delete_activity(request, activity_id):
+    
+    if request.method == "POST":
+
+        activity = get_object_or_404(
+            models.Activity,
+            id=activity_id,
+            user=models.CustomUser.objects.first()
+        )
+
+        activity.delete()
+        
+        messages.success(request, "Actividad eliminada correctamente")
+        
+    return redirect(request.POST.get("next", "activity_history"))
     

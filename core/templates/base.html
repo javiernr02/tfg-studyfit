@@ -108,10 +108,16 @@
         const messages = document.querySelectorAll(".message");
 
         messages.forEach(message => {
-            message.classList.add("show");
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    message.classList.add("show");
+                });
+            });
 
             setTimeout(() => {
                 message.classList.remove("show");
+                message.style.transform = "translateY(0)";
                 message.classList.add("hide");
 
                 setTimeout(() => {
@@ -160,8 +166,10 @@
         const createSubjectButton = document.querySelectorAll(".create-subject-button");
         const subjectForm = document.getElementById("subject-form");
         const subjectSubmit = document.getElementById("subject-submit");
-        const subjectSelect = document.querySelectorAll("#study-finished-content select[name='subject'], #study-live-content select[name='subject']");
+        const subjectSelect = document.querySelectorAll("select[name='subject']");
+        const mainSubjectSelect = document.querySelectorAll("#study-finished-content select[name='subject'], #study-live-content select[name='subject']");
         const subjectErrors = document.getElementById("subject-errors");
+        let activeSubjectSelect = null;
 
         const sportForm = sportModal.querySelector("form");
         const sportSubmit = document.getElementById("sport-submit");
@@ -238,6 +246,7 @@
 
         createSubjectButton.forEach(button => {
             button.addEventListener("click", () => {
+                activeSubjectSelect = button.parentElement.querySelector("select[name='subject']");
                 openModal(subjectModal);
             });
         });
@@ -285,10 +294,10 @@
                         select.appendChild(option);
                     });
 
-                    // Seleccionarla automáticamente en todos los desplegables
-                    subjectSelect.forEach(select => {
-                        select.value = data.id;
-                    });
+                    // Seleccionarla automáticamente en el desplegable desde el que se creó
+                    if (activeSubjectSelect) {
+                        activeSubjectSelect.value = data.id;
+                    }
 
                     subjectForm.reset();
                     
@@ -323,7 +332,7 @@
 
         // Eliminación de asignatura
 
-        subjectSelect.forEach(select => {
+        mainSubjectSelect.forEach(select => {
             const subjectContainer = select.parentNode;
 
             const deleteSubjectButton = document.createElement("button");
@@ -368,7 +377,7 @@
 
                     if (data.success) {
 
-                        subjectSelect.forEach(select => {
+                        mainSubjectSelect.forEach(select => {
                             const option = select.querySelector(`option[value="${subjectId}"]`);
 
                             if (option) {

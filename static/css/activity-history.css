@@ -9,13 +9,173 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
+.activity-actions {
+    display: flex;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    gap: 5px;
+    z-index: 10;
+}
+
+.activity-actions form {
+    margin: 0;
+}
+
+.activity-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background-color: #f3f4f6;
+    border: none;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.activity-actions button:hover {
+    background-color: #e5e7eb;
+    color: #374151;
+    border-color: #bfc4ca;
+}
+
 .activity-card {
+    position: relative;
     background: #fff;
     border-radius: 15px;
     border: 1px solid #e8e8e8;
     padding: 20px;
     margin-top: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.delete-activity-button:hover {
+    background-color: #e5e7eb;
+    color: #dc2626 !important;
+    border-color: #9d1919 !important;
+}
+
+.cancel-edit-activity-button {
+    display: none !important;
+    color: #dc2626 !important;
+}
+
+.cancel-edit-activity-button:hover {
+    background-color: #fad9d9 !important;
+    border-color: #9d1919 !important;
+}
+
+.save-activity-button {
+    display: none !important;
+    color: #24B88D !important;
+}
+
+.save-activity-button:hover {
+    background-color: #d9f8e9 !important;
+    border-color: #24B88D !important;
+}
+
+.activity-edit-content {
+    display: none;
+    padding-top: 35px;
+}
+
+.activity-edit-content form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 16px;
+}
+
+.edit-modal-error {
+    margin-top: 5px;
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+}
+
+.activity-edit-content .edit-info {
+    margin-bottom: 0;
+}
+
+.activity-card.editing {
+    border: 1px solid #24B88D;
+}
+
+.activity-card.editing .activity-normal-content {
+    display: none;
+}
+
+.activity-card.editing .activity-edit-content {
+    display: block;
+}
+
+.activity-card.editing .edit-activity-button {
+    display: none;
+}
+
+.activity-card.editing .delete-activity-form {
+    display: none;
+}
+
+.activity-card.editing .cancel-edit-activity-button {
+    display: flex !important;
+}
+
+.activity-card.editing .save-activity-button {
+    display: flex !important;
+}
+
+.edit-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.edit-info label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.edit-info input,
+.edit-info select,
+.edit-info textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background-color: white;
+    color: #374151;
+    font-size: 13px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-info textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.edit-info input:focus,
+.edit-info select:focus,
+.edit-info textarea:focus {
+    outline: none;
+    border-color: #24B88D;
+    box-shadow: 0 0 0 2px rgba(36, 184, 141, 0.15);
+}
+
+.activity-edit-content .edit-title,
+.activity-edit-content .edit-description {
+    flex-basis: 100%;
 }
 
 .title {
@@ -227,16 +387,17 @@
     color: #6b7280;
 }
 
-.final-buttons {
+.filters-final-buttons {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid #e5e7eb;
 }
 
-.final-buttons button {
+.filters-final-buttons button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -252,15 +413,15 @@
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.final-buttons button:hover {
+.filters-final-buttons button:hover {
     background-color: #0a3332;
 }
 
-.final-buttons button:active {
+.filters-final-buttons button:active {
     transform: scale(0.97);
 }
 
-.final-buttons a {
+.filters-final-buttons a {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -275,7 +436,7 @@
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.final-buttons a:hover {
+.filters-final-buttons a:hover {
     background-color: #f3f4f6;
     color: #374151;
     border-color: #bfc4ca;
