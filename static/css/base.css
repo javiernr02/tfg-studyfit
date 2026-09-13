@@ -55,12 +55,11 @@ nav.navbar .logo img {
 
 nav.navbar .nav-links {
     display: flex;
-    gap: 10px;
 }
 
 nav.navbar .nav-links .features-links {
     display: flex;
-    gap: 30px;
+    gap: 20px;
 }
 
 nav.navbar .nav-links a {
@@ -458,6 +457,7 @@ nav.footer-links a:hover {
 }
 
 .modal-error {
+    margin-top: 5px;
     color: #dc3545;
     background-color: #f8d7da;
     border: 1px solid #f5c2c7;
@@ -637,10 +637,12 @@ textarea[name="description"] {
     display: flex;
     align-items: center;
     gap: 8px;
+    opacity: 0;
+    transform: translateY(-30px);
 }
 
 .message.show {
-    animation: message-down 1s ease-out forwards;
+    animation: message-down 0.7s ease-out forwards;
 }
 
 .message.hide {
@@ -649,7 +651,7 @@ textarea[name="description"] {
 
 @keyframes message-down {
     from {
-        transform: translateY(-10px);
+        transform: translateY(-30px);
         opacity: 0;
     }
 

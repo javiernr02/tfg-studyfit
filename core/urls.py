@@ -18,4 +18,8 @@ urlpatterns = [
     
     path('create-live-sport-activity/', views.create_live_sport_activity, name='create_live_sport_activity'),
     path('cancel-live-sport-activity/', views.cancel_live_sport_activity, name='cancel_live_sport_activity'),
+    
+    path('activity-history/', views.activity_history, name='activity_history'),
+    path('activity/<int:activity_id>/edit/', views.edit_activity, name='edit_activity'),
+    path('activity/<int:activity_id>/delete/', views.delete_activity, name='delete_activity'),
 ]

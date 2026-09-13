@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -122,14 +123,14 @@ def get_balance_data(user):
         
         balance_streak_value = balance_logic_streak(user)
                 
-    study_durations_format = format_duration(study_durations)
-    sport_durations_format = format_duration(sport_durations)
+    today_study_durations_format = format_duration(study_durations)
+    today_sport_durations_format = format_duration(sport_durations)
         
     return {
         'today_study_activities': today_study_activities,
         'today_sport_activities': today_sport_activities,
-        'study_durations_format': study_durations_format,
-        'sport_durations_format': sport_durations_format,
+        'today_study_durations_format': today_study_durations_format,
+        'today_sport_durations_format': today_sport_durations_format,
         'balance_value': balance_value,
         'balance_streak_value': balance_streak_value
     }
@@ -163,7 +164,7 @@ def home(request):
             sport_durations += i.duration
             sport_activities_by_sport_types[sport_type]["duration"] += i.duration
             sport_activities_by_sport_types[sport_type]["count"] += 1
-            
+                
         study_durations_format = format_duration(study_durations)
         sport_durations_format = format_duration(sport_durations)
         
@@ -184,17 +185,18 @@ def home(request):
             
         last_7_days = timezone.now() - timedelta(days=7)
         last_activities = activities.filter(date__gte=last_7_days).count()
-    return render(request, 'home.html', 
-                  {'user': user,
-                   'activities': activities, 
-                   'study_durations_format': study_durations_format, 
-                   'sport_durations_format': sport_durations_format, 
-                   'last_activities': last_activities,
-                   'study_activities_by_subjects_format': study_activities_by_subjects_format,
-                   'sport_activities_by_sport_types_format': sport_activities_by_sport_types_format,
-                   
-                   **get_balance_data(user)
-                   })
+        
+    return render(request, 'home.html', {
+        'user': user,
+        'activities': activities,
+        'study_durations_format': study_durations_format,
+        'sport_durations_format': sport_durations_format,
+        'last_activities': last_activities,
+        'study_activities_by_subjects_format': study_activities_by_subjects_format,
+        'sport_activities_by_sport_types_format': sport_activities_by_sport_types_format,
+        
+        **get_balance_data(user)
+    })
 
 # Creación de actividad de estudio con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
@@ -423,4 +425,262 @@ def cancel_live_sport_activity(request):
     request.session.pop("open_live_sport", None)
 
     return JsonResponse({"success": True})
+
+# Consultar actividades registradas por el usuario mostradas según paginación pudiendo
+# navegar entre las distintas páginas. Además, se pueden filtrar según distintos parámetros,
+# mostrando el número de actividades encontradas
+def activity_history(request):
+    user = models.CustomUser.objects.first()
+
+    study_activities = models.StudyActivity.objects.filter(user=user)
+    
+    sport_activities = models.SportActivity.objects.filter(user=user)
+    
+    subjects = models.Subject.objects.filter(user=user)
+    
+    edit_activity_id = request.session.pop("edit_activity_id", None)
+    edit_activity_errors = request.session.pop("edit_activity_errors", None)
+    scroll_activity_id = request.session.pop("scroll_activity_id", None)
+    
+    # Parámetros de filtros
+
+    activity_type = request.GET.get("type", "all")
+    sort = request.GET.get("sort", "newest")
+
+    subject_id = request.GET.get("subject")
+    study_type = request.GET.get("study_type")
+
+    concentration_min = request.GET.get("concentration_min")
+    concentration_max = request.GET.get("concentration_max")
+
+    sport_type = request.GET.get("sport_type")
+
+    distance_min = request.GET.get("distance_min")
+    distance_max = request.GET.get("distance_max")
+
+    intensity = request.GET.get("intensity")
+
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    
+    # Filtros por tipo de actividad
+    
+    if activity_type == "study":
+        sport_activities = models.SportActivity.objects.none()
+        
+    elif activity_type == "sport":
+        study_activities = models.StudyActivity.objects.none()
+        
+    # Filtros de estudio
+
+    if activity_type == "study":
+        if subject_id:
+            study_activities = study_activities.filter(subject_id=subject_id)
+
+        if study_type:
+            study_activities = study_activities.filter(study_type=study_type)
+
+        if concentration_min:
+            study_activities = study_activities.filter(concentration__gte=concentration_min)
+            
+        if concentration_max:
+            study_activities = study_activities.filter(concentration__lte=concentration_max)
+    
+    # Filtros de deporte
+
+    if activity_type == "sport":
+        if sport_type:
+            sport_activities = sport_activities.filter(sport_type=sport_type)
+            
+        if intensity:
+            sport_activities = sport_activities.filter(intensity=intensity)
+
+        if distance_min:
+            sport_activities = sport_activities.filter(distance__gte=distance_min)
+
+        if distance_max:
+            sport_activities = sport_activities.filter(distance__lte=distance_max)
+            
+    # Filtros de fechas
+
+    if date_from:
+        start_datetime = timezone.make_aware(datetime.combine(datetime.strptime(date_from, "%Y-%m-%d").date(), datetime.min.time()))
+        
+        study_activities = study_activities.filter(date__gte=start_datetime)
+        
+        sport_activities = sport_activities.filter(date__gte=start_datetime)
+
+    if date_to:
+        
+        end_datetime = timezone.make_aware(datetime.combine(datetime.strptime(date_to, "%Y-%m-%d").date() + timedelta(days=1), datetime.min.time()))
+        
+        study_activities = study_activities.filter(date__lt=end_datetime)
+        
+        sport_activities = sport_activities.filter(date__lt=end_datetime)
+        
+    
+    activities = []
+
+    for activity in study_activities:
+        activities.append({
+            "type": "study",
+            "activity": activity,
+            "start_datetime": activity.date,
+            "end_datetime": activity.date + activity.duration,
+            "duration": timedelta(seconds=int(activity.duration.total_seconds())),
+        })
+
+    for activity in sport_activities:
+        activities.append({
+            "type": "sport",
+            "activity": activity,
+            "start_datetime": activity.date,
+            "end_datetime": activity.date + activity.duration,
+            "duration": timedelta(seconds=int(activity.duration.total_seconds())),
+        })
+        
+    # Filtros de ordenación
+    
+    if sort == "oldest":
+        activities.sort(key=lambda activity: activity["start_datetime"])
+    else:
+        activities.sort(key=lambda activity: activity["start_datetime"], reverse=True)
+        
+    # Contador
+    
+    total_activities_count = len(activities)
+    
+    # Paginación
+    
+    paginator = Paginator(activities, 100)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    
+    query_params = request.GET.copy()
+    
+    if "page" in query_params:
+        query_params.pop("page")
+        
+    query = query_params.urlencode()
+    
+    current_page = page_obj.number
+    total_pages = paginator.num_pages
+    
+    page_numbers = []
+    
+    for num in range(1, total_pages + 1):
+        
+        if (num <= 2 or num > total_pages - 2 or abs(num - current_page) <= 1):
+            page_numbers.append(num)
+            
+    display_pages = []
+    
+    for i, num in enumerate(page_numbers):
+        
+        if i > 0 and num > page_numbers[i - 1] + 1:
+            display_pages.append("...")
+            
+        display_pages.append(num)
+
+    return render(request, 'activity_history.html', {
+        'page_obj': page_obj,
+        'display_pages': display_pages,
+        'subjects': subjects,
+        'total_activities_count': total_activities_count,
+        
+        'activity_type': activity_type,
+        'sort': sort,
+        'subject_id': subject_id,
+        'study_type': study_type,
+        'concentration_min': concentration_min,
+        'concentration_max': concentration_max,
+        'sport_type': sport_type,
+        'distance_min': distance_min,
+        'distance_max': distance_max,
+        'intensity': intensity,
+        'date_from': date_from,
+        'date_to': date_to,
+        'query': query,
+        
+        'study_type_choices': models.StudyType.choices,
+        'sport_type_choices': models.SportType.choices,
+        'intensity_choices': models.Intensity.choices,
+        
+        'edit_activity_id': edit_activity_id,
+        'edit_activity_errors': edit_activity_errors,
+        'scroll_activity_id': scroll_activity_id
+    })
+    
+# Editar los datos de una actividad registrada, gestionando los errores si no fuera posible actualizarla
+def edit_activity(request, activity_id):
+    
+    activity = get_object_or_404(
+        models.Activity,
+        id=activity_id,
+        user=models.CustomUser.objects.first()
+    )
+
+    if hasattr(activity, "studyactivity"):
+        activity = activity.studyactivity
+        form_class = StudyActivityForm
+
+    elif hasattr(activity, "sportactivity"):
+        activity = activity.sportactivity
+        form_class = SportActivityForm
+
+    else:
+        return redirect("activity_history")
+
+    if request.method == "POST":
+
+        form = form_class(
+            request.POST,
+            instance=activity
+        )
+
+        if form.is_valid():
+            activity = form.save(commit=False)
+            
+            date = form.cleaned_data["date"]
+            start_time = form.cleaned_data["start_time"]
+            end_time = form.cleaned_data["end_time"]
+            
+            start_datetime = timezone.make_aware(datetime.combine(date.date(), start_time))
+
+            end_datetime = timezone.make_aware(datetime.combine(date.date(), end_time))
+
+            activity.date = start_datetime
+            activity.duration = end_datetime - start_datetime
+
+            activity.save()
+            
+            request.session["scroll_activity_id"] = activity.id
+            
+            messages.success(request, "Actividad actualizada correctamente")
+        else:
+            request.session["edit_activity_errors"] = {
+                "activity_id": activity.id,
+                "errors": form.errors.get_json_data()
+            }
+            
+            request.session["edit_activity_id"] = activity.id
+
+    return redirect(request.POST.get("next", "activity_history"))
+
+# Eliminar actividad registrada
+def delete_activity(request, activity_id):
+    
+    if request.method == "POST":
+
+        activity = get_object_or_404(
+            models.Activity,
+            id=activity_id,
+            user=models.CustomUser.objects.first()
+        )
+
+        activity.delete()
+        
+        messages.success(request, "Actividad eliminada correctamente")
+        
+    return redirect(request.POST.get("next", "activity_history"))
     
