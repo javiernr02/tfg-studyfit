@@ -30,6 +30,14 @@ def format_duration(duration):
         return f'{hours}h'
     else:
         return f'{hours}h {minutes}min'
+
+# Renderización de la página principal o de la página de landing según el usuario esté autenticado o no
+def landing(request):
+    
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    return render(request, 'landing.html')
     
 # Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
 def balance_logic(study_total_minutes, sport_total_minutes):

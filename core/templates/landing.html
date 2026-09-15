@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+
+<body class="landing-page">
+    
+    <section class="hero">
+
+        <div class="content">
+
+            <div class="logo">
+                <img src="{% static 'images/StudyFitTransparenteTexto.png' %}" alt="Logo">
+            </div>
+            
+            <h1>
+                Estudia mejor.
+                Entrena mejor.
+                <span>Equilibra ambos.</span>
+            </h1>
+
+            <div class="description">
+                <p>
+                    Registra tus actividades de estudio y deporte,
+                    analiza tu progreso y encuentra el equilibrio
+                    entre mente y cuerpo
+                </p>
+            </div>
+
+            <div class="buttons">
+                <a href="{% url 'home' %}" class="rounded-button">
+                    Crear mi cuenta
+                </a>
+
+                <a href="{% url 'home' %}" class="rounded-button">
+                    Iniciar sesión
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="features">
+
+        <div class="section-header">
+            <span class="section-label">STUDYFIT</span>
+            
+            <h2>Todo lo que necesitas en un solo lugar</h2>
+        </div>
+        
+        <div class="features-grid">
+            
+            <div class="feature-card study">
+                <div class="feature-title">
+                    <i class="fa-solid fa-book"></i>
+                    <h3>Estudio</h3>
+                </div>
+                
+                <p>Registra tus sesiones de estudio, asignaturas y concentración</p>
+            </div>
+
+            <div class="feature-card sport">
+                <div class="feature-title">
+                    <i class="fa-solid fa-person-running"></i>
+                    <h3>Deporte</h3>
+                </div>
+                
+                <p>Registra tus entrenamientos, distancia e intensidad</p>
+            </div>
+
+            <div class="feature-card statistics">
+                <div class="feature-title">
+                    <i class="fa-solid fa-arrow-up-right-dots"></i>
+                    <h3>Estadísticas</h3>
+                </div>
+                
+                <p>Analiza tu evolución y tus hábitos de estudio y deporte</p>
+            </div>
+
+            <div class="feature-card gamification">
+                <div class="feature-title">
+                    <i class="fa-solid fa-trophy"></i>
+                    <h3>Gamificación</h3>
+                </div>
+
+                <p>Consigue experiencia desbloqueando trofeos y sube de nivel</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="balance">
+
+        <div class="balance-container">
+        
+            <div class="balance-text">
+
+                <span class="section-label">EQUILIBRIO MENTE-CUERPO</span>
+                
+                <h2>Encuentra tu equilibrio</h2>
+                
+                <p>
+                    StudyFit combina el seguimiento académico
+                    y deportivo para ayudarte a conocer tus
+                    hábitos y mantener un equilibrio saludable
+                </p>
+                
+                <a href="{% url 'home' %}" class="rounded-button">
+                    Empezar ahora
+                </a>
+
+            </div>
+            
+            <div class="balance-visual">
+                <div class="balance-circle">
+                    <span>⚖️</span>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</body>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
