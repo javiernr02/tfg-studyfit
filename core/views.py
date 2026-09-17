@@ -2,7 +2,7 @@ import core.models as models
 from django.utils import timezone
 from datetime import timedelta
 from collections import defaultdict
-from .forms import StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
+from .forms import RegisterForm, StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
 from django.contrib import messages
@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
 from django.core.paginator import Paginator
+from django.contrib.auth import login
 
 
 # Create your views here.
@@ -32,12 +33,49 @@ def format_duration(duration):
         return f'{hours}h {minutes}min'
 
 # Renderización de la página principal o de la página de landing según el usuario esté autenticado o no
+# con los datos guardados en sesión del formulario de registro
 def landing(request):
     
     if request.user.is_authenticated:
         return redirect('home')
+    
+    register_form_data = request.session.pop("register_form_data", None)
+    open_register_modal = request.session.pop("open_register_modal", False)
+    
+    if register_form_data:
+        register_form = RegisterForm(register_form_data)
+    else:
+        register_form = RegisterForm()
 
-    return render(request, 'landing.html')
+    return render(request, 'landing.html', {
+        "register_form": register_form,
+        "open_register_modal": open_register_modal
+    })
+
+# Funcionalidad para el registro de usuarios que en caso de éxito redirige a página de home
+# y en caso de error redirige a la página actual de landing, volviendo a abrir el modal y mostrando los errores
+def register(request):
+    
+    if request.method == "POST":
+
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            return redirect("home")
+        
+        register_form_data = request.POST.copy()
+        register_form_data.pop("password1", None)
+        register_form_data.pop("password2", None)
+
+        request.session["register_form_data"] = register_form_data.dict()
+        request.session["open_register_modal"] = True
+
+        return redirect(request.POST.get("next", "landing"))
+
+    return redirect("landing")
     
 # Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
 def balance_logic(study_total_minutes, sport_total_minutes):

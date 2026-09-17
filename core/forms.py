@@ -2,6 +2,84 @@ from django import forms
 import core.models as models
 from django.utils import timezone
 import unicodedata
+from django.contrib.auth.forms import UserCreationForm
+
+class RegisterForm(UserCreationForm):
+    
+    password1 = forms.CharField(
+        label="Contraseña *",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Contraseña"
+            }
+        ),
+        error_messages={
+            "required": "La contraseña es obligatoria"
+        }
+    )
+    
+    password2 = forms.CharField(
+        label="Confirmar contraseña *",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Confirmar contraseña"
+            }
+        ),
+        error_messages={
+            "required": "La confirmación de la contraseña es obligatoria"
+        }
+    )
+    
+    class Meta:
+        model = models.CustomUser
+        fields = ["first_name", "last_name", "username", "email", "birth_date", "gender", "password1", "password2"]
+        labels = {
+            "first_name": "Nombre",
+            "last_name": "Apellidos",
+            "username": "Nombre de usuario *",
+            "email": "Email *",
+            "birth_date": "Fecha de nacimiento *",
+            "gender": "Género *"
+        }
+        error_messages = {
+            "username": {
+                "required": "El nombre de usuario es obligatorio"
+            },
+            "email": {
+                "required": "El email es obligatorio"
+            },
+            "birth_date": {
+                "required": "La fecha de nacimiento es obligatoria"
+            },
+            "gender": {
+                "required": "El género es obligatorio"
+            },
+        }
+        widgets = {
+            "first_name": forms.TextInput(attrs={
+                "placeholder": "Nombre"
+            }),
+            "last_name": forms.TextInput(attrs={
+                "placeholder": "Apellidos"
+            }),
+            "username": forms.TextInput(attrs={
+                "placeholder": "Nombredeusuario"
+            }),
+            "email": forms.EmailInput(attrs={
+                "placeholder": "ejemplo@email.com"
+            }),
+            "birth_date": forms.DateInput(attrs={
+                "type": "date"
+            }),
+        }
+        
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        
+        if models.CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese email")
+        
+        return email
 
 class StudyActivityForm(forms.ModelForm):
     start_time = forms.TimeField(

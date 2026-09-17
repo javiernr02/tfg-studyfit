@@ -33,11 +33,11 @@
             </div>
 
             <div class="buttons">
-                <a href="{% url 'home' %}" class="rounded-button">
+                <a href="#" id="register-button" class="rounded-button">
                     Crear mi cuenta
                 </a>
 
-                <a href="{% url 'home' %}" class="rounded-button">
+                <a href="#" class="rounded-button">
                     Iniciar sesión
                 </a>
             </div>
@@ -112,7 +112,7 @@
                     hábitos y mantener un equilibrio saludable
                 </p>
                 
-                <a href="{% url 'home' %}" class="rounded-button">
+                <a href="#" id="register-button" class="rounded-button">
                     Empezar ahora
                 </a>
 
@@ -126,6 +126,50 @@
         </div>
 
     </section>
+
+    {% include "modals/users-management/register_modal.html" %}
+
+    <script>
+        
+        const registerButton = document.getElementById("register-button");
+        const registerModal = document.getElementById("register-modal");
+        const registerClose = document.getElementById("register-close");
+        const registerForm = registerModal.querySelector("form");
+        const registerSubmit = document.getElementById("register-submit");
+
+        function openModal(modal) {
+            modal.classList.add("show");
+        }
+        
+        function closeModal(modal) {
+            modal.classList.remove("show");
+        }
+
+        registerButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            openModal(registerModal);
+        });
+
+        registerClose.addEventListener("click", () => {
+            closeModal(registerModal);
+        });
+
+        registerModal.addEventListener("click", (e) => {
+            if (e.target === registerModal) {
+                closeModal(registerModal);
+            }
+        });
+
+        registerForm.addEventListener("submit", () => {
+            registerSubmit.disabled = true;
+        });
+        
+        {% if open_register_modal %}
+            openModal(registerModal);
+        {% endif %}
+        
+    </script>
+
 </body>
 {% endblock %}
 

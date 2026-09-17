@@ -1,0 +1,97 @@
+<div class="modal-overlay" id="register-modal">
+
+    <div class="modal register">
+
+        <div class="modal-header">
+            <i id="icon-title" class="fa-solid fa-user-plus"></i>
+            <h2>Registro</h2>
+
+            <p>Rellena el formulario para registrarte</p>
+
+            <button type="button" class="close-button" id="register-close" title="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+
+        <div id="register-content">
+            
+            {% if register_form.errors %}
+                <div class="errors">
+                    {% for error in register_form.non_field_errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% for field in register_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'register' %}" novalidate>
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                <p>
+                    {{ register_form.first_name.label_tag }}
+                    {{ register_form.first_name }}
+                </p>
+
+                <p>
+                    {{ register_form.last_name.label_tag }}
+                    {{ register_form.last_name }}
+                </p>
+
+                <p>
+                    {{ register_form.username.label_tag }}
+                    {{ register_form.username }}
+                </p>
+
+                <p>
+                    {{ register_form.email.label_tag }}
+                    {{ register_form.email }}
+                </p>
+
+                <p>
+                    {{ register_form.birth_date.label_tag }}
+                    {{ register_form.birth_date }}
+                </p>
+
+                <p>
+                    {{ register_form.gender.label_tag }}
+                    {{ register_form.gender }}
+                </p>
+
+                <p>
+                    {{ register_form.password1.label_tag }}
+                    {{ register_form.password1 }}
+                </p>
+
+                <p>
+                    {{ register_form.password2.label_tag }}
+                    {{ register_form.password2 }}
+                </p>
+
+                <div class="final-buttons">
+                    <button type="submit" class="rounded-button" id="register-submit">
+                        Registrarse
+                    </button>
+                </div>
+
+            </form>
+            
+        </div>
+
+    </div>
+
+</div>
