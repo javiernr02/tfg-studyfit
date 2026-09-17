@@ -37,7 +37,7 @@
                     Crear mi cuenta
                 </a>
 
-                <a href="#" class="rounded-button">
+                <a href="#" id="login-button" class="rounded-button">
                     Iniciar sesión
                 </a>
             </div>
@@ -128,14 +128,9 @@
     </section>
 
     {% include "modals/users-management/register_modal.html" %}
+    {% include "modals/users-management/login_modal.html" %}
 
     <script>
-        
-        const registerButton = document.getElementById("register-button");
-        const registerModal = document.getElementById("register-modal");
-        const registerClose = document.getElementById("register-close");
-        const registerForm = registerModal.querySelector("form");
-        const registerSubmit = document.getElementById("register-submit");
 
         function openModal(modal) {
             modal.classList.add("show");
@@ -144,7 +139,15 @@
         function closeModal(modal) {
             modal.classList.remove("show");
         }
-
+        
+        // Registro
+        
+        const registerButton = document.getElementById("register-button");
+        const registerModal = document.getElementById("register-modal");
+        const registerClose = document.getElementById("register-close");
+        const registerForm = registerModal.querySelector("form");
+        const registerSubmit = document.getElementById("register-submit");
+        
         registerButton.addEventListener("click", (e) => {
             e.preventDefault();
             openModal(registerModal);
@@ -164,8 +167,41 @@
             registerSubmit.disabled = true;
         });
         
+        // Inicio de sesión
+
+        const loginButton = document.getElementById("login-button");
+        const loginModal = document.getElementById("login-modal");
+        const loginClose = document.getElementById("login-close");
+        const loginForm = loginModal.querySelector("form");
+        const loginSubmit = document.getElementById("login-submit");
+
+        loginButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            openModal(loginModal);
+        });
+
+        loginClose.addEventListener("click", () => {
+            closeModal(loginModal);
+        });
+
+        loginModal.addEventListener("click", (e) => {
+            if (e.target === loginModal) {
+                closeModal(loginModal);
+            }
+        });
+
+        loginForm.addEventListener("submit", () => {
+            loginSubmit.disabled = true;
+        });
+
+        // Reabrir modal en caso de errores
+
         {% if open_register_modal %}
             openModal(registerModal);
+        {% endif %}
+        
+        {% if open_login_modal %}
+            openModal(loginModal);
         {% endif %}
         
     </script>

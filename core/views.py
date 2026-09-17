@@ -10,7 +10,8 @@ from django.http import JsonResponse
 from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
 from django.core.paginator import Paginator
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import AuthenticationForm
 
 
 # Create your views here.
@@ -32,13 +33,15 @@ def format_duration(duration):
     else:
         return f'{hours}h {minutes}min'
 
-# Renderización de la página principal o de la página de landing según el usuario esté autenticado o no
-# con los datos guardados en sesión del formulario de registro
+# Renderización de la página principal o de la página de landing según el usuario esté autenticado o no.
+# En caso de no estar autenticado y fallar la petición se vuelve a renderizar la página de landing con 
+# los datos guardados en sesión del formulario de registro o del de inicio de sesión según sea el caso
 def landing(request):
     
     if request.user.is_authenticated:
         return redirect('home')
     
+    # Registro
     register_form_data = request.session.pop("register_form_data", None)
     open_register_modal = request.session.pop("open_register_modal", False)
     
@@ -46,10 +49,21 @@ def landing(request):
         register_form = RegisterForm(register_form_data)
     else:
         register_form = RegisterForm()
-
+        
+    # Inicio de sesión
+    login_form_data = request.session.pop("login_form_data", None)
+    open_login_modal = request.session.pop("open_login_modal", False)
+    
+    if login_form_data:
+        login_form = AuthenticationForm(request, data=login_form_data)
+    else:
+        login_form = AuthenticationForm(request)
+    
     return render(request, 'landing.html', {
         "register_form": register_form,
-        "open_register_modal": open_register_modal
+        "open_register_modal": open_register_modal,
+        "login_form": login_form,
+        "open_login_modal": open_login_modal
     })
 
 # Funcionalidad para el registro de usuarios que en caso de éxito redirige a página de home
@@ -73,6 +87,31 @@ def register(request):
         request.session["register_form_data"] = register_form_data.dict()
         request.session["open_register_modal"] = True
 
+        return redirect(request.POST.get("next", "landing"))
+
+    return redirect("landing")
+
+# Funcionalidad para el inicio de sesión de usuarios que en caso de éxito redirige a página de home
+# y en caso de error redirige a la página actual de landing, volviendo a abrir el modal y mostrando los errores
+def user_login(request):
+
+    if request.method == "POST":
+        
+        form = AuthenticationForm(request, data=request.POST)
+        
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            return redirect("home")
+        
+        login_form_data = request.POST.copy()
+        login_form_data.pop("password", None)
+        login_form_data.pop("next", None)
+        
+        request.session["login_form_data"] = login_form_data.dict()
+        request.session["open_login_modal"] = True
+        
         return redirect(request.POST.get("next", "landing"))
 
     return redirect("landing")
