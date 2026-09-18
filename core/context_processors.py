@@ -1,11 +1,11 @@
 from .forms import StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
 
 def activity_forms(request):
-    study_form = StudyActivityForm()
+    study_form = StudyActivityForm(user=request.user)
     sport_form = SportActivityForm()
-    live_study_form = LiveStudyActivityForm()
+    live_study_form = LiveStudyActivityForm(user=request.user)
     live_sport_form = LiveSportActivityForm()
-    subject_form = SubjectForm()
+    subject_form = SubjectForm(user=request.user)
     
     live_study_start_datetime = None
     live_study_end_datetime = None
@@ -31,10 +31,10 @@ def activity_forms(request):
     live_sport_finished = request.session.pop("live_sport_finished", False)
 
     if study_form_data:
-        study_form = StudyActivityForm(study_form_data)
+        study_form = StudyActivityForm(study_form_data, user=request.user)
         
     if live_study_form_data:
-        live_study_form = LiveStudyActivityForm(live_study_form_data)
+        live_study_form = LiveStudyActivityForm(live_study_form_data, user=request.user)
         
         live_study_start_datetime = live_study_form_data.get("start_datetime")
         live_study_end_datetime = live_study_form_data.get("end_datetime")

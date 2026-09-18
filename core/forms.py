@@ -116,12 +116,11 @@ class StudyActivityForm(forms.ModelForm):
         )
     )
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         
-        user = models.CustomUser.objects.first()
-        
-        self.fields["subject"].queryset = models.Subject.objects.filter(user=user)
+        self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
 
     class Meta:
         model = models.StudyActivity
@@ -202,12 +201,11 @@ class LiveStudyActivityForm(forms.ModelForm):
         )
     )
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         
-        user = models.CustomUser.objects.first()
-        
-        self.fields["subject"].queryset = models.Subject.objects.filter(user=user)
+        self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
     
     class Meta:
         model = models.StudyActivity
@@ -231,6 +229,10 @@ class LiveStudyActivityForm(forms.ModelForm):
         }
         
 class SubjectForm(forms.ModelForm):
+    
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
 
     class Meta:
         model = models.Subject
@@ -251,7 +253,7 @@ class SubjectForm(forms.ModelForm):
         
     def clean_name(self):
         name = self.cleaned_data["name"]
-        user = models.CustomUser.objects.first()
+        user = self.user
 
         normalized_name = ''.join(
             c for c in unicodedata.normalize('NFD', name)

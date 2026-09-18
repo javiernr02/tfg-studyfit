@@ -10,8 +10,9 @@ from django.http import JsonResponse
 from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
 from django.core.paginator import Paginator
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -223,8 +224,9 @@ def get_balance_data(user):
 # Renderización de la página principal de la aplicación con información sobre horas de deporte y estudio hoy y totales, cumplimiento
 # del equilibrio entre estudio y deporte, número de actividades en los últimos 7 días, y desglose de actividad según su tipo con 
 # información sobre sus horas totales y número de actividades
+@login_required
 def home(request):
-    user = models.CustomUser.objects.first()
+    user = request.user
     
     activities = user.activities.all()
     
@@ -285,13 +287,14 @@ def home(request):
 
 # Creación de actividad de estudio con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_study_activity(request):
     if request.method == "POST":
-        form = StudyActivityForm(request.POST)
+        form = StudyActivityForm(request.POST, user=request.user)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
             
             date = form.cleaned_data["date"]
             start_time = form.cleaned_data["start_time"]
@@ -320,13 +323,14 @@ def create_study_activity(request):
     return redirect("home")
 
 # Creación de asignatura asociada al usuario que la crea o gestión de error en caso de fallar
+@login_required
 def create_subject(request):
     if request.method == "POST":
-        form = SubjectForm(request.POST)
+        form = SubjectForm(request.POST, user=request.user)
 
         if form.is_valid():
             subject = form.save(commit=False)
-            subject.user = models.CustomUser.objects.first()
+            subject.user = request.user
             
             subject.save()
 
@@ -348,12 +352,13 @@ def create_subject(request):
 
 # Eliminación de la asignatura seleccionada asociada al usuario que la elimina o gestión
 # de error en caso de fallar, por ejemplo, porque la asignatura tenga actividades de estudio asociadas
+@login_required
 def delete_subject(request, subject_id):
     if request.method == "POST":
         subject = get_object_or_404(
             models.Subject,
             id=subject_id,
-            user=models.CustomUser.objects.first()
+            user=request.user
         )
         
         try:
@@ -375,13 +380,14 @@ def delete_subject(request, subject_id):
     
 # Creación de actividad de estudio en directo y cálculo de su duración, con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_live_study_activity(request):
     if request.method == "POST":
-        form = LiveStudyActivityForm(request.POST)
+        form = LiveStudyActivityForm(request.POST, user=request.user)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
 
             start_datetime = parse_datetime(request.POST.get("start_datetime"))
 
@@ -410,6 +416,7 @@ def create_live_study_activity(request):
     return redirect("home")
 
 # Eliminar datos rellenados en la actividad de estudio finalizada
+@login_required
 def cancel_study_activity(request):
     request.session.pop("study_form_data", None)
     request.session.pop("open_study_modal", None)
@@ -417,6 +424,7 @@ def cancel_study_activity(request):
     return JsonResponse({"success": True})
 
 # Eliminar datos rellenados y variables del cronómetro en la actividad de estudio en directo
+@login_required
 def cancel_live_study_activity(request):
     request.session.pop("live_study_form_data", None)
     request.session.pop("open_study_modal", None)
@@ -426,13 +434,14 @@ def cancel_live_study_activity(request):
 
 # Creación de actividad deportiva con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_sport_activity(request):
     if request.method == "POST":
         form = SportActivityForm(request.POST)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
             
             date = form.cleaned_data["date"]
             start_time = form.cleaned_data["start_time"]
@@ -462,13 +471,14 @@ def create_sport_activity(request):
 
 # Creación de actividad de deporte en directo y cálculo de su duración, con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_live_sport_activity(request):
     if request.method == "POST":
         form = LiveSportActivityForm(request.POST)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
 
             start_datetime = parse_datetime(request.POST.get("start_datetime"))
 
@@ -497,6 +507,7 @@ def create_live_sport_activity(request):
     return redirect("home")
 
 # Eliminar datos rellenados en la actividad de deporte finalizada
+@login_required
 def cancel_sport_activity(request):
     request.session.pop("sport_form_data", None)
     request.session.pop("open_sport_modal", None)
@@ -504,6 +515,7 @@ def cancel_sport_activity(request):
     return JsonResponse({"success": True})
 
 # Eliminar datos rellenados y variables del cronómetro en la actividad de deporte en directo
+@login_required
 def cancel_live_sport_activity(request):
     request.session.pop("live_sport_form_data", None)
     request.session.pop("open_sport_modal", None)
@@ -514,8 +526,9 @@ def cancel_live_sport_activity(request):
 # Consultar actividades registradas por el usuario mostradas según paginación pudiendo
 # navegar entre las distintas páginas. Además, se pueden filtrar según distintos parámetros,
 # mostrando el número de actividades encontradas
+@login_required
 def activity_history(request):
-    user = models.CustomUser.objects.first()
+    user = request.user
 
     study_activities = models.StudyActivity.objects.filter(user=user)
     
@@ -697,21 +710,24 @@ def activity_history(request):
     })
     
 # Editar los datos de una actividad registrada, gestionando los errores si no fuera posible actualizarla
+@login_required
 def edit_activity(request, activity_id):
     
     activity = get_object_or_404(
         models.Activity,
         id=activity_id,
-        user=models.CustomUser.objects.first()
+        user=request.user
     )
-
+    
     if hasattr(activity, "studyactivity"):
         activity = activity.studyactivity
         form_class = StudyActivityForm
-
+        form_kwargs = {"user": request.user}
+        
     elif hasattr(activity, "sportactivity"):
         activity = activity.sportactivity
         form_class = SportActivityForm
+        form_kwargs = {}
 
     else:
         return redirect("activity_history")
@@ -720,7 +736,8 @@ def edit_activity(request, activity_id):
 
         form = form_class(
             request.POST,
-            instance=activity
+            instance=activity,
+            **form_kwargs
         )
 
         if form.is_valid():
@@ -753,6 +770,7 @@ def edit_activity(request, activity_id):
     return redirect(request.POST.get("next", "activity_history"))
 
 # Eliminar actividad registrada
+@login_required
 def delete_activity(request, activity_id):
     
     if request.method == "POST":
@@ -760,7 +778,7 @@ def delete_activity(request, activity_id):
         activity = get_object_or_404(
             models.Activity,
             id=activity_id,
-            user=models.CustomUser.objects.first()
+            user=request.user
         )
 
         activity.delete()
