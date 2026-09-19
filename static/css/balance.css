@@ -173,13 +173,11 @@ hr {
 .trophy-obtained-today {
     display: flex;
     align-items: center;
-    gap: 5px;
 }
 
 .trophy-not-obtained-today {
     display: flex;
     align-items: center;
-    gap: 5px;
 }
 
 .trophy-obtained-today i {
@@ -188,6 +186,22 @@ hr {
 
 .trophy-not-obtained-today i {
     color: red;
+}
+
+.repeatable-not-found {
+    margin-top: 16px;
+}
+
+.repeatable-not-found .info {
+    color: #24B88D;
+}
+
+.non-repeatable-not-found {
+    margin-bottom: 16px;
+}
+
+.non-repeatable-not-found .info {
+    color: #24B88D;
 }
 
 span {
@@ -634,6 +648,12 @@ span {
 
 .concentration-prediction .info p {
     color: #5f5e5e;
+}
+
+.not-found {
+    color: black !important;
+    text-align: center;
+    width: 100%;
 }
 
 .concentration-prediction .info span {

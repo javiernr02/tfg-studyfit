@@ -13,25 +13,28 @@
                 <i class="fa-solid fa-arrows-spin"></i>
                 Logros Acumulables (Hoy) <span>- {{ repeatable_trophies_count }} trofeos en total</span>
             </div>
-            {% if repeatable_student_trophy_obtained_today %}
-                <div class="trophy-obtained-today">
-                    <i class="fa-regular fa-circle-check"></i>
-                    <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
+            {% if not repeatable_student_trophy_obtained_today and not repeatable_sportsman_trophy_obtained_today %}
+                <div class="repeatable-not-found">
+                    <span class="info">Aún no has ganado ningún trofeo acumulable hoy</span>
                 </div>
-            {% else %}
+                
                 <div class="trophy-not-obtained-today">
                     <i class="fa-regular fa-circle-xmark"></i>
                     <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
                 </div>
-            {% endif %}
-            {% if repeatable_sportsman_trophy_obtained_today %}
-                <div class="trophy-obtained-today">
-                    <i class="fa-regular fa-circle-check"></i>
+                
+                <div class="trophy-not-obtained-today">
+                    <i class="fa-regular fa-circle-xmark"></i>
                     <p>{{ repeatable_sportsman_trophy.title }}: <span>{{ repeatable_sportsman_trophy.description }}</span></p>
                 </div>
             {% else %}
-                <div class="trophy-not-obtained-today">
-                    <i class="fa-regular fa-circle-xmark"></i>
+                <div class="trophy-obtained-today">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <p>{{ repeatable_student_trophy.title }}: <span>{{ repeatable_student_trophy.description }}</span></p>
+                </div>
+
+                <div class="trophy-obtained-today">
+                    <i class="fa-regular fa-circle-check"></i>
                     <p>{{ repeatable_sportsman_trophy.title }}: <span>{{ repeatable_sportsman_trophy.description }}</span></p>
                 </div>
             {% endif %}
@@ -53,7 +56,9 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <p>Aún no has ganado ningún trofeo exclusivo</p>
+                <div class="non-repeatable-not-found">
+                    <span class="info">Aún no has ganado ningún trofeo exclusivo</span>
+                </div>
             {% endif %}
             <div class="non-obtained-non-repeatable-trophies-title">
                 <i class="fa-solid fa-lock"></i>
@@ -71,7 +76,7 @@
 
         <div class="streak">
             <i class="fa-solid fa-fire"></i>
-            Racha (logros acumulables consecutivos cada día): <span>{{ streak_value }}</span>
+            Racha (logros acumulables consecutivos cada día): <span>{{ streak }}</span>
         </div>
 
         <div class="level">

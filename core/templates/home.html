@@ -52,7 +52,11 @@
             Horas de Estudio
         </div>
         <div class="card-value">
-            {{ study_durations_format }}
+            {% if study_activities %}
+                {{ study_durations_format }}
+            {% else %}
+                0h
+            {% endif %}
         </div>
     </div>
     <div class="card">
@@ -61,7 +65,11 @@
             Horas de Deporte
         </div>
         <div class="card-value">
-            {{ sport_durations_format }}
+            {% if sport_activities %}
+                {{ sport_durations_format }}
+            {% else %}
+                0h
+            {% endif %}
         </div>
     </div>
     <div class="card">
@@ -86,18 +94,22 @@
                 </div>
                 
                 <div class="card-value">
-                    <div class="row-title">
-                        <span>Asignatura</span>
-                        <span>Horas</span>
-                        <span>Actividades</span>
-                    </div>
-                    {% for subject, i in study_activities_by_subjects_format.items %}
-                        <div class="row">
-                            <span>{{ subject.name }}</span>
-                            <span>{{ i.duration }}</span>
-                            <span>{{ i.count }}</span>
+                    {% if study_activities %}
+                        <div class="row-title">
+                            <span>Asignatura</span>
+                            <span>Horas</span>
+                            <span>Actividades</span>
                         </div>
-                    {% endfor %}
+                        {% for subject, i in study_activities_by_subjects_format.items %}
+                            <div class="row">
+                                <span>{{ subject.name }}</span>
+                                <span>{{ i.duration }}</span>
+                                <span>{{ i.count }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No se ha registrado ninguna actividad de estudio</p>
+                    {% endif %}
                 </div>
             </div>
             <div class="card-column">
@@ -107,18 +119,22 @@
                 </div>
 
                 <div class="card-value">
-                    <div class="row-title">
-                        <span>Tipo de Deporte</span>
-                        <span>Horas</span>
-                        <span>Actividades</span>
-                    </div>
-                    {% for sport_type, i in sport_activities_by_sport_types_format.items %}
-                        <div class="row">
-                            <span>{{ sport_type }}</span>
-                            <span>{{ i.duration }}</span>
-                            <span>{{ i.count }}</span>
+                    {% if sport_activities %}
+                        <div class="row-title">
+                            <span>Tipo de Deporte</span>
+                            <span>Horas</span>
+                            <span>Actividades</span>
                         </div>
-                    {% endfor %}
+                        {% for sport_type, i in sport_activities_by_sport_types_format.items %}
+                            <div class="row">
+                                <span>{{ sport_type }}</span>
+                                <span>{{ i.duration }}</span>
+                                <span>{{ i.count }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No se ha registrado ninguna actividad deportiva</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

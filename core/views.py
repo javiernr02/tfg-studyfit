@@ -230,52 +230,63 @@ def home(request):
     
     activities = user.activities.all()
     
+    study_durations_format = None
+    sport_durations_format = None
+    last_activities = 0
+    
+    study_activities_by_subjects_format = {}
+    sport_activities_by_sport_types_format = {}
+    
+    study_activities = models.StudyActivity.objects.filter(user=user)
+    sport_activities = models.SportActivity.objects.filter(user=user)
+    
     study_durations = timedelta()
     sport_durations = timedelta()
-    
-    if activities:
-        study_activities = models.StudyActivity.objects.filter(user=user)
-        study_activities_by_subjects = defaultdict(lambda: {"duration": timedelta(), "count": 0})
-        
-        sport_activities = models.SportActivity.objects.filter(user=user)
-        sport_activities_by_sport_types = defaultdict(lambda: {"duration": timedelta(), "count": 0})
-        
-        for i in study_activities:
-            subject = i.subject
-            study_durations += i.duration
-            study_activities_by_subjects[subject]["duration"] += i.duration
-            study_activities_by_subjects[subject]["count"] += 1
             
-        for i in sport_activities:
-            sport_type = i.get_sport_type_display()
-            sport_durations += i.duration
-            sport_activities_by_sport_types[sport_type]["duration"] += i.duration
-            sport_activities_by_sport_types[sport_type]["count"] += 1
-                
+    for i in study_activities:
+        subject = i.subject
+        study_durations += i.duration
+        study_activities_by_subjects_format.setdefault(subject, 
+            {
+                "duration": timedelta(),
+                "count": 0
+            }
+        )
+        study_activities_by_subjects_format[subject]["duration"] += i.duration
+        study_activities_by_subjects_format[subject]["count"] += 1
+        
+    for i in sport_activities:
+        sport_type = i.get_sport_type_display()
+        sport_durations += i.duration
+        sport_activities_by_sport_types_format.setdefault(sport_type,
+            {
+                "duration": timedelta(),
+                "count": 0   
+            }
+        )
+        sport_activities_by_sport_types_format[sport_type]["duration"] += i.duration
+        sport_activities_by_sport_types_format[sport_type]["count"] += 1
+        
+    if study_activities.exists():
         study_durations_format = format_duration(study_durations)
+        
+    if sport_activities.exists():
         sport_durations_format = format_duration(sport_durations)
         
-        study_activities_by_subjects_format = {}
-        sport_activities_by_sport_types_format = {}
+    for subject, i in study_activities_by_subjects_format.items():
+        i["duration"] = format_duration(i["duration"])
         
-        for subject, i in study_activities_by_subjects.items():
-            study_activities_by_subjects_format[subject] = {
-                "duration": format_duration(i["duration"]),
-                "count": i["count"]
-            }
-            
-        for sport_type, i in sport_activities_by_sport_types.items():
-            sport_activities_by_sport_types_format[sport_type] = {
-                "duration": format_duration(i["duration"]),
-                "count": i["count"]
-            }
-            
-        last_7_days = timezone.now() - timedelta(days=7)
-        last_activities = activities.filter(date__gte=last_7_days).count()
+    for sport_type, i in sport_activities_by_sport_types_format.items():
+        i["duration"] = format_duration(i["duration"])
+        
+    last_7_days = timezone.now() - timedelta(days=7)
+    last_activities = activities.filter(date__gte=last_7_days).count()
         
     return render(request, 'home.html', {
         'user': user,
         'activities': activities,
+        'study_activities': study_activities,
+        'sport_activities': sport_activities,
         'study_durations_format': study_durations_format,
         'sport_durations_format': sport_durations_format,
         'last_activities': last_activities,
