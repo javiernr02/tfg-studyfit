@@ -33,7 +33,7 @@
             </div>
 
             <div class="buttons">
-                <a href="#" id="register-button" class="rounded-button">
+                <a href="#" class="register-button rounded-button">
                     Crear mi cuenta
                 </a>
 
@@ -112,9 +112,11 @@
                     hábitos y mantener un equilibrio saludable
                 </p>
                 
-                <a href="#" id="register-button" class="rounded-button">
-                    Empezar ahora
-                </a>
+                <div class="final-button">
+                    <a href="#" class="register-button rounded-button">
+                        Empezar ahora
+                    </a>
+                </div>
 
             </div>
             
@@ -142,15 +144,17 @@
         
         // Registro
         
-        const registerButton = document.getElementById("register-button");
+        const registerButtons = document.querySelectorAll(".register-button");
         const registerModal = document.getElementById("register-modal");
         const registerClose = document.getElementById("register-close");
         const registerForm = registerModal.querySelector("form");
         const registerSubmit = document.getElementById("register-submit");
         
-        registerButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            openModal(registerModal);
+        registerButtons.forEach(button => {
+            button.addEventListener("click", (e) => {
+                e.preventDefault();
+                openModal(registerModal);
+            });
         });
 
         registerClose.addEventListener("click", () => {
