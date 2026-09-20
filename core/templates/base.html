@@ -54,10 +54,21 @@
                             Progreso
                         </a>
                     </div>
-                    <a href="{% url 'home' %}" class="button">
-                        <i class="fa-solid fa-user"></i>
-                        <span>{{ user.username }}</span>
-                    </a>
+                    <div class="dropdown user-dropdown">
+                        <a href="#" class="rounded-button user-button" id="user-button">
+                            <i class="fa-solid fa-user"></i>
+                            <span>{{ user.username }}</span>
+                            <i id="chevron-down-user" class="fa-solid fa-chevron-down"></i>
+                        </a>
+
+                        <form method="post" action="{% url 'logout' %}" class="dropdown-menu user-menu">
+                            {% csrf_token %}
+                            <button type="submit" id="logout-button">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                Cerrar sesión
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </nav>
         </header>
@@ -178,6 +189,9 @@
 
         const sportForm = sportModal.querySelector("form");
         const sportSubmit = document.getElementById("sport-submit");
+        
+        const userButton = document.getElementById("user-button");
+        const userMenu = document.querySelector(".user-menu");
 
         function openModal(modal) {
             modal.classList.add("show");
@@ -200,11 +214,7 @@
         dropdownMenu.addEventListener("click", (e) => {
             e.stopPropagation();
         });
-
-        document.addEventListener("click", () => {
-            closeDropdown();
-        });
-
+        
         studyButton.addEventListener("click", (e) => {
             e.preventDefault();
             closeDropdown();
@@ -245,6 +255,25 @@
         sportForm.addEventListener("submit", () => {
             sportSubmit.disabled = true;
             sportSubmit.textContent = "Guardando...";
+        });
+        
+        function closeUserDropdown() {
+            userMenu.classList.remove("show");
+        }
+        
+        userButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            userMenu.classList.toggle("show");
+        });
+
+        userMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener("click", () => {
+            closeDropdown();
+            closeUserDropdown();
         });
 
         // Creación de asignatura
