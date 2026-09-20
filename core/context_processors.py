@@ -1,11 +1,19 @@
 from .forms import StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
 
 def activity_forms(request):
-    study_form = StudyActivityForm(user=request.user)
+    
+    if request.user.is_authenticated:
+        study_form = StudyActivityForm(user=request.user)
+        live_study_form = LiveStudyActivityForm(user=request.user)
+        subject_form = SubjectForm(user=request.user)
+        
+    else:
+        study_form = StudyActivityForm()
+        live_study_form = LiveStudyActivityForm()
+        subject_form = SubjectForm()
+        
     sport_form = SportActivityForm()
-    live_study_form = LiveStudyActivityForm(user=request.user)
     live_sport_form = LiveSportActivityForm()
-    subject_form = SubjectForm(user=request.user)
     
     live_study_start_datetime = None
     live_study_end_datetime = None
@@ -31,10 +39,16 @@ def activity_forms(request):
     live_sport_finished = request.session.pop("live_sport_finished", False)
 
     if study_form_data:
-        study_form = StudyActivityForm(study_form_data, user=request.user)
+        if request.user.is_authenticated:
+            study_form = StudyActivityForm(study_form_data, user=request.user)
+        else:
+            study_form = StudyActivityForm(study_form_data)
         
     if live_study_form_data:
-        live_study_form = LiveStudyActivityForm(live_study_form_data, user=request.user)
+        if request.user.is_authenticated:
+            live_study_form = LiveStudyActivityForm(live_study_form_data, user=request.user)
+        else:
+            live_study_form = LiveStudyActivityForm(live_study_form_data)
         
         live_study_start_datetime = live_study_form_data.get("start_datetime")
         live_study_end_datetime = live_study_form_data.get("end_datetime")

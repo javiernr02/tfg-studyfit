@@ -120,7 +120,10 @@ class StudyActivityForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
         
-        self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
+        if self.user and self.user.is_authenticated:
+            self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
+        else:
+            self.fields["subject"].queryset = models.Subject.objects.none()
 
     class Meta:
         model = models.StudyActivity
@@ -205,7 +208,10 @@ class LiveStudyActivityForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
         
-        self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
+        if self.user and self.user.is_authenticated:
+            self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
+        else:
+            self.fields["subject"].queryset = models.Subject.objects.none()
     
     class Meta:
         model = models.StudyActivity
@@ -254,7 +260,10 @@ class SubjectForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data["name"]
         user = self.user
-
+        
+        if not user or not user.is_authenticated:
+            return name
+        
         normalized_name = ''.join(
             c for c in unicodedata.normalize('NFD', name)
             if unicodedata.category(c) != 'Mn'
