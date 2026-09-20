@@ -449,16 +449,16 @@ nav.footer-links a:hover {
     flex-wrap: wrap;
     align-items: center;
     width: 100%;
-    gap: 5px;
+    gap: 10px;
 }
 
 .modal-header h2 {
     margin: 0;
-    flex: 1;
 }
 
 .modal-header p {
     flex-basis: 100%;
+    margin: 0;
 }
 
 input::placeholder {

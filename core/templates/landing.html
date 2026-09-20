@@ -194,6 +194,14 @@
             loginSubmit.disabled = true;
         });
 
+        // Cambiar de modal
+        const openLoginButton = document.getElementById("open-login");
+        
+        openLoginButton.addEventListener("click", () => {
+            closeModal(registerModal);
+            openModal(loginModal);
+        });
+
         // Reabrir modal en caso de errores
 
         {% if open_register_modal %}

@@ -212,3 +212,26 @@ h1 {
 .balance-circle span {
     font-size: 100px;
 }
+
+.change-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.change-modal button {
+    border: none;
+    background: none;
+    padding: 0;
+    color: #24B88D;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.change-modal button:hover {
+    text-decoration: underline;
+}
