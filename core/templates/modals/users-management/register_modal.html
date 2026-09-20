@@ -42,45 +42,68 @@
 
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
-                <p>
+                <div>
                     {{ register_form.first_name.label_tag }}
-                    {{ register_form.first_name }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-regular fa-user"></i>
+                        {{ register_form.first_name }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.last_name.label_tag }}
-                    {{ register_form.last_name }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-regular fa-user"></i>
+                        {{ register_form.last_name }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.username.label_tag }}
-                    {{ register_form.username }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-solid fa-id-badge"></i>
+                        {{ register_form.username }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.email.label_tag }}
-                    {{ register_form.email }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-solid fa-envelope"></i>
+                        {{ register_form.email }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.birth_date.label_tag }}
-                    {{ register_form.birth_date }}
-                </p>
+                    <div class="date-input-box">
+                        {{ register_form.birth_date }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.gender.label_tag }}
-                    {{ register_form.gender }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-solid fa-mars-and-venus"></i>
+                        {{ register_form.gender }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.password1.label_tag }}
-                    {{ register_form.password1 }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ register_form.password1 }}
+                    </div>
+                </div>
 
-                <p>
+                <div>
                     {{ register_form.password2.label_tag }}
-                    {{ register_form.password2 }}
-                </p>
+                    <div class="input-box">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ register_form.password2 }}
+                    </div>
+                </div>
 
                 <div class="final-buttons">
                     <button type="submit" class="rounded-button" id="register-submit">

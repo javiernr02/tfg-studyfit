@@ -35,7 +35,7 @@ class RegisterForm(UserCreationForm):
         fields = ["first_name", "last_name", "username", "email", "birth_date", "gender", "password1", "password2"]
         labels = {
             "first_name": "Nombre",
-            "last_name": "Apellidos",
+            "last_name": "Apellido(s)",
             "username": "Nombre de usuario *",
             "email": "Email *",
             "birth_date": "Fecha de nacimiento *",
@@ -60,7 +60,7 @@ class RegisterForm(UserCreationForm):
                 "placeholder": "Nombre"
             }),
             "last_name": forms.TextInput(attrs={
-                "placeholder": "Apellidos"
+                "placeholder": "Apellido"
             }),
             "username": forms.TextInput(attrs={
                 "placeholder": "Nombredeusuario"
