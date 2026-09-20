@@ -462,7 +462,7 @@ nav.footer-links a:hover {
 }
 
 input::placeholder {
-    font-size: 12px;
+    font-size: 13px;
 }
 
 #icon-title {
@@ -541,12 +541,12 @@ textarea[name="description"] {
 
 input[type="date"] {
     color: #757575;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 input[type="date"]:not(:valid) {
     color: #757575;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .input-box {
@@ -558,7 +558,7 @@ input[type="date"]:not(:valid) {
 .input-box i {
     position: absolute;
     left: 12px;
-    top: 50%;
+    top: 45%;
     transform: translateY(-50%);
     color: #24B88D;
     font-size: 12px;

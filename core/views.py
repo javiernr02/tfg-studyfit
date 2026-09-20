@@ -59,6 +59,9 @@ def landing(request):
         login_form = AuthenticationForm(request, data=login_form_data)
     else:
         login_form = AuthenticationForm(request)
+        
+    login_form.fields["username"].widget.attrs["placeholder"] = "Usuario"
+    login_form.fields["password"].widget.attrs["placeholder"] = "Contraseña"
     
     return render(request, 'landing.html', {
         "register_form": register_form,

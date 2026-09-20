@@ -63,7 +63,7 @@ class RegisterForm(UserCreationForm):
                 "placeholder": "Apellido"
             }),
             "username": forms.TextInput(attrs={
-                "placeholder": "Nombredeusuario"
+                "placeholder": "Usuario"
             }),
             "email": forms.EmailInput(attrs={
                 "placeholder": "ejemplo@email.com"
