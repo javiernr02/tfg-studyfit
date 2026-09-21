@@ -199,11 +199,18 @@
         });
 
         // Cambiar de modal
+        
         const openLoginButton = document.getElementById("open-login");
+        const openRegisterButton = document.getElementById("open-register");
         
         openLoginButton.addEventListener("click", () => {
             closeModal(registerModal);
             openModal(loginModal);
+        });
+        
+        openRegisterButton.addEventListener("click", () => {
+            closeModal(loginModal);
+            openModal(registerModal);
         });
 
         // Reabrir modal en caso de errores
