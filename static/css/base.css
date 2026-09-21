@@ -549,6 +549,18 @@ input[type="date"]:not(:valid) {
     font-size: 13px;
 }
 
+select:has(option:checked[value=""]) {
+    color: #757575;
+}
+
+select {
+    color: black;
+}
+
+select option {
+    color: black;
+}
+
 .input-box {
     position: relative;
     margin-top: 5px;
