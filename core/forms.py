@@ -3,8 +3,63 @@ import core.models as models
 from django.utils import timezone
 import unicodedata
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+import re
+
+def validate_first_name(value):
+    if (
+        not all(char.isalpha() or char in "-" for char in value)
+        or any(
+            value[i] == "-"
+            and (
+                i == 0
+                or i == len(value) - 1
+                or not value[i - 1].isalpha()
+                or not value[i + 1].isalpha()
+            )
+            for i in range(len(value))
+        )
+    ):
+        raise forms.ValidationError("El nombre solo debe contener letras")
+
+def validate_last_name(value):
+    if (
+        not all(char.isalpha() or char in " -" for char in value)
+        or any(
+            value[i] == "-"
+            and (
+                i == 0
+                or i == len(value) - 1
+                or not value[i - 1].isalpha()
+                or not value[i + 1].isalpha()
+            )
+            for i in range(len(value))
+        )
+    ):
+        raise forms.ValidationError("El apellido solo debe contener letras")
 
 class RegisterForm(UserCreationForm):
+    
+    first_name = forms.CharField(
+        label="Nombre",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Nombre"
+            }
+        ),
+        validators=[validate_first_name]
+    )
+    
+    last_name = forms.CharField(
+        label="Apellido(s)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Apellido"
+            }
+        ),
+        validators=[validate_last_name]
+    )
     
     password1 = forms.CharField(
         label="Contraseña *",
@@ -34,8 +89,6 @@ class RegisterForm(UserCreationForm):
         model = models.CustomUser
         fields = ["first_name", "last_name", "username", "email", "birth_date", "gender", "password1", "password2"]
         labels = {
-            "first_name": "Nombre",
-            "last_name": "Apellido(s)",
             "username": "Nombre de usuario *",
             "email": "Email *",
             "birth_date": "Fecha de nacimiento *",
@@ -56,12 +109,6 @@ class RegisterForm(UserCreationForm):
             },
         }
         widgets = {
-            "first_name": forms.TextInput(attrs={
-                "placeholder": "Nombre"
-            }),
-            "last_name": forms.TextInput(attrs={
-                "placeholder": "Apellido"
-            }),
             "username": forms.TextInput(attrs={
                 "placeholder": "Usuario"
             }),
@@ -80,6 +127,50 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("Ya existe un usuario con ese email")
         
         return email
+    
+    def clean_password1(self):
+        password = self.cleaned_data.get("password1")
+        
+        if password:
+        
+            if (
+                len(password) < 8
+                or not re.search(r"[a-z]", password)
+                or not re.search(r"[A-Z]", password)
+                or not re.search(r"\d", password)
+                or not re.search(r"[!@#$%&*\-_=+?.]", password)
+            ):
+                
+                raise forms.ValidationError(
+                    "La contraseña debe tener al menos 8 caracteres, "
+                    "1 minúscula, 1 mayúscula, 1 número y 1 símbolo"
+                )
+        
+        return password
+    
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        
+        if password2:
+                
+            if (
+                len(password2) < 8
+                or not re.search(r"[a-z]", password2)
+                or not re.search(r"[A-Z]", password2)
+                or not re.search(r"\d", password2)
+                or not re.search(r"[!@#$%&*\-_=+?.]", password2)
+            ):
+                
+                raise forms.ValidationError(
+                    "La confirmación de la contraseña debe tener al menos 8 caracteres, "
+                    "1 minúscula, 1 mayúscula, 1 número y 1 símbolo"
+                )
+        
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Las contraseñas no coinciden")
+        
+        return password2
 
 class LoginForm(AuthenticationForm):
     

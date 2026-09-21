@@ -43,10 +43,16 @@ def landing(request):
     
     # Registro
     register_form_data = request.session.pop("register_form_data", None)
+    register_errors = request.session.pop("register_errors", None)
     open_register_modal = request.session.pop("open_register_modal", False)
     
     if register_form_data:
-        register_form = RegisterForm(register_form_data)
+        register_form = RegisterForm(initial=register_form_data)
+        
+        if register_errors:
+            register_form._errors = ErrorDict()
+            for field, errors in register_errors.items():
+                register_form._errors[field] = ErrorList(errors)
     else:
         register_form = RegisterForm()
         
@@ -91,6 +97,14 @@ def register(request):
         register_form_data.pop("password2", None)
 
         request.session["register_form_data"] = register_form_data.dict()
+        
+        register_errors = {}
+                
+        for field, errors in form.errors.items():
+            register_errors[field] = [str(error) for error in errors]
+                
+            request.session["register_errors"] = register_errors
+        
         request.session["open_register_modal"] = True
 
         return redirect(request.POST.get("next", "landing"))
