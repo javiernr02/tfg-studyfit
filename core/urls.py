@@ -1,8 +1,17 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.landing, name='landing'),
+    
+    path('home/', views.home, name='home'),
+    
+    path('register/', views.register, name='register'),
+    
+    path('login/', views.user_login, name='login'),
+    
+    path('logout/', LogoutView.as_view(next_page='landing'), name='logout'),
     
     path('create-study-activity/', views.create_study_activity, name='create_study_activity'),
     path('cancel-study-activity/', views.cancel_study_activity, name='cancel_study_activity'),

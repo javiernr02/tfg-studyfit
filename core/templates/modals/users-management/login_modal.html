@@ -1,0 +1,81 @@
+<div class="modal-overlay" id="login-modal">
+
+    <div class="modal login">
+
+        <div class="modal-header">
+            <i id="icon-title" class="fa-solid fa-arrow-right-to-bracket"></i>
+            <h2>Inicio de sesión</h2>
+
+            <p>Ingresa tus datos para acceder</p>
+
+            <button type="button" class="close-button" id="login-close" title="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+
+        <div id="login-content">
+            
+            {% if login_form.errors %}
+                <div class="errors">
+                    {% for error in login_form.non_field_errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% for field in login_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}" novalidate>
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                <div>
+                    {{ login_form.username.label_tag }}
+                    <div class="input-box">
+                         <i class="fa-solid fa-id-badge"></i>
+                        {{ login_form.username }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ login_form.password.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ login_form.password }}
+                    </div>
+                </div>
+
+                <div class="final-buttons">
+                    <button type="submit" class="rounded-button" id="login-submit">
+                        Iniciar sesión
+                    </button>
+                </div>
+
+                <div class="change-modal">
+                    <span>¿No tienes cuenta?</span>
+
+                    <button type="button" id="open-register">
+                        Crear cuenta
+                    </button>
+                </div>
+
+            </form>
+            
+        </div>
+
+    </div>
+
+</div>

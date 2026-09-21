@@ -1,0 +1,237 @@
+.landing-page {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.landing-page * {
+    box-sizing: border-box;
+}
+
+.landing-page a {
+    text-decoration: none;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+.logo img {
+    height: 200px;
+    width: auto;
+    display: block;
+    animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+h1 {
+    margin: 0 auto;
+    margin-left: 18px;
+    max-width: 850px;
+    font-weight: 600;
+    font-size: 90px;
+    line-height: 1;
+    letter-spacing: -3px;
+    color: rgb(21, 20, 20);
+    margin-bottom: 40px;
+}
+
+.description {
+    display: flex;
+    justify-content: center;
+}
+
+.description p {
+    color: #374151;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.hero {
+    position: relative;
+    min-height: 760px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: min(1100px, 90%);
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.landing-section {
+    padding: 110px 7%;
+}
+
+.section-header {
+    max-width: 700px;
+    margin: 0 auto 60px;
+    text-align: center;
+}
+
+.section-label {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: #24B88D;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.section-header h2 {
+    margin: 0;
+    color: rgb(21, 20, 20);
+    font-size: 50px;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    margin-top: 20px;
+}
+
+.features {
+    background: white;
+}
+
+.features-grid {
+    width: min(1200px, 100%);
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+}
+
+.feature-card {
+    position: relative;
+    padding: 35px 28px;
+    border: 1px solid #e8e8e8;
+    border-radius: 24px;
+    background: white;
+    box-shadow: 0 10px 35px rgba(13, 72, 70, 0.06);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 45px rgba(23, 124, 128, 0.12);
+    border: 1px solid #24B88D;
+}
+
+.feature-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #24B88D;
+}
+
+.feature-card p {
+    margin: 0;
+    line-height: 1.7;
+}
+
+.balance {
+    position: relative;
+    overflow: hidden;
+    color: rgb(21, 20, 20);
+}
+
+.balance-container {
+    position: relative;
+    z-index: 1;
+    width: min(1150px, 100%);
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 80px;
+}
+
+.balance-text .section-label {
+    color: #374151;
+}
+
+.balance-text h2 {
+    margin: 0;
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -2px;
+}
+
+.balance-text p {
+    max-width: 560px;
+    margin: 25px 0 35px;
+    color: #0D4846;
+    line-height: 1.8;
+}
+
+.balance-visual {
+    position: relative;
+    min-height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.balance-circle {
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 35px rgba(36, 184, 141, 0.08),
+        0 0 0 70px rgba(36, 184, 141, 0.04);
+}
+
+.balance-circle span {
+    font-size: 100px;
+}
+
+.change-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.change-modal button {
+    border: none;
+    background: none;
+    padding: 0;
+    color: #24B88D;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.change-modal button:hover {
+    text-decoration: underline;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(58%) sepia(43%) saturate(1000%) hue-rotate(119deg) brightness(88%) contrast(80%);
+}

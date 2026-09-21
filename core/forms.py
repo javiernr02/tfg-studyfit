@@ -2,7 +2,207 @@ from django import forms
 import core.models as models
 from django.utils import timezone
 import unicodedata
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+import re
 
+def validate_first_name(value):
+    if (
+        not all(char.isalpha() or char in "-" for char in value)
+        or any(
+            value[i] == "-"
+            and (
+                i == 0
+                or i == len(value) - 1
+                or not value[i - 1].isalpha()
+                or not value[i + 1].isalpha()
+            )
+            for i in range(len(value))
+        )
+    ):
+        raise forms.ValidationError("El nombre solo debe contener letras")
+
+def validate_last_name(value):
+    if (
+        not all(char.isalpha() or char in " -" for char in value)
+        or any(
+            value[i] == "-"
+            and (
+                i == 0
+                or i == len(value) - 1
+                or not value[i - 1].isalpha()
+                or not value[i + 1].isalpha()
+            )
+            for i in range(len(value))
+        )
+    ):
+        raise forms.ValidationError("El apellido solo debe contener letras")
+
+class RegisterForm(UserCreationForm):
+    
+    first_name = forms.CharField(
+        label="Nombre",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Nombre"
+            }
+        ),
+        validators=[validate_first_name]
+    )
+    
+    last_name = forms.CharField(
+        label="Apellido(s)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Apellido"
+            }
+        ),
+        validators=[validate_last_name]
+    )
+    
+    password1 = forms.CharField(
+        label="Contraseña *",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Contraseña"
+            }
+        ),
+        error_messages={
+            "required": "La contraseña es obligatoria"
+        }
+    )
+    
+    password2 = forms.CharField(
+        label="Confirmar contraseña *",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Confirmar contraseña"
+            }
+        ),
+        error_messages={
+            "required": "La confirmación de la contraseña es obligatoria"
+        }
+    )
+    
+    class Meta:
+        model = models.CustomUser
+        fields = ["first_name", "last_name", "username", "email", "birth_date", "gender", "password1", "password2"]
+        labels = {
+            "username": "Nombre de usuario *",
+            "email": "Email *",
+            "birth_date": "Fecha de nacimiento *",
+            "gender": "Género *"
+        }
+        error_messages = {
+            "username": {
+                "required": "El nombre de usuario es obligatorio"
+            },
+            "email": {
+                "required": "El email es obligatorio"
+            },
+            "birth_date": {
+                "required": "La fecha de nacimiento es obligatoria"
+            },
+            "gender": {
+                "required": "El género es obligatorio"
+            },
+        }
+        widgets = {
+            "username": forms.TextInput(attrs={
+                "placeholder": "Usuario"
+            }),
+            "email": forms.EmailInput(attrs={
+                "placeholder": "ejemplo@email.com"
+            }),
+            "birth_date": forms.DateInput(attrs={
+                "type": "date"
+            }),
+        }
+        
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        
+        if models.CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese email")
+        
+        return email
+    
+    def clean_password1(self):
+        password = self.cleaned_data.get("password1")
+        
+        if password:
+        
+            if (
+                len(password) < 8
+                or not re.search(r"[a-z]", password)
+                or not re.search(r"[A-Z]", password)
+                or not re.search(r"\d", password)
+                or not re.search(r"[!@#$%&*\-_=+?.]", password)
+            ):
+                
+                raise forms.ValidationError(
+                    "La contraseña debe tener al menos 8 caracteres, "
+                    "1 minúscula, 1 mayúscula, 1 número y 1 símbolo"
+                )
+        
+        return password
+    
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        
+        if password2:
+                
+            if (
+                len(password2) < 8
+                or not re.search(r"[a-z]", password2)
+                or not re.search(r"[A-Z]", password2)
+                or not re.search(r"\d", password2)
+                or not re.search(r"[!@#$%&*\-_=+?.]", password2)
+            ):
+                
+                raise forms.ValidationError(
+                    "La confirmación de la contraseña debe tener al menos 8 caracteres, "
+                    "1 minúscula, 1 mayúscula, 1 número y 1 símbolo"
+                )
+        
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Las contraseñas no coinciden")
+        
+        return password2
+
+class LoginForm(AuthenticationForm):
+    
+    username = forms.CharField(
+        label="Nombre de usuario *",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Usuario"
+            }
+        ),
+        error_messages={
+            "required": "El nombre de usuario es obligatorio"
+        }
+    )
+    
+    password = forms.CharField(
+        label="Contraseña *",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Contraseña"
+            }
+        ),
+        error_messages={
+            "required": "La contraseña es obligatoria"
+        }
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.error_messages["invalid_login"] = "El usuario o la contraseña no son correctos"
+        
 class StudyActivityForm(forms.ModelForm):
     start_time = forms.TimeField(
         label="Hora de inicio *",
@@ -38,12 +238,14 @@ class StudyActivityForm(forms.ModelForm):
         )
     )
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         
-        user = models.CustomUser.objects.first()
-        
-        self.fields["subject"].queryset = models.Subject.objects.filter(user=user)
+        if self.user and self.user.is_authenticated:
+            self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
+        else:
+            self.fields["subject"].queryset = models.Subject.objects.none()
 
     class Meta:
         model = models.StudyActivity
@@ -124,12 +326,14 @@ class LiveStudyActivityForm(forms.ModelForm):
         )
     )
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         
-        user = models.CustomUser.objects.first()
-        
-        self.fields["subject"].queryset = models.Subject.objects.filter(user=user)
+        if self.user and self.user.is_authenticated:
+            self.fields["subject"].queryset = models.Subject.objects.filter(user=self.user)
+        else:
+            self.fields["subject"].queryset = models.Subject.objects.none()
     
     class Meta:
         model = models.StudyActivity
@@ -153,6 +357,10 @@ class LiveStudyActivityForm(forms.ModelForm):
         }
         
 class SubjectForm(forms.ModelForm):
+    
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
 
     class Meta:
         model = models.Subject
@@ -173,8 +381,11 @@ class SubjectForm(forms.ModelForm):
         
     def clean_name(self):
         name = self.cleaned_data["name"]
-        user = models.CustomUser.objects.first()
-
+        user = self.user
+        
+        if not user or not user.is_authenticated:
+            return name
+        
         normalized_name = ''.join(
             c for c in unicodedata.normalize('NFD', name)
             if unicodedata.category(c) != 'Mn'

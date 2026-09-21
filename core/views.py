@@ -1,8 +1,7 @@
 import core.models as models
 from django.utils import timezone
 from datetime import timedelta
-from collections import defaultdict
-from .forms import StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
+from .forms import RegisterForm, LoginForm, StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
 from django.contrib import messages
@@ -10,6 +9,9 @@ from django.http import JsonResponse
 from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
 from django.core.paginator import Paginator
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.forms.utils import ErrorDict, ErrorList
 
 
 # Create your views here.
@@ -30,6 +32,117 @@ def format_duration(duration):
         return f'{hours}h'
     else:
         return f'{hours}h {minutes}min'
+
+# Renderización de la página principal o de la página de landing según el usuario esté autenticado o no.
+# En caso de no estar autenticado y fallar la petición se vuelve a renderizar la página de landing con 
+# los datos guardados en sesión del formulario de registro o del de inicio de sesión según sea el caso
+def landing(request):
+    
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    # Registro
+    register_form_data = request.session.pop("register_form_data", None)
+    register_errors = request.session.pop("register_errors", None)
+    open_register_modal = request.session.pop("open_register_modal", False)
+    
+    if register_form_data:
+        register_form = RegisterForm(initial=register_form_data)
+        
+        if register_errors:
+            register_form._errors = ErrorDict()
+            for field, errors in register_errors.items():
+                register_form._errors[field] = ErrorList(errors)
+    else:
+        register_form = RegisterForm()
+        
+    # Inicio de sesión
+    login_form_data = request.session.pop("login_form_data", None)
+    login_errors = request.session.pop("login_errors", None)
+    open_login_modal = request.session.pop("open_login_modal", False)
+    
+    if login_form_data:
+        login_form = LoginForm(initial=login_form_data)
+        
+        if login_errors:
+            login_form._errors = ErrorDict()
+            for field, errors in login_errors.items():
+                login_form._errors[field] = ErrorList(errors)
+    else:
+        login_form = LoginForm()
+        
+    return render(request, 'landing.html', {
+        "register_form": register_form,
+        "open_register_modal": open_register_modal,
+        "login_form": login_form,
+        "open_login_modal": open_login_modal
+    })
+
+# Funcionalidad para el registro de usuarios que en caso de éxito redirige a página de home
+# y en caso de error redirige a la página actual de landing, volviendo a abrir el modal y mostrando los errores
+def register(request):
+    
+    if request.method == "POST":
+
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            return redirect("home")
+        
+        register_form_data = request.POST.copy()
+        register_form_data.pop("password1", None)
+        register_form_data.pop("password2", None)
+
+        request.session["register_form_data"] = register_form_data.dict()
+        
+        register_errors = {}
+                
+        for field, errors in form.errors.items():
+            register_errors[field] = [str(error) for error in errors]
+                
+            request.session["register_errors"] = register_errors
+        
+        request.session["open_register_modal"] = True
+
+        return redirect(request.POST.get("next", "landing"))
+
+    return redirect("landing")
+
+# Funcionalidad para el inicio de sesión de usuarios que en caso de éxito redirige a página de home
+# y en caso de error redirige a la página actual de landing, volviendo a abrir el modal y mostrando los errores
+def user_login(request):
+
+    if request.method == "POST":
+        
+        form = LoginForm(request, data=request.POST)
+        
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            return redirect("home")
+        
+        login_form_data = request.POST.copy()
+        login_form_data.pop("password", None)
+        login_form_data.pop("next", None)
+        
+        request.session["login_form_data"] = login_form_data.dict()
+        
+        login_errors = {}
+        
+        for field, errors in form.errors.items():
+            login_errors[field] = [str(error) for error in errors]
+            
+        request.session["login_errors"] = login_errors
+            
+        request.session["open_login_modal"] = True
+        
+        return redirect(request.POST.get("next", "landing"))
+
+    return redirect("landing")
     
 # Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
 def balance_logic(study_total_minutes, sport_total_minutes):
@@ -138,57 +251,69 @@ def get_balance_data(user):
 # Renderización de la página principal de la aplicación con información sobre horas de deporte y estudio hoy y totales, cumplimiento
 # del equilibrio entre estudio y deporte, número de actividades en los últimos 7 días, y desglose de actividad según su tipo con 
 # información sobre sus horas totales y número de actividades
+@login_required
 def home(request):
-    user = models.CustomUser.objects.first()
+    user = request.user
     
     activities = user.activities.all()
     
+    study_durations_format = None
+    sport_durations_format = None
+    last_activities = 0
+    
+    study_activities_by_subjects_format = {}
+    sport_activities_by_sport_types_format = {}
+    
+    study_activities = models.StudyActivity.objects.filter(user=user)
+    sport_activities = models.SportActivity.objects.filter(user=user)
+    
     study_durations = timedelta()
     sport_durations = timedelta()
-    
-    if activities:
-        study_activities = models.StudyActivity.objects.filter(user=user)
-        study_activities_by_subjects = defaultdict(lambda: {"duration": timedelta(), "count": 0})
-        
-        sport_activities = models.SportActivity.objects.filter(user=user)
-        sport_activities_by_sport_types = defaultdict(lambda: {"duration": timedelta(), "count": 0})
-        
-        for i in study_activities:
-            subject = i.subject
-            study_durations += i.duration
-            study_activities_by_subjects[subject]["duration"] += i.duration
-            study_activities_by_subjects[subject]["count"] += 1
             
-        for i in sport_activities:
-            sport_type = i.get_sport_type_display()
-            sport_durations += i.duration
-            sport_activities_by_sport_types[sport_type]["duration"] += i.duration
-            sport_activities_by_sport_types[sport_type]["count"] += 1
-                
+    for i in study_activities:
+        subject = i.subject
+        study_durations += i.duration
+        study_activities_by_subjects_format.setdefault(subject, 
+            {
+                "duration": timedelta(),
+                "count": 0
+            }
+        )
+        study_activities_by_subjects_format[subject]["duration"] += i.duration
+        study_activities_by_subjects_format[subject]["count"] += 1
+        
+    for i in sport_activities:
+        sport_type = i.get_sport_type_display()
+        sport_durations += i.duration
+        sport_activities_by_sport_types_format.setdefault(sport_type,
+            {
+                "duration": timedelta(),
+                "count": 0   
+            }
+        )
+        sport_activities_by_sport_types_format[sport_type]["duration"] += i.duration
+        sport_activities_by_sport_types_format[sport_type]["count"] += 1
+        
+    if study_activities.exists():
         study_durations_format = format_duration(study_durations)
+        
+    if sport_activities.exists():
         sport_durations_format = format_duration(sport_durations)
         
-        study_activities_by_subjects_format = {}
-        sport_activities_by_sport_types_format = {}
+    for subject, i in study_activities_by_subjects_format.items():
+        i["duration"] = format_duration(i["duration"])
         
-        for subject, i in study_activities_by_subjects.items():
-            study_activities_by_subjects_format[subject] = {
-                "duration": format_duration(i["duration"]),
-                "count": i["count"]
-            }
-            
-        for sport_type, i in sport_activities_by_sport_types.items():
-            sport_activities_by_sport_types_format[sport_type] = {
-                "duration": format_duration(i["duration"]),
-                "count": i["count"]
-            }
-            
-        last_7_days = timezone.now() - timedelta(days=7)
-        last_activities = activities.filter(date__gte=last_7_days).count()
+    for sport_type, i in sport_activities_by_sport_types_format.items():
+        i["duration"] = format_duration(i["duration"])
+        
+    last_7_days = timezone.now() - timedelta(days=7)
+    last_activities = activities.filter(date__gte=last_7_days).count()
         
     return render(request, 'home.html', {
         'user': user,
         'activities': activities,
+        'study_activities': study_activities,
+        'sport_activities': sport_activities,
         'study_durations_format': study_durations_format,
         'sport_durations_format': sport_durations_format,
         'last_activities': last_activities,
@@ -200,13 +325,14 @@ def home(request):
 
 # Creación de actividad de estudio con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_study_activity(request):
     if request.method == "POST":
-        form = StudyActivityForm(request.POST)
+        form = StudyActivityForm(request.POST, user=request.user)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
             
             date = form.cleaned_data["date"]
             start_time = form.cleaned_data["start_time"]
@@ -235,13 +361,14 @@ def create_study_activity(request):
     return redirect("home")
 
 # Creación de asignatura asociada al usuario que la crea o gestión de error en caso de fallar
+@login_required
 def create_subject(request):
     if request.method == "POST":
-        form = SubjectForm(request.POST)
+        form = SubjectForm(request.POST, user=request.user)
 
         if form.is_valid():
             subject = form.save(commit=False)
-            subject.user = models.CustomUser.objects.first()
+            subject.user = request.user
             
             subject.save()
 
@@ -263,12 +390,13 @@ def create_subject(request):
 
 # Eliminación de la asignatura seleccionada asociada al usuario que la elimina o gestión
 # de error en caso de fallar, por ejemplo, porque la asignatura tenga actividades de estudio asociadas
+@login_required
 def delete_subject(request, subject_id):
     if request.method == "POST":
         subject = get_object_or_404(
             models.Subject,
             id=subject_id,
-            user=models.CustomUser.objects.first()
+            user=request.user
         )
         
         try:
@@ -290,13 +418,14 @@ def delete_subject(request, subject_id):
     
 # Creación de actividad de estudio en directo y cálculo de su duración, con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_live_study_activity(request):
     if request.method == "POST":
-        form = LiveStudyActivityForm(request.POST)
+        form = LiveStudyActivityForm(request.POST, user=request.user)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
 
             start_datetime = parse_datetime(request.POST.get("start_datetime"))
 
@@ -325,6 +454,7 @@ def create_live_study_activity(request):
     return redirect("home")
 
 # Eliminar datos rellenados en la actividad de estudio finalizada
+@login_required
 def cancel_study_activity(request):
     request.session.pop("study_form_data", None)
     request.session.pop("open_study_modal", None)
@@ -332,6 +462,7 @@ def cancel_study_activity(request):
     return JsonResponse({"success": True})
 
 # Eliminar datos rellenados y variables del cronómetro en la actividad de estudio en directo
+@login_required
 def cancel_live_study_activity(request):
     request.session.pop("live_study_form_data", None)
     request.session.pop("open_study_modal", None)
@@ -341,13 +472,14 @@ def cancel_live_study_activity(request):
 
 # Creación de actividad deportiva con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_sport_activity(request):
     if request.method == "POST":
         form = SportActivityForm(request.POST)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
             
             date = form.cleaned_data["date"]
             start_time = form.cleaned_data["start_time"]
@@ -377,13 +509,14 @@ def create_sport_activity(request):
 
 # Creación de actividad de deporte en directo y cálculo de su duración, con gestión de errores en caso de fallar
 # o redirigiendo a la página desde donde se hizo la petición en caso de éxito
+@login_required
 def create_live_sport_activity(request):
     if request.method == "POST":
         form = LiveSportActivityForm(request.POST)
 
         if form.is_valid():
             activity = form.save(commit=False)
-            activity.user = models.CustomUser.objects.first()
+            activity.user = request.user
 
             start_datetime = parse_datetime(request.POST.get("start_datetime"))
 
@@ -412,6 +545,7 @@ def create_live_sport_activity(request):
     return redirect("home")
 
 # Eliminar datos rellenados en la actividad de deporte finalizada
+@login_required
 def cancel_sport_activity(request):
     request.session.pop("sport_form_data", None)
     request.session.pop("open_sport_modal", None)
@@ -419,6 +553,7 @@ def cancel_sport_activity(request):
     return JsonResponse({"success": True})
 
 # Eliminar datos rellenados y variables del cronómetro en la actividad de deporte en directo
+@login_required
 def cancel_live_sport_activity(request):
     request.session.pop("live_sport_form_data", None)
     request.session.pop("open_sport_modal", None)
@@ -429,8 +564,9 @@ def cancel_live_sport_activity(request):
 # Consultar actividades registradas por el usuario mostradas según paginación pudiendo
 # navegar entre las distintas páginas. Además, se pueden filtrar según distintos parámetros,
 # mostrando el número de actividades encontradas
+@login_required
 def activity_history(request):
-    user = models.CustomUser.objects.first()
+    user = request.user
 
     study_activities = models.StudyActivity.objects.filter(user=user)
     
@@ -612,21 +748,24 @@ def activity_history(request):
     })
     
 # Editar los datos de una actividad registrada, gestionando los errores si no fuera posible actualizarla
+@login_required
 def edit_activity(request, activity_id):
     
     activity = get_object_or_404(
         models.Activity,
         id=activity_id,
-        user=models.CustomUser.objects.first()
+        user=request.user
     )
-
+    
     if hasattr(activity, "studyactivity"):
         activity = activity.studyactivity
         form_class = StudyActivityForm
-
+        form_kwargs = {"user": request.user}
+        
     elif hasattr(activity, "sportactivity"):
         activity = activity.sportactivity
         form_class = SportActivityForm
+        form_kwargs = {}
 
     else:
         return redirect("activity_history")
@@ -635,7 +774,8 @@ def edit_activity(request, activity_id):
 
         form = form_class(
             request.POST,
-            instance=activity
+            instance=activity,
+            **form_kwargs
         )
 
         if form.is_valid():
@@ -668,6 +808,7 @@ def edit_activity(request, activity_id):
     return redirect(request.POST.get("next", "activity_history"))
 
 # Eliminar actividad registrada
+@login_required
 def delete_activity(request, activity_id):
     
     if request.method == "POST":
@@ -675,7 +816,7 @@ def delete_activity(request, activity_id):
         activity = get_object_or_404(
             models.Activity,
             id=activity_id,
-            user=models.CustomUser.objects.first()
+            user=request.user
         )
 
         activity.delete()

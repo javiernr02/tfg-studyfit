@@ -4,14 +4,12 @@ from django.utils.formats import date_format
 import core.models as models
 from datetime import date, timedelta, datetime
 from core.views import format_duration
-from django.db.models import Sum, Avg
+from django.db.models import Sum
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.http import JsonResponse
-import numpy as np
-import pandas as pd
 from .services.ai_service import get_hybrid_prediction, get_scatter_data_grouped, get_regression_curve, get_regression_curve_global
-from sklearn.linear_model import LinearRegression
 import math
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -127,8 +125,9 @@ def get_most_productive(study_activities, sport_activities, trunc, format):
 # Cálculo de los valores para dibujar gráficas en Chart.js, de medias de horas de estudio y deporte, además de
 # medias para días activos y de cálculo de la productividad.
 # Los cálculos a realizar dependen del filtro por periodo seleccionado: semana, mes, año y global
+@login_required
 def stats(request):
-    user = models.CustomUser.objects.first()
+    user = request.user
     
     period = request.GET.get('period', 'week')
     
@@ -295,9 +294,10 @@ def stats(request):
 
 # Obtención para el usuario correspondiente de los puntos para la gráfica de dispersión,
 # curva de regresión personal con zona recomendada de deporte y valor óptimo de horas-concentración, y
-# curva de regresión global de la aplicación  
+# curva de regresión global de la aplicación
+@login_required
 def scatter_view(request):
-    user = models.CustomUser.objects.get(id=4)
+    user = request.user
     
     regression = get_regression_curve(user)
     regression_global = get_regression_curve_global()
@@ -313,8 +313,9 @@ def scatter_view(request):
 # Función principal balance que renderiza la página html con todos los datos calculados en las funciones anteriores,
 # además de lo relacionado con niveles, puntos de experiencia, valor de predicción de la concentración
 # y progreso dinámico del deporte realizado en el día actual
+@login_required
 def balance(request):
-    user = models.CustomUser.objects.get(id=4)
+    user = request.user
     
     tab = request.GET.get("tab", "trophies")
     
