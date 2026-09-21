@@ -2,7 +2,7 @@ from django import forms
 import core.models as models
 from django.utils import timezone
 import unicodedata
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class RegisterForm(UserCreationForm):
     
@@ -81,6 +81,37 @@ class RegisterForm(UserCreationForm):
         
         return email
 
+class LoginForm(AuthenticationForm):
+    
+    username = forms.CharField(
+        label="Nombre de usuario *",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Usuario"
+            }
+        ),
+        error_messages={
+            "required": "El nombre de usuario es obligatorio"
+        }
+    )
+    
+    password = forms.CharField(
+        label="Contraseña *",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Contraseña"
+            }
+        ),
+        error_messages={
+            "required": "La contraseña es obligatoria"
+        }
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.error_messages["invalid_login"] = "El usuario o la contraseña no son correctos"
+        
 class StudyActivityForm(forms.ModelForm):
     start_time = forms.TimeField(
         label="Hora de inicio *",

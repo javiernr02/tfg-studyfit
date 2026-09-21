@@ -1,8 +1,7 @@
 import core.models as models
 from django.utils import timezone
 from datetime import timedelta
-from collections import defaultdict
-from .forms import RegisterForm, StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
+from .forms import RegisterForm, LoginForm, StudyActivityForm, LiveStudyActivityForm, SportActivityForm, LiveSportActivityForm, SubjectForm
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
 from django.contrib import messages
@@ -11,8 +10,8 @@ from django.db.models import ProtectedError
 from django.utils.dateparse import parse_datetime
 from django.core.paginator import Paginator
 from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.forms.utils import ErrorDict, ErrorList
 
 
 # Create your views here.
@@ -53,16 +52,19 @@ def landing(request):
         
     # Inicio de sesión
     login_form_data = request.session.pop("login_form_data", None)
+    login_errors = request.session.pop("login_errors", None)
     open_login_modal = request.session.pop("open_login_modal", False)
     
     if login_form_data:
-        login_form = AuthenticationForm(request, data=login_form_data)
-    else:
-        login_form = AuthenticationForm(request)
+        login_form = LoginForm(initial=login_form_data)
         
-    login_form.fields["username"].widget.attrs["placeholder"] = "Usuario"
-    login_form.fields["password"].widget.attrs["placeholder"] = "Contraseña"
-    
+        if login_errors:
+            login_form._errors = ErrorDict()
+            for field, errors in login_errors.items():
+                login_form._errors[field] = ErrorList(errors)
+    else:
+        login_form = LoginForm()
+        
     return render(request, 'landing.html', {
         "register_form": register_form,
         "open_register_modal": open_register_modal,
@@ -101,7 +103,7 @@ def user_login(request):
 
     if request.method == "POST":
         
-        form = AuthenticationForm(request, data=request.POST)
+        form = LoginForm(request, data=request.POST)
         
         if form.is_valid():
             user = form.get_user()
@@ -114,6 +116,14 @@ def user_login(request):
         login_form_data.pop("next", None)
         
         request.session["login_form_data"] = login_form_data.dict()
+        
+        login_errors = {}
+        
+        for field, errors in form.errors.items():
+            login_errors[field] = [str(error) for error in errors]
+            
+        request.session["login_errors"] = login_errors
+            
         request.session["open_login_modal"] = True
         
         return redirect(request.POST.get("next", "landing"))
