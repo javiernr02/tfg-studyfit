@@ -4,28 +4,29 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
 
 ## Instalación ⚙️
 
-1) Clonar el repositorio:
+1) Clonar el repositorio
 
    ```bash
    git clone https://github.com/javiernr02/tfg-studyfit.git
 2) Instalar Python 3.12.10 https://www.python.org/downloads/windows/
-    - Configurar variable de entorno, en PATH añadir: ubicacion_python\Python\Python312\Scripts
+    - Configurar variable de entorno, en PATH de Windows, añadir: ubicacion_python\Python\Python312\Scripts
     - Añadir también en PATH: ubicacion_python\Python\Python312\
     - En cmd comprobar versión:
       
       ```bash
       python --version
-3) Crear entorno virtual venv en la raíz del proyecto:
+3) Crear entorno virtual venv en la raíz del proyecto
     - Crear entorno virtual:
       
       ```bash
       py -3.12 -m venv venv
-    - Activar entorno virtual (para desactivarlo: deactivate):
+    - Activar entorno virtual (para desactivarlo comando: deactivate):
   
       ```bash
       venv\Scripts\activate
-    - Ctrl + shift + p -> Select Interpreter -> verificar que esté el de venv seleccionado
-4) Instalar requisitos:
+    - En Visual Studio Code, pulsar:
+    Ctrl + shift + p -> Select Interpreter -> verificar que esté el de venv que hemos creado seleccionado
+4) Instalar requisitos
     - Actualizar instalador de paquetes pip:
   
       ```bash
@@ -34,13 +35,13 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```bash
       pip install -r requirements.txt
-5) Instalación base de datos PostgreSQL 18.3 https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
-    - Configurar variable de entorno, en PATH añadir: ubicacion_postgresql\PostgreSQL\18\bin
+5) Instalación base de datos PostgreSQL 18.3 (recordar contraseña creada durante la instalación) https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+    - Configurar variable de entorno, en PATH de Windows, añadir: ubicacion_postgresql\PostgreSQL\18\bin
     - En cmd comprobar versión:
   
       ```bash
       psql --version
-    - Entrar en postgreSQL usando contraseña establecida en la instalación:
+    - Entrar en PostgreSQL usando la contraseña establecida en la instalación:
   
       ```bash
       psql -U postgres
@@ -65,19 +66,19 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
       ```sql
       \q
 6) Editar archivo de configuración
-    - Copiar contenido .env.example en nuevo archivo .env
-    - En DB_PASSWORD poner contraseña configurada en el usuario de la BD (paso 6)
-7) Preparación base de datos
-    - Nos ubicamos en raíz del proyecto
-    - Crea archivos de migraciones por los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones por el desarrollador):
+    - Copiar el contenido del archivo proporcionado .env.example en un nuevo archivo .env
+    - En DB_PASSWORD poner la contraseña configurada en el usuario de la BD (paso anterior)
+7) Preparación de la base de datos
+    - Nos ubicamos en la raíz del proyecto
+    - Creación de los archivos de migraciones con los cambios detectados en los modelos (no es necesario ejecutarlo, ya que se incluyen las migraciones por el desarrollador):
   
       ```bash
       python manage.py makemigrations
-    - Aplica las migraciones generadas a la BD:
+    - Aplicación en la BD de las migraciones generadas:
   
       ```bash
       python manage.py migrate
-    - Poblar la BD con los datos, usando el script aleatorio y reproducible mediante seed fijado creado (esperar hasta que se muestre mensaje de confirmación):
+    - Poblar la BD con los datos generados, usando el script aleatorio y reproducible mediante seed fijado creado (esperar hasta que se muestre mensaje de confirmación):
 
       ```bash
       python manage.py seed
@@ -85,7 +86,7 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```bash
       python manage.py flush
-    - Para acceder al panel de administración /admin creamos usuario escribiendo los datos que queramos para username, email y password:
+    - Para acceder al panel de administración de Django creamos usuario admin escribiendo los datos que queramos para username, email y password:
   
       ```bash
       python manage.py createsuperuser
