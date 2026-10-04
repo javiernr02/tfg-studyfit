@@ -61,13 +61,15 @@
                             <i id="chevron-down-user" class="fa-solid fa-chevron-down"></i>
                         </a>
 
-                        <form method="post" action="{% url 'logout' %}" class="dropdown-menu user-menu">
-                            {% csrf_token %}
-                            <button type="submit" id="logout-button">
-                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                                Cerrar sesión
-                            </button>
-                        </form>
+                        <div class="dropdown-menu user-menu">
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" id="logout-button">
+                                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                    Cerrar sesión
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </nav>
