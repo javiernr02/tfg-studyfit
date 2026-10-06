@@ -57,6 +57,10 @@ Bienvenido a StudyFit una innovadora aplicación para el seguimiento de estudio 
   
       ```sql
       ALTER DATABASE studyfitdb OWNER TO studyfituser;
+    - Dar permisos al usuario creado para crear bases de datos (para poder ejecutar tests):
+  
+      ```sql
+      ALTER USER studyfituser CREATEDB;
     - Comprobar información de la BD:
   
       ```sql

@@ -74,7 +74,7 @@ class Command(BaseCommand):
                 last_name = last_name,
                 username = username,
                 email = f'{username}@email.com',
-                password = 'studyfit',
+                password = 'Studyfit1!',
                 birth_date = birt_date,
                 gender = gender.value,
                 experience_points = xp,
@@ -82,6 +82,15 @@ class Command(BaseCommand):
             )
 
             users.append(user)
+        
+        # Guardamos los últimos 100 usuarios para pruebas de carga
+        with open("populate/locust_users.json", "w", encoding="utf-8") as file:
+            json.dump(
+                [user.username for user in users[-100:]],
+                file,
+                ensure_ascii=False,
+                indent=4
+            )
             
         with open("populate/subjects.json", encoding="utf-8") as file:
             subject_data = json.load(file)
