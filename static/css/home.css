@@ -1,0 +1,154 @@
+
+.balance-title {
+    text-align: center;
+    font-size: 30px;
+    color: #0D4846;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    text-align: center;
+}
+
+.balance-value p {
+    color: #24B88D;
+    text-shadow: 0 0 4px rgba(36, 184, 141, 0.15);
+}
+
+.initial-table {
+    border-collapse: collapse;
+}
+
+.initial-table td {
+    border: 1px solid #bebebe;
+    background-color: #f2f2f2;
+    padding: 10px;
+    text-align: center;
+    color: #0D4846;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.initial-table i {
+    color: #007cb2;
+    font-size: 16px;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.card {
+    background-color: #FFFFFF;
+    padding: 20px;
+    border: 1px solid #24B88D;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.card .card-title i {
+    color: #24B88D;
+    font-size: 20px;
+}
+
+.card .card-title {
+    color: #24B88D;
+    display: flex;
+    gap: 5px;
+    font-size: 20px;
+    align-items: center;
+}
+
+.card .card-value {
+    font-size: 17px;
+}
+
+.activities-card {
+    grid-column: 1 / 4;
+    background-color: #FFFFFF;
+    padding: 20px;
+    border: 1px solid #24B88D;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.activities-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.card-column {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.activities-card .card-title {
+    color: #24B88D;
+    display: flex;
+    gap: 5px;
+    font-size: 20px;
+    align-items: center;
+}
+
+.activities-card .card-title i {
+    color: #24B88D;
+    font-size: 20px;
+}
+
+.activities-card .card-title-type {
+    color: #5f5e5e;
+    display: flex;
+    gap: 5px;
+    font-size: 20px;
+    align-items: center;
+}
+
+.activities-card .card-title-type i {
+    color: #24B88D;
+    font-size: 20px;
+}
+
+.activities-card .card-value {
+    font-size: 17px;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: center;
+}
+
+.activities-card .card-value i {
+    color: #24B88D;
+    font-size: 17px;
+}
+
+.row {
+    display: contents;
+}
+
+.row-title {
+    display: contents;
+}
+
+.row-title span {
+    color: #5f5e5e;
+    font-size: 17px;
+    padding-bottom: 5px;
+}
+
+
+

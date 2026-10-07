@@ -1,12 +1,13 @@
 Django==5.2.1
 djangorestframework==3.15.2
 psycopg2==2.9.9
-Pillow==10.4.0
 python-dotenv==1.0.1
 python-dateutil==2.9.0.post0
 sqlparse==0.5.2
 Faker==25.2.0
-coverage==7.6.1
 selenium==4.23.1
 locust==2.31.6
 chromedriver-autoinstaller==0.6.4
+numpy==2.1.1
+pandas==2.2.2
+scikit-learn==1.5.1

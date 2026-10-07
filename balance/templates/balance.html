@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/balance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
+<div class="progress-tabs">
+    <a href="?tab=trophies"
+       class="trophies {% if tab == 'trophies' %}active{% endif %}">
+        🏆 Trofeos
+    </a>
+
+    <a href="?tab=statistics"
+       class="statistics {% if tab == 'statistics' %}active{% endif %}">
+        📊 Estadísticas
+    </a>
+
+    <a href="?tab=analysis"
+       class="analysis {% if tab == 'analysis' %}active{% endif %}">
+        🤖 Análisis Inteligente
+    </a>
+</div>
+
+<div class="balance-dashboard">
+
+    {% if tab == "trophies" %}
+        {% include "balance/trophies.html" %}
+
+    {% elif tab == "statistics" %}
+        {% include "balance/statistics.html" %}
+
+    {% elif tab == "analysis" %}
+        {% include "balance/analysis.html" %}
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

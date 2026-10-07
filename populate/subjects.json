@@ -1,0 +1,31 @@
+[
+    {
+        "name": "Matemáticas", 
+        "subject_category": "sciences"
+    },
+    
+    {
+        "name": "Física", 
+        "subject_category": "sciences"
+    },
+    
+    {
+        "name": "Economía", 
+        "subject_category": "socials"
+    },
+    
+    {
+        "name": "Inglés", 
+        "subject_category": "languages"
+    },
+    
+    {
+        "name": "Python", 
+        "subject_category": "programming"
+    },
+
+    {
+        "name": "Filosofía", 
+        "subject_category": "humanities"
+    }
+]

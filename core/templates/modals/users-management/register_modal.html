@@ -1,0 +1,128 @@
+<div class="modal-overlay" id="register-modal">
+
+    <div class="modal register">
+
+        <div class="modal-header">
+            <i id="icon-title" class="fa-solid fa-user-plus"></i>
+            <h2>Registro</h2>
+
+            <p>Rellena el formulario para registrarte</p>
+
+            <button type="button" class="close-button" id="register-close" title="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+
+        <div id="register-content">
+            
+            {% if register_form.errors %}
+                <div class="errors">
+                    {% for error in register_form.non_field_errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% for field in register_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'register' %}" novalidate>
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                <div>
+                    {{ register_form.first_name.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-regular fa-user"></i>
+                        {{ register_form.first_name }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.last_name.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-regular fa-user"></i>
+                        {{ register_form.last_name }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.username.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-id-badge"></i>
+                        {{ register_form.username }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.email.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-envelope"></i>
+                        {{ register_form.email }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.birth_date.label_tag }}
+                    <div class="date-input-box">
+                        {{ register_form.birth_date }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.gender.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-mars-and-venus"></i>
+                        {{ register_form.gender }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.password1.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ register_form.password1 }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ register_form.password2.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ register_form.password2 }}
+                    </div>
+                </div>
+
+                <div class="final-buttons">
+                    <button type="submit" class="rounded-button" id="register-submit">
+                        Registrarse
+                    </button>
+                </div>
+                
+                <div class="change-modal">
+                    <span>¿Ya tienes una cuenta?</span>
+
+                    <button type="button" id="open-login">
+                        Iniciar sesión
+                    </button>
+                </div>
+
+            </form>
+            
+        </div>
+
+    </div>
+
+</div>

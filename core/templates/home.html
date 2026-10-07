@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+<div class="balance-title">
+    <i class="fa-solid fa-clipboard-list"></i>
+    Resumen
+</div>
+<div class="header">
+    <div class="balance-value">
+        {% if balance_value %}
+            <p>¡Buen equilibrio hoy!</p>
+        {% elif not today_study_activities and not today_sport_activities %}
+            <p>Para calcular el equilibrio de hoy necesitas registrar actividades de estudio y deporte</p>
+        {% else %}
+            <p>Tienes que equilibrar tus horas de estudio y deporte</p>
+        {% endif %}
+    </div>
+
+    <table class="initial-table">
+        <tr>
+            <td>Estudio (Hoy):
+                {% if today_study_activities %}
+                    {{ today_study_durations_format }}
+                {% else %}
+                    0h
+                {% endif %}
+            </td>
+            <td>Deporte (Hoy):
+                {% if today_sport_activities %}
+                    {{ today_sport_durations_format }}
+                {% else %}
+                    0h
+                {% endif %}
+            </td>
+            <td>Equilibrio: {{ balance_streak_value }} días
+                <i
+                    class="fa-solid fa-circle-info"
+                    title="Días consecutivos que se mantiene la proporción de equilibrio de que las horas de estudio sean al menos el doble de las horas de deporte">
+                </i>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="dashboard">
+    <div class="card">
+        <div class="card-title">
+            <i class="fa-solid fa-clock"></i>
+            Horas de Estudio
+        </div>
+        <div class="card-value">
+            {% if study_activities %}
+                {{ study_durations_format }}
+            {% else %}
+                0h
+            {% endif %}
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">
+            <i class="fa-regular fa-clock"></i>
+            Horas de Deporte
+        </div>
+        <div class="card-value">
+            {% if sport_activities %}
+                {{ sport_durations_format }}
+            {% else %}
+                0h
+            {% endif %}
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">
+            <i class="fa-solid fa-rotate-left"></i>
+            Últimos 7 Días
+        </div>
+        <div class="card-value">
+            {{ last_activities }} actividades
+        </div>
+    </div>
+    <div class="activities-card">
+        <div class="card-title">
+            <i class="fa-solid fa-list"></i>
+            Actividades
+        </div>
+        <div class="activities-content">
+            <div class="card-column">
+                <div class="card-title-type">
+                    <i class="fa-solid fa-book"></i>
+                    Estudio
+                </div>
+                
+                <div class="card-value">
+                    {% if study_activities %}
+                        <div class="row-title">
+                            <span>Asignatura</span>
+                            <span>Horas</span>
+                            <span>Actividades</span>
+                        </div>
+                        {% for subject, i in study_activities_by_subjects_format.items %}
+                            <div class="row">
+                                <span>{{ subject.name }}</span>
+                                <span>{{ i.duration }}</span>
+                                <span>{{ i.count }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No se ha registrado ninguna actividad de estudio</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-column">
+                <div class="card-title-type">
+                    <i class="fa-solid fa-person-running"></i>
+                    Deporte
+                </div>
+
+                <div class="card-value">
+                    {% if sport_activities %}
+                        <div class="row-title">
+                            <span>Tipo de Deporte</span>
+                            <span>Horas</span>
+                            <span>Actividades</span>
+                        </div>
+                        {% for sport_type, i in sport_activities_by_sport_types_format.items %}
+                            <div class="row">
+                                <span>{{ sport_type }}</span>
+                                <span>{{ i.duration }}</span>
+                                <span>{{ i.count }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No se ha registrado ninguna actividad deportiva</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

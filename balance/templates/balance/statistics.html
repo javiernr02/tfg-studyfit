@@ -1,0 +1,454 @@
+<p class="description">Analiza la evolución de tus hábitos de estudio y deporte mediante gráficos y métricas interactivas</p>
+<div class="statistics-card">
+    <div class="card-title">
+        <i class="fa-solid fa-arrow-up-right-dots"></i>
+        Estadísticas
+    </div>
+    <div class="card-value">
+        <button class="week-button" onclick="setActive(this); load('week', this)">7 días</button>
+        <button onclick="setActive(this); load('month', this)">30 días</button>
+        <button onclick="setActive(this); load('year', this)">365 días</button>
+        <button onclick="setActive(this); load('global', this)">Histórico</button>
+        
+        <p id="no-data" style="display:none; text-align:center;">No hay datos en este periodo</p>
+
+        <div class="charts">
+            <i 
+                id="openIcon"
+                class="fa-solid fa-up-right-and-down-left-from-center"
+                title="Abrir gráfico en pantalla completa"
+                onclick="openFullscreen()">
+            </i>
+            <canvas id="lineChart"></canvas>
+            <canvas id="pieChart"></canvas>
+        </div>
+
+        <div id="chart-fullscreen" class="chart-fullscreen" style="display:none;">
+            <p>Haz zoom y arrastra para ver mejor los datos</p>
+            <i 
+                class="fa-solid fa-xmark"
+                title="Cerrar gráfico"
+                onclick="closeFullscreen()">
+            </i>
+            <canvas id="lineChartFullscreen"></canvas>
+        </div>
+        
+        <div id="all-averages" class="average-hours">
+            <div class="average-hours-title">
+                <i class="fa-solid fa-calculator"></i>
+                Medias
+            </div>
+            <div class="averages">
+                <p class="line">
+                    <span class="label">Media de estudio:</span>
+                    <span id="study-average"></span>
+                </p>
+                <p class="line">
+                    <span class="label">Media de deporte:</span>
+                    <span id="sport-average"></span>
+                </p>
+            </div>
+            <div class="active-averages">
+                <p class="line">
+                    <span class="label">Media de estudio en días con actividad:</span>
+                    <span id="study-active-average"></span>
+                </p>
+                <p class="line">
+                    <span class="label">Media de deporte en días con actividad:</span>
+                    <span id="sport-active-average"></span>
+                </p>
+            </div>
+        </div>
+
+        <div id="productive" class="productive-stats">
+            <div class="productive-stats-title">
+                <i class="fa-solid fa-rocket"></i>
+                Periodos con más actividad
+            </div>
+            <p id="best-day-line" class="productive-line">
+                <span class="label">📆 Día con más actividad:</span>
+                <span id="best-day"></span>
+            </p>
+            <p id="best-week-line" class="productive-line">
+                <span class="label">📅 Semana con más actividad:</span>
+                <span id="best-week"></span>
+            </p>
+            <p id="best-month-line" class="productive-line">
+                <span class="label">📅 Mes con más actividad:</span>
+                <span id="best-month"></span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let lineChart;
+    let pieChart;
+    let fullscreenChart;
+    let chartData = null;
+    
+    Chart.register(ChartZoom);
+
+    function setActive(button) {
+        document.querySelectorAll(".statistics-card button").forEach(i => i.classList.remove("active"));
+
+        if (button) {
+            button.classList.add("active");
+        }
+    }
+    
+    function load(period, button = null) {
+
+        if (button) {
+            setActive(button);
+        }
+
+        fetch(`{% url 'stats' %}?period=${period}`)
+            .then(response => response.json())
+            .then(data => {
+
+                chartData = data;
+
+                const noData = document.getElementById("no-data");
+                const allAverages = document.getElementById("all-averages");
+                const productive = document.getElementById("productive");
+
+                document.getElementById("study-average").textContent = `${data.study_average} al día`;
+                document.getElementById("sport-average").textContent = `${data.sport_average} al día`;
+                document.getElementById("study-active-average").textContent = `${data.study_active_average} al día`;
+                document.getElementById("sport-active-average").textContent = `${data.sport_active_average} al día`;
+
+                const productive_stats = data.productive_stats;
+
+                const bestDay = document.getElementById("best-day");
+                const bestWeek = document.getElementById("best-week");
+                const bestMonth = document.getElementById("best-month");
+
+                const bestDayLine = document.getElementById("best-day-line");
+                const bestWeekLine = document.getElementById("best-week-line");
+                const bestMonthLine = document.getElementById("best-month-line");
+
+                if (productive_stats.best_day) {
+                    bestDay.textContent = 
+                        `${productive_stats.best_day.date} → ` +
+                        `⌚ ${productive_stats.best_day.total_time} ` +
+                        `(📚 ${productive_stats.best_day.study_time} 🏃🏽 ${productive_stats.best_day.sport_time})`;
+                }
+                else {
+                    bestDay.textContent = ""
+                }
+
+                if (productive_stats.best_week) {
+                    bestWeek.textContent = 
+                        `${productive_stats.best_week.date} → ` +
+                        `⌚ ${productive_stats.best_week.total_time} ` +
+                        `(📚 ${productive_stats.best_week.study_time} 🏃🏽 ${productive_stats.best_week.sport_time})`;
+                }
+                else {
+                    bestWeek.textContent = ""
+                }
+
+                if (productive_stats.best_month) {
+                    bestMonth.textContent = 
+                        `${productive_stats.best_month.date} → ` +
+                        `⌚ ${productive_stats.best_month.total_time} ` +
+                        `(📚 ${productive_stats.best_month.study_time} 🏃🏽 ${productive_stats.best_month.sport_time})`;
+                }
+                else {
+                    bestMonth.textContent = ""
+                }
+                
+                const lineCanvas = document.getElementById("lineChart");
+                const pieCanvas = document.getElementById("pieChart");
+
+                const openIcon = document.getElementById("openIcon");
+
+                const study_hours = data.study_values.map(x => x / 3600);
+                const sport_hours = data.sport_values.map(x => x / 3600);
+
+                const hasLineData = (data.labels && data.labels.length > 0);
+                const hasPieData = (data.study_total_time > 0 || data.sport_total_time > 0);
+
+                if (!hasLineData && !hasPieData) {
+                    noData.style.display = "block";
+                    allAverages.style.display = "none";
+                    productive.style.display = "none";
+
+
+                    if (lineChart) {
+                        lineChart.destroy();
+                    }
+
+                    if (pieChart) {
+                        pieChart.destroy();
+                    }
+
+                    lineCanvas.style.display = "none";
+                    pieCanvas.style.display = "none";
+
+                    openIcon.style.display = "none";
+
+                    return;
+                }
+
+                noData.style.display = "none";
+                allAverages.style.display = "block";
+                productive.style.display = "block";
+                lineCanvas.style.display = "block";
+                pieCanvas.style.display = "block";
+
+                openIcon.style.display = "block";
+
+                if (period == "week") {
+                    bestWeekLine.style.display = "none";
+                    bestMonthLine.style.display = "none";
+                }
+                else if (period == "month") {
+                    bestWeekLine.style.display = "flex";
+                    bestMonthLine.style.display = "none";
+                }
+                else {
+                    bestWeekLine.style.display = "flex";
+                    bestMonthLine.style.display = "flex";
+                }
+
+                if (lineChart) {
+                    lineChart.destroy();
+                }
+
+                if (hasLineData) {
+
+                    lineChart = new Chart(lineCanvas, {
+                        type: "line",
+
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: "Estudio",
+                                data: study_hours,
+                                borderColor: "#24B88D",
+                                backgroundColor: "#24B88D"
+                            },
+                            {
+                                label: "Deporte",
+                                data: sport_hours,
+                                borderColor: "#0D4846",
+                                backgroundColor: "#0D4846"
+                            }]
+                        },
+
+                        options: {
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: "Fechas"
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: "Tiempos"
+                                    },
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1,
+                                        callback: function(value) {
+                                            return value + "h";
+                                        }
+                                    }
+                                }
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false,
+
+                            interaction: {
+                                mode: "nearest",
+                                intersect: true,
+                            },
+
+                            plugins: {
+                                tooltip: {
+                                    enabled: true,
+                                    mode: "nearest",
+                                    intersect: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            if (context.dataset.label === "Estudio") {
+                                                return "Estudio: " + chartData.study_labels_formatted[context.dataIndex];
+                                            }
+                                            else {
+                                                return "Deporte: " + chartData.sport_labels_formatted[context.dataIndex];
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                if (pieChart) {
+                    pieChart.destroy();
+                }
+
+                if (hasPieData) {
+
+                    pieChart = new Chart(pieCanvas, {
+                        type: "pie",
+
+                        data: {
+                            labels: ["Estudio", "Deporte"],
+                            datasets: [{
+                                data: [data.study_total_time, data.sport_total_time],
+                                backgroundColor: ["#24B88D", "#0D4846"]
+                            }]
+                        },
+
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            if (context.label === "Estudio") {
+                                                return `${chartData.study_percent}% (${chartData.study_total_time_formatted})`;
+                                            }
+                                            else {
+                                                return `${chartData.sport_percent}% (${chartData.sport_total_time_formatted})`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    
+                    });
+                }
+
+            });
+    }
+
+    function openFullscreen() {
+        const container = document.getElementById("chart-fullscreen");
+        const fullscreenCanvas = document.getElementById("lineChartFullscreen");
+
+        container.style.display = "flex";
+
+        if (fullscreenChart) {
+            fullscreenChart.destroy();
+            fullscreenChart = null;
+        }
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+
+                fullscreenChart = new Chart(fullscreenCanvas, {
+                    type: "line",
+
+                    data: {
+                        labels: [...lineChart.data.labels],
+                        datasets: lineChart.data.datasets.map(dataset => ({
+                            ...dataset,
+                            data: [...dataset.data]
+                        }))
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "nearest",
+                            intersect: false,
+                            axis: "x"
+                        },
+
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: "Fechas"
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: "Tiempos"
+                                },
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return value + "h";
+                                    }
+                                }
+                            }
+                        },
+
+                        plugins: {
+                            tooltip: {
+                                enabled: true,
+                                mode: "nearest",
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataset.label === "Estudio") {
+                                            return "Estudio: " + chartData.study_labels_formatted[context.dataIndex];
+                                        }
+                                        else {
+                                            return "Deporte: " + chartData.sport_labels_formatted[context.dataIndex];
+                                        }
+                                    }
+                                }
+                            },
+
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: "x",
+                                    modifierKey: null,
+                                    threshold: 10
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: "x"
+                                }
+                            }
+                        },
+                    }
+                });
+                
+                fullscreenChart.update();
+                fullscreenChart.resize();
+            });
+        }); 
+    }
+
+    function closeFullscreen() {
+        const container = document.getElementById("chart-fullscreen");
+
+        container.style.display = "none";
+
+        if (fullscreenChart) {
+            fullscreenChart.destroy();
+
+            fullscreenChart = null;
+        }
+
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        const initialButton = document.querySelector(".week-button");
+        load("week", initialButton);
+        
+    });
+
+</script>

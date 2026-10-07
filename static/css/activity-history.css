@@ -1,0 +1,443 @@
+
+.history-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 30px;
+    color: #0D4846;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.activity-actions {
+    display: flex;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    gap: 5px;
+    z-index: 10;
+}
+
+.activity-actions form {
+    margin: 0;
+}
+
+.activity-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background-color: #f3f4f6;
+    border: none;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.activity-actions button:hover {
+    background-color: #e5e7eb;
+    color: #374151;
+    border-color: #bfc4ca;
+}
+
+.activity-card {
+    position: relative;
+    background: #fff;
+    border-radius: 15px;
+    border: 1px solid #e8e8e8;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.delete-activity-button:hover {
+    background-color: #e5e7eb;
+    color: #dc2626 !important;
+    border-color: #9d1919 !important;
+}
+
+.cancel-edit-activity-button {
+    display: none !important;
+    color: #dc2626 !important;
+}
+
+.cancel-edit-activity-button:hover {
+    background-color: #fad9d9 !important;
+    border-color: #9d1919 !important;
+}
+
+.save-activity-button {
+    display: none !important;
+    color: #24B88D !important;
+}
+
+.save-activity-button:hover {
+    background-color: #d9f8e9 !important;
+    border-color: #24B88D !important;
+}
+
+.activity-edit-content {
+    display: none;
+    padding-top: 35px;
+}
+
+.activity-edit-content form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 16px;
+}
+
+.edit-modal-error {
+    margin-top: 5px;
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+}
+
+.activity-edit-content .edit-info {
+    margin-bottom: 0;
+}
+
+.activity-card.editing {
+    border: 1px solid #24B88D;
+}
+
+.activity-card.editing .activity-normal-content {
+    display: none;
+}
+
+.activity-card.editing .activity-edit-content {
+    display: block;
+}
+
+.activity-card.editing .edit-activity-button {
+    display: none;
+}
+
+.activity-card.editing .delete-activity-form {
+    display: none;
+}
+
+.activity-card.editing .cancel-edit-activity-button {
+    display: flex !important;
+}
+
+.activity-card.editing .save-activity-button {
+    display: flex !important;
+}
+
+.edit-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.edit-info label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.edit-info input,
+.edit-info select,
+.edit-info textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background-color: white;
+    color: #374151;
+    font-size: 13px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-info textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.edit-info input:focus,
+.edit-info select:focus,
+.edit-info textarea:focus {
+    outline: none;
+    border-color: #24B88D;
+    box-shadow: 0 0 0 2px rgba(36, 184, 141, 0.15);
+}
+
+.activity-edit-content .edit-title,
+.activity-edit-content .edit-description {
+    flex-basis: 100%;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #24B88D;
+}
+
+.title h2 {
+    margin: 0;
+}
+
+.type {
+    margin: 15px 0 5px;
+}
+
+.activity-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.item-info span {
+    font-size: 13px;
+    color: #5f5e5e;
+}
+
+.item-info strong {
+    font-size: 14px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 25px;
+}
+
+.pagination a,
+.pagination span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 35px;
+    height: 35px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.pagination a {
+    color: #333;
+    border: 1px solid #e8e8e8;
+    background: white;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.pagination a:hover {
+    background-color: #f5f5f5;
+    border-color: #d8d8d8;
+}
+
+.pagination .current {
+    background-color: #0D4846;
+    color: white;
+}
+
+.pagination .disabled {
+    color: #bbb;
+    border: 1px solid #eee;
+    background-color: #fafafa;
+}
+
+.pagination span:not(.current):not(.disabled) {
+    border: none;
+    color: #666;
+}
+
+.header {
+    margin-top: 30px;
+    padding: 0 5px;
+}
+
+.filters-panel {
+    display: none;
+    width: 100%;
+    margin-top: 15px;
+    padding: 22px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.filters-panel.active {
+    display: block;
+}
+
+.specific-filters {
+    display: none;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f8fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.specific-filters h2 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.specific-filters h2 i {
+    color: #0D4846;
+}
+
+.filters-container {
+    width: 100%;
+    margin: 20px 0 30px;
+}
+
+#filters-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: #0D4846;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#filters-button:hover {
+    background-color: #0a3332;
+}
+
+#filters-button:active {
+    transform: scale(0.97);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 18px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 11px;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: #24B88D;
+    box-shadow: 0 0 0 2px rgba(36, 184, 141, 0.15);
+}
+
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.range-inputs input {
+    flex: 1;
+}
+
+.range-inputs span {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.filters-final-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.filters-final-buttons button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 17px;
+    border: none;
+    border-radius: 7px;
+    background-color: #0D4846;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.filters-final-buttons button:hover {
+    background-color: #0a3332;
+}
+
+.filters-final-buttons button:active {
+    transform: scale(0.97);
+}
+
+.filters-final-buttons a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 17px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background-color: white;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.filters-final-buttons a:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #bfc4ca;
+}

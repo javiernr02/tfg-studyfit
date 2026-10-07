@@ -1,0 +1,51 @@
+<div class="modal-overlay" id="subject-modal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+            <i id="icon-title" class="fa-solid fa-book"></i>
+            <h2>Crear Asignatura</h2>
+
+            <button type="button" class="close-button" id="subject-close" title="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+        
+        {% if subject_form.errors %}
+            <div class="errors">
+                {% for error in subject_form.non_field_errors %}
+                    <div class="modal-error">
+                        <i class="fa-regular fa-circle-xmark"></i>
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+                {% for field in subject_form %}
+                    {% for error in field.errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div id="subject-errors" class="errors"></div>
+
+        <form id="subject-form" method="post" action="{% url 'create_subject' %}" novalidate>
+            {% csrf_token %}
+
+            {{ subject_form.as_p }}
+
+            <button type="submit" class="rounded-button" id="subject-submit">
+                <i class="fa-solid fa-plus"></i>
+                Crear
+            </button>
+        </form>
+
+    </div>
+
+</div>
