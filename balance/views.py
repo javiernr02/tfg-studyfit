@@ -75,11 +75,8 @@ def get_trophies_data(user):
 # Estadísticas equilibrio mente-cuerpo
 
 
-# Función para cálculo de la productividad.
-# Existe productividad cuando mínimo se estudia 1 hora y se hace media hora de deporte
+# Función para cálculo de la función con más actividad
 def get_most_productive(study_activities, sport_activities, trunc, format):
-    MIN_STUDY_TIME = timedelta(minutes=60)
-    MIN_SPORT_TIME = timedelta(minutes=30)
     
     study = (study_activities.annotate(period=trunc('date')).values('period').annotate(total_duration=Sum('duration')))
     
@@ -98,27 +95,26 @@ def get_most_productive(study_activities, sport_activities, trunc, format):
         study_time = study_dict.get(period, timedelta(0))
         sport_time = sport_dict.get(period, timedelta(0))
         
-        if study_time >= MIN_STUDY_TIME and sport_time >= MIN_SPORT_TIME:
-            total_time = study_time + sport_time
+        total_time = study_time + sport_time
+        
+        if total_time > best_total:
+            best_total = total_time
             
-            if total_time > best_total:
-                best_total = total_time
+            if trunc == TruncDate:
+                date = period.strftime('%d/%m/%Y')
                 
-                if trunc == TruncDate:
-                    date = period.strftime('%d/%m/%Y')
-                    
-                elif trunc == TruncWeek:
-                    date = f"Semana del {period.strftime('%d/%m/%Y')}"
-                    
-                elif trunc == TruncMonth:
-                    date = date_format(period, "F Y").capitalize()
+            elif trunc == TruncWeek:
+                date = f"Semana del {period.strftime('%d/%m/%Y')}"
                 
-                best_period = {
-                    'date': date, 
-                    'study_time': format(study_time),
-                    'sport_time': format(sport_time),
-                    'total_time': format(total_time)
-                }
+            elif trunc == TruncMonth:
+                date = date_format(period, "F Y").capitalize()
+            
+            best_period = {
+                'date': date, 
+                'study_time': format(study_time),
+                'sport_time': format(sport_time),
+                'total_time': format(total_time)
+            }
                 
     return best_period
 

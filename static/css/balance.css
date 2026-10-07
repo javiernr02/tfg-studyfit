@@ -1,5 +1,9 @@
 /* Pestañas pantalla principal balance */
 
+.rounded-button span {
+    color: white !important; 
+}
+
 .balance-dashboard {
     display: flex;
     flex-direction: column;
