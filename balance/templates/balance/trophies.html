@@ -1,17 +1,17 @@
 {% load static %}
 {% load l10n %}
 
-<p class="description">Consulta los logros acumulables y exclusivos y el progreso hacia nuevos objetivos de gamificación</p>
+<p class="description">Consulta los trofeos acumulables y exclusivos y el progreso hacia nuevos objetivos de gamificación</p>
 <div class="trophies-card">
     <div class="card-title">
         <i class="fa-solid fa-trophy"></i>
-        Logros
+        Trofeos
     </div>
     <div class="card-value">
         <div class="repeatable-trophies">
             <div class="repeatable-trophies-title">
                 <i class="fa-solid fa-arrows-spin"></i>
-                Logros Acumulables (Hoy) <span>- {{ repeatable_trophies_count }} trofeos en total</span>
+                Trofeos Acumulables (Hoy) <span>- {{ repeatable_trophies_count }} trofeos en total</span>
             </div>
             {% if not repeatable_student_trophy_obtained_today and not repeatable_sportsman_trophy_obtained_today %}
                 <div class="repeatable-not-found">
@@ -45,7 +45,7 @@
         <div class="non-repeatable-trophies">
             <div class="non-repeatable-trophies-title">
                 <i class="fa-brands fa-square-web-awesome-stroke"></i>
-                Logros Exclusivos <span>- {{ non_repeatable_trophies_count }} trofeos en total</span>
+                Trofeos Exclusivos <span>- {{ non_repeatable_trophies_count }} trofeos en total</span>
             </div>
             {% if non_repeatable_trophies %}
                 {% for i in non_repeatable_trophies %}
@@ -76,7 +76,7 @@
 
         <div class="streak">
             <i class="fa-solid fa-fire"></i>
-            Racha (logros acumulables consecutivos cada día): <span>{{ streak }}</span>
+            Racha (trofeos acumulables consecutivos cada día): <span>{{ streak }}</span>
         </div>
 
         <div class="level">
