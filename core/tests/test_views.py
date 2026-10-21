@@ -137,17 +137,17 @@ class BalanceLogicTest(SimpleTestCase):
     def test_balance_with_ratio_two(self):
         self.assertTrue(balance_logic(120, 60))
 
-    def test_balance_with_ratio_greater_than_two(self):
-        self.assertTrue(balance_logic(180, 60))
+    def test_balance_with_ratio_equal(self):
+        self.assertTrue(balance_logic(60, 60))
         
-    def test_balance_with_ratio_less_than_two(self):
-        self.assertFalse(balance_logic(100, 60))
+    def test_balance_with_ratio_study_greater_sport(self):
+        self.assertTrue(balance_logic(100, 60))
 
-    def test_balance_without_sport(self):
-        self.assertFalse(balance_logic(120, 0))
+    def test_balance_with_ratio_sport_greater_study(self):
+        self.assertTrue(balance_logic(60, 100))
 
-    def test_balance_without_study(self):
-        self.assertFalse(balance_logic(0, 60))
+    def test_balance_without_study_and_sport(self):
+        self.assertFalse(balance_logic(0, 0))
         
 
 # Test para la funcionalidad de racha de balance
@@ -215,7 +215,7 @@ class BalanceLogicStreakTest(TestCase):
         self.create_sport_activity(today, 60)
 
         # Día de ayer sin equilibrio
-        self.create_study_activity(yesterday, 60)
+        self.create_study_activity(yesterday, 180)
         self.create_sport_activity(yesterday, 60)
 
         self.assertEqual(balance_logic_streak(self.user), 1)

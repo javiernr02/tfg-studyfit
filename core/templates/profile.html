@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="profile-title">
+    <i class="fa-solid fa-user"></i>
+    Perfil de Usuario
+</div>
+
+<div class="profile-container">
+
+    <section class="profile-header-card">
+
+        <div class="profile-main-info">
+
+            <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+
+            <div class="profile-data">
+
+                <span>
+                    <strong>Nombre de usuario:</strong> {{ user.username }}
+                </span>
+
+                <span>
+                    <strong>Email:</strong> {{ user.email }}
+                </span>
+
+                <span>
+                    <strong>Género:</strong> {{ user.get_gender_display }}
+                </span>
+
+                <span>
+                    <strong>Fecha de Nacimiento:</strong>
+                    {{ user.birth_date|date:"d/m/Y" }}
+                </span>
+
+                <span>
+                    <strong>Nivel:</strong> {{ user.level }}
+                </span>
+
+            </div>
+
+            <div class="experience-section">
+
+                <div class="experience-header">
+                    <span>Experiencia</span>
+
+                    <span>
+                        {{ current_level_xp }} / 1000 XP
+                    </span>
+                </div>
+                
+                <div class="level-bar">
+                    <div class="level-progress" style="width: {% localize off %}{{ level_progress }}{% endlocalize %}%;"></div>
+                </div>
+
+                {% if user.level < 10 %}
+                    <span class="remaining-points">
+                        {{ remaining_points }} XP para el nivel {{ user.level|add:"1" }}
+                    </span>
+                {% else %}
+                    <span class="remaining-points">
+                        ¡Has alcanzado el nivel máximo!
+                    </span>
+                {% endif %}
+
+            </div>
+
+            <div class="profile-trophies">
+
+                <span>
+                    <i class="fa-solid fa-calendar"></i>
+                    Miembro desde {{ user.date_joined|date:"j \d\e F \d\e Y" }}
+                </span>
+
+                <span>
+                    <i class="fa-solid fa-arrows-spin"></i>
+                    {{ repeatable_trophies_count }} logros acumulables
+                </span>
+
+                <span>
+                    <i class="fa-brands fa-square-web-awesome-stroke"></i>
+                    {{ non_repeatable_trophies_count }} / 6 logros exclusivos
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="profile-summary">
+
+        <div class="summary-card">
+
+            <div class="summary-title">
+                <i class="fa-solid fa-list"></i>
+                Total de Actividades
+            </div>
+
+            <div class="summary-value">
+                <span>{{ total_activities }}</span>
+            </div>
+
+        </div>
+
+        <div class="summary-card">
+
+            <div class="summary-title">
+                <i class="fa-solid fa-book"></i>
+                Actividades de Estudio
+            </div>
+
+            <div class="summary-value">
+                <span>{{ total_study_activities }}</span>
+            </div>
+
+        </div>
+
+        <div class="summary-card">
+
+            <div class="summary-title">
+                <i class="fa-solid fa-person-running"></i>
+                Actividades de Deporte
+            </div>
+
+            <div class="summary-value">
+                <span>{{ total_sport_activities }}</span>
+            </div>
+
+        </div>
+
+        <div class="summary-card">
+
+            <div class="summary-title">
+                <i class="fa-solid fa-bolt"></i>
+                Experiencia Total
+            </div>
+
+            <div class="summary-value">
+                <span>{{ total_xp }}</span>
+            </div>
+
+        </div>
+        
+    </section>
+
+    <section id="information" class="profile-section">
+
+        <div class="summary-card-profile">
+
+            <div class="summary-title">
+                <i class="fa-solid fa-user"></i>
+                <h2>Datos Personales</h2>
+            </div>
+
+            <div class="summary-value">
+                <p>Actualiza tus datos personales</p>
+            </div>
+
+        </div>
+
+        <p class="mandatory">* Campo obligatorio</p>
+        
+        <div id="profile-content">
+
+            {% if profile_form.errors %}
+                <div class="errors">
+                    {% for error in profile_form.non_field_errors %}
+                        <div class="modal-error">
+                            <i class="fa-regular fa-circle-xmark"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% for field in profile_form %}
+                        {% for error in field.errors %}
+                            <div class="modal-error">
+                                <i class="fa-regular fa-circle-xmark"></i>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'profile' %}" novalidate>
+                {% csrf_token %}
+
+                <div>
+                    {{ profile_form.first_name.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-regular fa-user"></i>
+                        {{ profile_form.first_name }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ profile_form.last_name.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-regular fa-user"></i>
+                        {{ profile_form.last_name }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ profile_form.email.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-envelope"></i>
+                        {{ profile_form.email }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ profile_form.birth_date.label_tag }}
+                    <div class="date-input-box">
+                        {{ profile_form.birth_date }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ profile_form.gender.label_tag }}
+                    <div class="input-box">
+                        <i class="fa-solid fa-mars-and-venus"></i>
+                        {{ profile_form.gender }}
+                    </div>
+                </div>
+
+                <div class="final-buttons">
+                    <button type="submit" class="rounded-button">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Guardar
+                    </button>
+                </div>
+            
+            </form>
+            
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,189 @@
+.profile-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 30px;
+    color: #0D4846;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.profile-header-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 24px;
+}
+
+.profile-main-info h1 {
+    color: #24B88D;
+}
+
+.profile-data {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.experience-section {
+    margin-bottom: 20px;
+}
+
+.experience-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.experience-header span {
+    font-weight: normal;
+}
+
+.level-bar {
+    width: 100%;
+    height: 10px;
+    background: #e5e5e5;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.level-progress {
+    height: 100%;
+    background: #F5A208;
+    border-radius: 20px;
+    transition: width .4s ease;
+}
+
+.remaining-points {
+    display: block;
+    margin-top: 8px;
+    color: #5f5e5e;
+}
+
+.profile-trophies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    color: #5f5e5e;
+}
+
+.profile-summary {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.summary-card {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #24B88D;
+}
+
+.summary-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.summary-value {
+    color: #5f5e5e;
+}
+
+.summary-title i {
+    color: #24B88D;
+}
+
+.profile-section {
+    padding: 24px;
+}
+
+input::placeholder {
+    font-size: 13px;
+}
+
+input,
+select,
+textarea {
+    border: 1px solid #999fa5;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #fff;
+    color: #333;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #24B88D;
+    box-shadow: 0 0 0 2px rgba(36, 184, 141, 0.15);
+}
+
+input[type="date"] {
+    color: #757575;
+    font-size: 13px;
+}
+
+input[type="date"]:not(:valid) {
+    color: #757575;
+    font-size: 13px;
+}
+
+select:has(option:checked[value=""]) {
+    color: #757575;
+}
+
+select {
+    color: black;
+}
+
+select option {
+    color: black;
+}
+
+.input-box {
+    position: relative;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.input-box i {
+    position: absolute;
+    left: 12px;
+    top: 45%;
+    transform: translateY(-50%);
+    color: #24B88D;
+    font-size: 12px;
+}
+
+.input-box input {
+    padding-left: 35px;
+}
+
+.input-box select {
+    padding-left: 35px;
+}
+
+.date-input-box input {
+    padding-left: 13px;
+}
+
+.date-input-box {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
