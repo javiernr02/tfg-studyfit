@@ -31,6 +31,8 @@ class Gender(models.TextChoices):
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     
+    REQUIRED_FIELDS = ["birth_date", "gender"]
+    
     birth_date = models.DateField(null=False, blank=False)
     
     gender = models.CharField(max_length=1, choices=Gender.choices, null=False, blank=False)
