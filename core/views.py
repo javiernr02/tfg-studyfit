@@ -395,6 +395,61 @@ def user_login(request):
         return redirect(request.POST.get("next", "landing"))
 
     return redirect("landing")
+
+@login_required
+def profile(request):
+    user = request.user
+    
+    if request.method == "POST":
+    
+        profile_form = ProfileForm(request.POST, instance=user)
+
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, "Perfil actualizado correctamente")
+
+            return redirect("profile")
+    
+    else:
+        profile_form = ProfileForm(instance=user)
+        
+    study_activities = models.StudyActivity.objects.filter(user=user)
+    sport_activities = models.SportActivity.objects.filter(user=user)
+    
+    total_study_activities = study_activities.count()
+    total_sport_activities = sport_activities.count()
+    
+    total_activities = total_study_activities + total_sport_activities
+    
+    level_progress = user.experience_points % 1000
+    
+    if user.level >= 10:
+        level_progress = 100
+        remaining_points = 0
+    else:
+        current_level_xp = user.experience_points - ((user.level - 1) * 1000)
+        remaining_points = 1000 - level_progress
+        level_progress = (level_progress / 1000) * 100
+        
+    user_trophies = models.UserTrophy.objects.filter(user=user).select_related("trophy")
+    
+    repeatable_trophies_count = user_trophies.filter(trophy__is_repeatable=True).count()
+    
+    non_repeatable_trophies_count = user_trophies.filter(trophy__is_repeatable=False).count()
+    
+    return render(request, "profile.html", {
+        'user': user,
+        'profile_form': profile_form,
+        'total_activities': total_activities,
+        'total_study_activities': total_study_activities,
+        'total_sport_activities': total_sport_activities,
+        'total_xp': user.experience_points,
+        'current_level_xp': current_level_xp,
+        'level_progress': level_progress,
+        'remaining_points': remaining_points,
+        'repeatable_trophies_count': repeatable_trophies_count,
+        'non_repeatable_trophies_count': non_repeatable_trophies_count
+    })
         
 # Cálculo en minutos de la lógica de balance de horas de estudio y deporte 
 def balance_logic(study_total_minutes, sport_total_minutes):

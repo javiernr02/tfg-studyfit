@@ -13,6 +13,8 @@ urlpatterns = [
     
     path('logout/', LogoutView.as_view(next_page='landing'), name='logout'),
     
+    path('profile/', views.profile, name='profile'),
+    
     path('create-study-activity/', views.create_study_activity, name='create_study_activity'),
     path('cancel-study-activity/', views.cancel_study_activity, name='cancel_study_activity'),
     

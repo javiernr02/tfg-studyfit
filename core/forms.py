@@ -1,6 +1,7 @@
 from django import forms
 import core.models as models
 from django.utils import timezone
+from datetime import datetime, timedelta
 import unicodedata
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 import re
@@ -203,6 +204,93 @@ class LoginForm(AuthenticationForm):
         
         self.error_messages["invalid_login"] = "El usuario o la contraseña no son correctos"
         
+class ProfileForm(forms.ModelForm):
+    
+    first_name = forms.CharField(
+        label="Nombre",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Nombre"
+            }
+        ),
+        validators=[validate_first_name]
+    )
+    
+    last_name = forms.CharField(
+        label="Apellido(s)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Apellido"
+            }
+        ),
+        validators=[validate_last_name]
+    )
+    
+    class Meta:
+        model = models.CustomUser
+        fields = ["first_name", "last_name", "email", "birth_date", "gender"]
+        labels = {
+            "email": "Email *",
+            "birth_date": "Fecha de nacimiento *",
+            "gender": "Género *"
+        }
+        error_messages = {
+            "email": {
+                "required": "El email es obligatorio"
+            },
+            "birth_date": {
+                "required": "La fecha de nacimiento es obligatoria"
+            },
+            "gender": {
+                "required": "El género es obligatorio"
+            },
+        }
+        widgets = {
+            "email": forms.EmailInput(attrs={
+                "placeholder": "ejemplo@email.com"
+            }),
+            "birth_date": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={"type": "date"}
+            ),
+        }
+        
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        
+        if models.CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese email")
+        
+        return email
+        
+def validate_activities_overlap(user, date, duration, instance=None):
+    
+    if not user or not user.is_authenticated:
+        return
+    
+    if date is None or duration is None or duration <= timedelta(0):
+        return
+    
+    end_date = date + duration
+    
+    study_activities = models.StudyActivity.objects.filter(user=user, date__lt=end_date)
+    sport_activities = models.SportActivity.objects.filter(user=user, date__lt=end_date)
+    
+    if instance and instance.pk:
+        if isinstance(instance, models.StudyActivity):
+            study_activities = study_activities.exclude(pk=instance.pk)
+            
+        elif isinstance(instance, models.SportActivity):
+            sport_activities = sport_activities.exclude(pk=instance.pk)
+        
+    for i in list(study_activities) + list(sport_activities):
+        end = i.date + i.duration
+        
+        if end > date:
+            raise forms.ValidationError("Ya existe una actividad en ese intervalo")
+        
 class StudyActivityForm(forms.ModelForm):
     start_time = forms.TimeField(
         label="Hora de inicio *",
@@ -287,7 +375,14 @@ class StudyActivityForm(forms.ModelForm):
         today = timezone.localdate()
         now = timezone.localtime()
         
-        if date:
+        if date and start_time and end_time and self.user:
+            
+            start_datetime = timezone.make_aware(timezone.datetime.combine(date, start_time))
+            
+            duration = datetime.combine(date, end_time) - datetime.combine(date, start_time)
+            
+            validate_activities_overlap(user=self.user, date=start_datetime, duration=duration, instance=self.instance)
+            
             date_only = date.date()
         
             if date_only > today:
@@ -433,6 +528,10 @@ class SportActivityForm(forms.ModelForm):
             }
         )
     )
+    
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
         
     class Meta:
         model = models.SportActivity
@@ -484,7 +583,14 @@ class SportActivityForm(forms.ModelForm):
         today = timezone.localdate()
         now = timezone.localtime()
         
-        if date:
+        if date and start_time and end_time and self.user:
+                    
+            start_datetime = timezone.make_aware(timezone.datetime.combine(date, start_time))
+            
+            duration = datetime.combine(date, end_time) - datetime.combine(date, start_time)
+            
+            validate_activities_overlap(user=self.user, date=start_datetime, duration=duration, instance=self.instance)
+            
             date_only = date.date()
         
             if date_only > today:
@@ -519,6 +625,10 @@ class LiveSportActivityForm(forms.ModelForm):
             }
         )
     )
+    
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
     
     class Meta:
         model = models.SportActivity
