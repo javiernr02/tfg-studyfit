@@ -426,6 +426,7 @@ def profile(request):
     if user.level >= 10:
         level_progress = 100
         remaining_points = 0
+        current_level_xp = 10000
     else:
         current_level_xp = user.experience_points - ((user.level - 1) * 1000)
         remaining_points = 1000 - level_progress
